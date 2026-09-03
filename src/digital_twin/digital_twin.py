@@ -1,3 +1,4 @@
+from src.digital_twin.reachability import compute_reachable_occupancy
 from src.digital_twin.state import AgentTwinState
 
 
@@ -23,3 +24,11 @@ class DigitalTwin:
         )
     def record_command(self, agent_id, action):
         self.agent_states[agent_id].command_history.append(int(action))
+    def get_reachable_occupancy(self, agent_id, grid):
+        state = self.agent_states[agent_id]
+
+        return compute_reachable_occupancy(
+            grid=grid,
+            last_trusted_position=state.last_trusted_position,
+            command_history=state.command_history,
+        )

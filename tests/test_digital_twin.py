@@ -68,3 +68,28 @@ def test_record_command():
     dt.record_command(1, Action.NORTH)
 
     assert state.command_history == [4, 1]
+def test_digital_twin_reachable_occupancy():
+    grid = [[0, 0, 0, 0, 0]]
+
+    state = AgentTwinState(
+        agent_id=1,
+        last_trusted_position=(3, 0),
+        last_trusted_timestamp=20,
+        goal=(0, 0),
+    )
+
+    dt = DigitalTwin({1: state})
+
+    dt.record_command(1, Action.WEST)
+    dt.record_command(1, Action.WEST)
+
+    reachable = dt.get_reachable_occupancy(
+        agent_id=1,
+        grid=grid,
+    )
+
+    assert reachable == {
+        (3, 0),
+        (2, 0),
+        (1, 0),
+    }
