@@ -51,3 +51,20 @@ def test_ignore_older_telemetry():
     assert updated is False
     assert state.last_trusted_position == (7, 5)
     assert state.last_trusted_timestamp == 21
+from src.environment.actions import Action
+
+
+def test_record_command():
+    state = AgentTwinState(
+        agent_id=1,
+        last_trusted_position=(8, 5),
+        last_trusted_timestamp=20,
+        goal=(1, 1),
+    )
+
+    dt = DigitalTwin({1: state})
+
+    dt.record_command(1, Action.WEST)
+    dt.record_command(1, Action.NORTH)
+
+    assert state.command_history == [4, 1]

@@ -21,3 +21,5 @@ class DigitalTwin:
         return self.agent_states[agent_id].age_of_information(
             current_timestep
         )
+    def record_command(self, agent_id, action):
+        self.agent_states[agent_id].command_history.append(int(action))
