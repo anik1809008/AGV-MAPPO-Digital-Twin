@@ -14,7 +14,14 @@ class DigitalTwin:
 
         state.last_trusted_position = message.position
         state.last_trusted_timestamp = message.source_timestamp
-        state.command_history.clear()
+
+        state.command_history = [
+            (timestamp, action)
+            for timestamp, action in state.command_history
+            if timestamp > message.source_timestamp
+        ]
+
+
 
         return True
 
@@ -22,8 +29,12 @@ class DigitalTwin:
         return self.agent_states[agent_id].age_of_information(
             current_timestep
         )
-    def record_command(self, agent_id, action):
-        self.agent_states[agent_id].command_history.append(int(action))
+    def record_command(self, agent_id, action, timestep):
+        self.agent_states[agent_id].command_history.append(
+            (timestep, int(action))
+        )
+
+
     def get_reachable_occupancy(self, agent_id, grid):
         state = self.agent_states[agent_id]
 

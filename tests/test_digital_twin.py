@@ -11,7 +11,10 @@ def test_process_fresh_telemetry():
         goal=(1, 1),
     )
 
-    state.command_history.extend([4, 4])
+    state.command_history.extend([
+     (20, 4),
+     (21, 4),
+   ])
 
     dt = DigitalTwin({1: state})
 
@@ -64,10 +67,12 @@ def test_record_command():
 
     dt = DigitalTwin({1: state})
 
-    dt.record_command(1, Action.WEST)
-    dt.record_command(1, Action.NORTH)
+    dt.record_command(1, Action.WEST, 21)
+    dt.record_command(1, Action.NORTH, 22)
 
-    assert state.command_history == [4, 1]
+    assert state.command_history == [(21, 4), (22, 1)]
+
+
 def test_digital_twin_reachable_occupancy():
     grid = [[0, 0, 0, 0, 0]]
 
@@ -80,8 +85,8 @@ def test_digital_twin_reachable_occupancy():
 
     dt = DigitalTwin({1: state})
 
-    dt.record_command(1, Action.WEST)
-    dt.record_command(1, Action.WEST)
+    dt.record_command(1, Action.WEST, 21)
+    dt.record_command(1, Action.WEST, 22)
 
     reachable = dt.get_reachable_occupancy(
         agent_id=1,
@@ -93,6 +98,14 @@ def test_digital_twin_reachable_occupancy():
         (2, 0),
         (1, 0),
     }
+
+
+
+
+
+
+
+
 def test_aoi_and_reachable_occupancy_grow_with_stale_telemetry():
     grid = [[0, 0, 0, 0, 0]]
 
@@ -110,7 +123,7 @@ def test_aoi_and_reachable_occupancy_grow_with_stale_telemetry():
         (3, 0),
     }
 
-    dt.record_command(1, Action.WEST)
+    dt.record_command(1, Action.WEST,21)
 
     assert dt.get_aoi(1, 21) == 1
     assert dt.get_reachable_occupancy(1, grid) == {
@@ -118,7 +131,7 @@ def test_aoi_and_reachable_occupancy_grow_with_stale_telemetry():
         (2, 0),
     }
 
-    dt.record_command(1, Action.WEST)
+    dt.record_command(1, Action.WEST,22)
 
     assert dt.get_aoi(1, 22) == 2
     assert dt.get_reachable_occupancy(1, grid) == {
@@ -138,8 +151,8 @@ def test_reconnection_resynchronizes_digital_twin():
 
     dt = DigitalTwin({1: state})
 
-    dt.record_command(1, Action.WEST)
-    dt.record_command(1, Action.WEST)
+    dt.record_command(1, Action.WEST,21)
+    dt.record_command(1, Action.WEST,22)
 
     assert dt.get_aoi(1, 22) == 2
     assert dt.get_reachable_occupancy(1, grid) == {

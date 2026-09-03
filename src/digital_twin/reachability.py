@@ -34,7 +34,14 @@ def compute_reachable_occupancy(
 ):
     reachable = {last_trusted_position}
 
-    for command in command_history:
+
+    for command_entry in command_history:
+        if isinstance(command_entry, tuple):
+            _, command = command_entry
+        else:
+            command = command_entry
+
+
         next_reachable = set(reachable)
 
         for position in reachable:
