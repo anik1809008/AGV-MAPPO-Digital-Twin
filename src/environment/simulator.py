@@ -45,3 +45,40 @@ class GroundTruthSimulator:
         self.agent_positions[agent_id] = next_position
 
         return next_position
+
+    def step_joint(self, actions):
+        current_positions = dict(self.agent_positions)
+
+        proposed_positions = {}
+
+        for agent_id, action in actions.items():
+            proposed_positions[agent_id] = self.get_next_position(
+                current_positions[agent_id],
+                action,
+            )
+
+        targets = {}
+
+        for agent_id, position in proposed_positions.items():
+            targets.setdefault(position, []).append(agent_id)
+
+        vertex_conflicts = {
+            position: agent_ids
+            for position, agent_ids in targets.items()
+            if len(agent_ids) > 1
+        }
+
+        if vertex_conflicts:
+            return {
+                "success": False,
+                "vertex_conflicts": vertex_conflicts,
+                "positions": current_positions,
+            }
+
+        self.agent_positions = proposed_positions
+
+        return {
+            "success": True,
+            "vertex_conflicts": {},
+            "positions": dict(self.agent_positions),
+        }

@@ -46,3 +46,32 @@ def test_wait_keeps_position():
     result = sim.move_agent(0, Action.WAIT)
 
     assert result == (0, 0)
+def test_vertex_conflict_blocks_joint_move():
+    grid = [
+        [0, 0, 0],
+        [0, 0, 0],
+        [0, 0, 0],
+    ]
+
+    sim = GroundTruthSimulator(
+        grid=grid,
+        agent_positions={
+            0: (0, 1),
+            1: (2, 1),
+        },
+    )
+
+    result = sim.step_joint({
+        0: Action.EAST,
+        1: Action.WEST,
+    })
+
+    assert result["success"] is False
+    assert result["vertex_conflicts"] == {
+        (1, 1): [0, 1]
+    }
+
+    assert sim.agent_positions == {
+        0: (0, 1),
+        1: (2, 1),
+    }
