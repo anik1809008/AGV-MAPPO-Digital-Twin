@@ -65,3 +65,32 @@ def build_local_observation(
                 observation[2, local_y, local_x] = 1.0
 
     return observation
+def build_m2_observation(
+    grid,
+    center_position,
+    trusted_positions,
+    window_size=9,
+):
+    return build_local_observation(
+        grid=grid,
+        center_position=center_position,
+        trusted_positions=trusted_positions,
+        reachable_occupancies=None,
+        window_size=window_size,
+    )
+
+
+def build_m3_observation(
+    grid,
+    center_position,
+    trusted_positions,
+    reachable_occupancies,
+    window_size=9,
+):
+    return build_local_observation(
+        grid=grid,
+        center_position=center_position,
+        trusted_positions=trusted_positions,
+        reachable_occupancies=reachable_occupancies,
+        window_size=window_size,
+    )
