@@ -43,3 +43,10 @@ class DigitalTwin:
             last_trusted_position=state.last_trusted_position,
             command_history=state.command_history,
         )
+    def get_reachable_occupancy_size(self, agent_id, grid):
+        return len(
+            self.get_reachable_occupancy(
+                agent_id=agent_id,
+                grid=grid,
+            )
+        )

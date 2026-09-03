@@ -174,3 +174,19 @@ def test_reconnection_resynchronizes_digital_twin():
         (2, 0),
     }
     assert state.command_history == []
+def test_reachable_occupancy_size():
+    grid = [[0, 0, 0, 0, 0]]
+
+    state = AgentTwinState(
+        agent_id=1,
+        last_trusted_position=(3, 0),
+        last_trusted_timestamp=20,
+        goal=(0, 0),
+    )
+
+    dt = DigitalTwin({1: state})
+
+    dt.record_command(1, Action.WEST, 21)
+    dt.record_command(1, Action.WEST, 22)
+
+    assert dt.get_reachable_occupancy_size(1, grid) == 3
