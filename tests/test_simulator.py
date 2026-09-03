@@ -99,3 +99,30 @@ def test_edge_swap_conflict_blocks_joint_move():
         0: (0, 0),
         1: (1, 0),
     }
+def test_successful_joint_move():
+    grid = [
+        [0, 0, 0],
+        [0, 0, 0],
+    ]
+
+    sim = GroundTruthSimulator(
+        grid=grid,
+        agent_positions={
+            0: (0, 0),
+            1: (2, 1),
+        },
+    )
+
+    result = sim.step_joint({
+        0: Action.EAST,
+        1: Action.WEST,
+    })
+
+    assert result["success"] is True
+    assert result["vertex_conflicts"] == {}
+    assert result["edge_swap_conflicts"] == []
+
+    assert sim.agent_positions == {
+        0: (1, 0),
+        1: (1, 1),
+    }
