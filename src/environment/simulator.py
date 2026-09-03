@@ -68,10 +68,26 @@ class GroundTruthSimulator:
             if len(agent_ids) > 1
         }
 
-        if vertex_conflicts:
+        edge_swap_conflicts = []
+
+        agent_ids = list(proposed_positions.keys())
+
+        for i in range(len(agent_ids)):
+            for j in range(i + 1, len(agent_ids)):
+                a = agent_ids[i]
+                b = agent_ids[j]
+
+                if (
+                    proposed_positions[a] == current_positions[b]
+                    and proposed_positions[b] == current_positions[a]
+                ):
+                    edge_swap_conflicts.append((a, b))
+
+        if vertex_conflicts or edge_swap_conflicts:
             return {
                 "success": False,
                 "vertex_conflicts": vertex_conflicts,
+                "edge_swap_conflicts": edge_swap_conflicts,
                 "positions": current_positions,
             }
 
@@ -80,5 +96,6 @@ class GroundTruthSimulator:
         return {
             "success": True,
             "vertex_conflicts": {},
+            "edge_swap_conflicts": [],
             "positions": dict(self.agent_positions),
         }
