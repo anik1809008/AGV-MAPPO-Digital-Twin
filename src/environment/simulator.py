@@ -2,13 +2,13 @@ from src.environment.actions import Action, ACTION_DELTAS
 
 
 class GroundTruthSimulator:
-    def __init__(self, grid, agent_positions):
+    def __init__(self, grid, agent_positions, agent_goals=None):
         self.grid = grid
         self.height = len(grid)
         self.width = len(grid[0])
 
         self.agent_positions = dict(agent_positions)
-
+        self.agent_goals = dict(agent_goals or {})
     def is_inside(self, position):
         x, y = position
         return 0 <= x < self.width and 0 <= y < self.height
@@ -45,6 +45,24 @@ class GroundTruthSimulator:
         self.agent_positions[agent_id] = next_position
 
         return next_position
+
+
+    def is_at_goal(self, agent_id):
+        if agent_id not in self.agent_goals:
+            return False
+
+        return self.agent_positions[agent_id] == self.agent_goals[agent_id]
+
+    def all_goals_reached(self):
+        if not self.agent_goals:
+            return False
+
+        return all(
+            self.is_at_goal(agent_id)
+            for agent_id in self.agent_goals
+        )
+
+
 
     def step_joint(self, actions):
         current_positions = dict(self.agent_positions)

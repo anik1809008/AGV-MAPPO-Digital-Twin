@@ -126,3 +126,20 @@ def test_successful_joint_move():
         0: (1, 0),
         1: (1, 1),
     }
+def test_goal_tracking():
+    grid = [[0, 0, 0]]
+
+    sim = GroundTruthSimulator(
+        grid=grid,
+        agent_positions={0: (0, 0)},
+        agent_goals={0: (2, 0)},
+    )
+
+    assert sim.is_at_goal(0) is False
+    assert sim.all_goals_reached() is False
+
+    sim.move_agent(0, Action.EAST)
+    sim.move_agent(0, Action.EAST)
+
+    assert sim.is_at_goal(0) is True
+    assert sim.all_goals_reached() is True
