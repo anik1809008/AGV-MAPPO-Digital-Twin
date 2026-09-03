@@ -143,3 +143,19 @@ def test_goal_tracking():
 
     assert sim.is_at_goal(0) is True
     assert sim.all_goals_reached() is True
+def test_deadlock_after_ten_non_progress_steps():
+    grid = [[0, 0, 0]]
+
+    sim = GroundTruthSimulator(
+        grid=grid,
+        agent_positions={0: (0, 0)},
+        agent_goals={0: (2, 0)},
+        deadlock_threshold=10,
+    )
+
+    for _ in range(10):
+        previous_positions = dict(sim.agent_positions)
+        sim.update_progress(previous_positions)
+
+    assert sim.non_progress_steps == 10
+    assert sim.is_deadlocked() is True
