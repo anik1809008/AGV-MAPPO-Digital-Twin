@@ -93,3 +93,36 @@ def test_digital_twin_reachable_occupancy():
         (2, 0),
         (1, 0),
     }
+def test_aoi_and_reachable_occupancy_grow_with_stale_telemetry():
+    grid = [[0, 0, 0, 0, 0]]
+
+    state = AgentTwinState(
+        agent_id=1,
+        last_trusted_position=(3, 0),
+        last_trusted_timestamp=20,
+        goal=(0, 0),
+    )
+
+    dt = DigitalTwin({1: state})
+
+    assert dt.get_aoi(1, 20) == 0
+    assert dt.get_reachable_occupancy(1, grid) == {
+        (3, 0),
+    }
+
+    dt.record_command(1, Action.WEST)
+
+    assert dt.get_aoi(1, 21) == 1
+    assert dt.get_reachable_occupancy(1, grid) == {
+        (3, 0),
+        (2, 0),
+    }
+
+    dt.record_command(1, Action.WEST)
+
+    assert dt.get_aoi(1, 22) == 2
+    assert dt.get_reachable_occupancy(1, grid) == {
+        (3, 0),
+        (2, 0),
+        (1, 0),
+    }
