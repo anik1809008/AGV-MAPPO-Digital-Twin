@@ -35,3 +35,17 @@ class SafetyShield:
             return position
 
         return candidate
+    def has_vertex_conflict(
+        self,
+        agent_id,
+        candidate_position,
+        other_next_positions,
+    ):
+        for other_agent_id, other_position in other_next_positions.items():
+            if other_agent_id == agent_id:
+                continue
+
+            if candidate_position == other_position:
+                return True
+
+        return False

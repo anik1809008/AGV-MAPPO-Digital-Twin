@@ -37,3 +37,25 @@ def test_boundary_blocks_move():
         (0, 0),
         Action.WEST,
     ) == (0, 0)
+def test_vertex_conflict_detection():
+    shield = SafetyShield([
+        [0, 0, 0],
+        [0, 0, 0],
+    ])
+
+    other_next_positions = {
+        1: (1, 0),
+        2: (2, 1),
+    }
+
+    assert shield.has_vertex_conflict(
+        agent_id=0,
+        candidate_position=(1, 0),
+        other_next_positions=other_next_positions,
+    ) is True
+
+    assert shield.has_vertex_conflict(
+        agent_id=0,
+        candidate_position=(0, 1),
+        other_next_positions=other_next_positions,
+    ) is False
