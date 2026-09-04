@@ -112,3 +112,15 @@ def build_scalar_features(
         ],
         dtype=np.float32,
     )
+def flatten_mappo_input(
+    spatial_observation,
+    scalar_features,
+):
+    spatial_flat = spatial_observation.reshape(-1)
+
+    return np.concatenate(
+        [
+            spatial_flat,
+            scalar_features,
+        ]
+    ).astype(np.float32)

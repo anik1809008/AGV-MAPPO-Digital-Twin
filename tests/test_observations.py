@@ -75,3 +75,35 @@ def test_scalar_features():
 
     assert features.shape == (4,)
     assert features.tolist() == [-5.0, 4.0, 2.0, 3.0]
+from src.marl.observations import flatten_mappo_input
+
+
+def test_flatten_mappo_input():
+    grid = [
+        [0, 0, 0],
+        [0, 0, 0],
+        [0, 0, 0],
+    ]
+
+    spatial = build_local_observation(
+        grid=grid,
+        center_position=(1, 1),
+        trusted_positions=[],
+        reachable_occupancies=set(),
+        window_size=9,
+    )
+
+    scalars = build_scalar_features(
+        center_position=(1, 1),
+        goal_position=(2, 2),
+        aoi=1,
+        reachable_size=2,
+    )
+
+    vector = flatten_mappo_input(
+        spatial,
+        scalars,
+    )
+
+    assert vector.shape == (247,)
+    assert str(vector.dtype) == "float32"
