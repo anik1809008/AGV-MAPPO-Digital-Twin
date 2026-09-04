@@ -62,3 +62,16 @@ def test_m2_vs_m3_reliability_channel():
 
     assert int(m2[2].sum()) == 0
     assert int(m3[2].sum()) == 2
+from src.marl.observations import build_scalar_features
+
+
+def test_scalar_features():
+    features = build_scalar_features(
+        center_position=(8, 5),
+        goal_position=(3, 9),
+        aoi=2,
+        reachable_size=3,
+    )
+
+    assert features.shape == (4,)
+    assert features.tolist() == [-5.0, 4.0, 2.0, 3.0]

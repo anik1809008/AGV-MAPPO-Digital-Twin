@@ -94,3 +94,21 @@ def build_m3_observation(
         reachable_occupancies=reachable_occupancies,
         window_size=window_size,
     )
+def build_scalar_features(
+    center_position,
+    goal_position,
+    aoi=0,
+    reachable_size=1,
+):
+    dx = goal_position[0] - center_position[0]
+    dy = goal_position[1] - center_position[1]
+
+    return np.array(
+        [
+            float(dx),
+            float(dy),
+            float(aoi),
+            float(reachable_size),
+        ],
+        dtype=np.float32,
+    )
