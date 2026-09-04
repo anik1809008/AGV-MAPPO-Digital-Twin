@@ -59,3 +59,23 @@ def test_vertex_conflict_detection():
         candidate_position=(0, 1),
         other_next_positions=other_next_positions,
     ) is False
+def test_edge_swap_conflict_detection():
+    shield = SafetyShield([[0, 0]])
+
+    current_positions = {
+        0: (0, 0),
+        1: (1, 0),
+    }
+
+    next_positions = {
+        0: (1, 0),
+        1: (0, 0),
+    }
+
+    assert shield.has_edge_swap_conflict(
+        agent_id=0,
+        current_position=(0, 0),
+        candidate_position=(1, 0),
+        other_current_positions=current_positions,
+        other_next_positions=next_positions,
+    ) is True

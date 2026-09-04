@@ -49,3 +49,27 @@ class SafetyShield:
                 return True
 
         return False
+    def has_edge_swap_conflict(
+        self,
+        agent_id,
+        current_position,
+        candidate_position,
+        other_current_positions,
+        other_next_positions,
+    ):
+        for other_agent_id, other_current in other_current_positions.items():
+            if other_agent_id == agent_id:
+                continue
+
+            other_next = other_next_positions.get(other_agent_id)
+
+            if other_next is None:
+                continue
+
+            if (
+                candidate_position == other_current
+                and other_next == current_position
+            ):
+                return True
+
+        return False
