@@ -92,6 +92,38 @@ class SafetyShield:
                 return True
 
         return False
+
+
+    def has_uncertain_edge_swap_conflict(
+        self,
+        agent_id,
+        possible_current_positions,
+        action,
+        other_possible_transitions,
+    ):
+        for current_position in possible_current_positions:
+            candidate_position = self.next_position(
+                current_position,
+                action,
+            )
+
+            for other_agent_id, transitions in other_possible_transitions.items():
+                if other_agent_id == agent_id:
+                    continue
+
+                for other_current, other_next in transitions:
+                    if (
+                        candidate_position == other_current
+                        and other_next == current_position
+                    ):
+                        return True
+
+        return False
+
+
+
+
+
     def intersects_reachable_occupancy(
         self,
         agent_id,
@@ -123,6 +155,7 @@ class SafetyShield:
         other_current_positions,
         other_next_positions,
         reachable_occupancies,
+        other_possible_transitions=None,
     ):
         possible_next = self.possible_next_positions(
             possible_current_positions,
@@ -155,6 +188,16 @@ class SafetyShield:
                 candidate_position=candidate_position,
                 other_current_positions=other_current_positions,
                 other_next_positions=other_next_positions,
+            ):
+                return False
+
+
+        if other_possible_transitions is not None:
+            if self.has_uncertain_edge_swap_conflict(
+                agent_id=agent_id,
+                possible_current_positions=possible_current_positions,
+                action=action,
+                other_possible_transitions=other_possible_transitions,
             ):
                 return False
 

@@ -191,3 +191,38 @@ def test_invalid_actions_are_unsafe():
         other_next_positions={},
         reachable_occupancies={},
     ) is True
+def test_uncertain_edge_swap_is_unsafe():
+    shield = SafetyShield([
+        [0, 0, 0],
+    ])
+
+    assert shield.is_action_safe(
+        agent_id=0,
+        possible_current_positions={(0, 0)},
+        action=Action.EAST,
+        other_current_positions={},
+        other_next_positions={},
+        reachable_occupancies={},
+        other_possible_transitions={
+            1: {
+                ((1, 0), (0, 0)),
+            }
+        },
+    ) is False
+
+    assert shield.is_action_safe(
+        agent_id=0,
+        possible_current_positions={(0, 0)},
+        action=Action.WAIT,
+        other_current_positions={},
+        other_next_positions={},
+        reachable_occupancies={},
+        other_possible_transitions={
+            1: {
+                ((1, 0), (0, 0)),
+            }
+        },
+    ) is True
+
+
+

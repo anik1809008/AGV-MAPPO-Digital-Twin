@@ -16,6 +16,7 @@ class M4Controller:
         other_current_positions,
         other_next_positions,
         reachable_occupancies,
+        other_possible_transitions=None,
     ):
         ranked_actions = rank_actions_by_probability(
             self.actor,
@@ -30,6 +31,7 @@ class M4Controller:
             other_current_positions=other_current_positions,
             other_next_positions=other_next_positions,
             reachable_occupancies=reachable_occupancies,
+            other_possible_transitions=other_possible_transitions,
         )
 
         return action, probability
