@@ -138,15 +138,31 @@ class SafetyShield:
                 return True
 
         return False
+
+
     def possible_next_positions(
         self,
         possible_current_positions,
         action,
     ):
-        return {
-            self.next_position(position, action)
-            for position in possible_current_positions
-        }
+        possible_next = set(possible_current_positions)
+
+        for position in possible_current_positions:
+            possible_next.add(
+                self.next_position(
+                    position,
+                    action,
+                )
+            )
+
+        return possible_next
+
+
+
+
+
+
+
     def is_action_safe(
         self,
         agent_id,

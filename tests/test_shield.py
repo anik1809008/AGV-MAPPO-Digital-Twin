@@ -118,6 +118,7 @@ def test_possible_next_positions_from_uncertain_state():
     )
 
     assert next_positions == {
+        (0, 0),
         (1, 0),
         (2, 0),
     }
@@ -224,5 +225,18 @@ def test_uncertain_edge_swap_is_unsafe():
         },
     ) is True
 
+def test_possible_next_positions_include_execution_delay():
+    shield = SafetyShield([
+        [0, 0, 0],
+    ])
 
+    possible_next = shield.possible_next_positions(
+        {(0, 0)},
+        Action.EAST,
+    )
+
+    assert possible_next == {
+        (0, 0),
+        (1, 0),
+    }
 
