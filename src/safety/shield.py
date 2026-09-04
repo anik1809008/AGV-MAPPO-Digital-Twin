@@ -96,3 +96,48 @@ class SafetyShield:
             self.next_position(position, action)
             for position in possible_current_positions
         }
+    def is_action_safe(
+        self,
+        agent_id,
+        possible_current_positions,
+        action,
+        other_current_positions,
+        other_next_positions,
+        reachable_occupancies,
+    ):
+        possible_next = self.possible_next_positions(
+            possible_current_positions,
+            action,
+        )
+
+        for current_position in possible_current_positions:
+            candidate_position = self.next_position(
+                current_position,
+                action,
+            )
+
+            if self.has_vertex_conflict(
+                agent_id=agent_id,
+                candidate_position=candidate_position,
+                other_next_positions=other_next_positions,
+            ):
+                return False
+
+            if self.has_edge_swap_conflict(
+                agent_id=agent_id,
+                current_position=current_position,
+                candidate_position=candidate_position,
+                other_current_positions=other_current_positions,
+                other_next_positions=other_next_positions,
+            ):
+                return False
+
+        for candidate_position in possible_next:
+            if self.intersects_reachable_occupancy(
+                agent_id=agent_id,
+                candidate_position=candidate_position,
+                reachable_occupancies=reachable_occupancies,
+            ):
+                return False
+
+        return True

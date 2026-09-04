@@ -122,3 +122,40 @@ def test_possible_next_positions_from_uncertain_state():
         (2, 0),
     }
 
+def test_combined_action_safety_check():
+    shield = SafetyShield([
+        [0, 0, 0],
+        [0, 0, 0],
+    ])
+
+    possible_current = {(0, 0)}
+
+    other_current = {
+        1: (2, 0),
+    }
+
+    other_next = {
+        1: (2, 0),
+    }
+
+    reachable = {
+        1: {(1, 0), (2, 0)},
+    }
+
+    assert shield.is_action_safe(
+        agent_id=0,
+        possible_current_positions=possible_current,
+        action=Action.EAST,
+        other_current_positions=other_current,
+        other_next_positions=other_next,
+        reachable_occupancies=reachable,
+    ) is False
+
+    assert shield.is_action_safe(
+        agent_id=0,
+        possible_current_positions=possible_current,
+        action=Action.SOUTH,
+        other_current_positions=other_current,
+        other_next_positions=other_next,
+        reachable_occupancies=reachable,
+    ) is True
