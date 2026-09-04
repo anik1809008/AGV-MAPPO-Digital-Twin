@@ -87,3 +87,12 @@ class SafetyShield:
                 return True
 
         return False
+    def possible_next_positions(
+        self,
+        possible_current_positions,
+        action,
+    ):
+        return {
+            self.next_position(position, action)
+            for position in possible_current_positions
+        }

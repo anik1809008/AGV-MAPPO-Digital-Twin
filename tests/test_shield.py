@@ -101,3 +101,24 @@ def test_reachable_occupancy_conflict_detection():
         candidate_position=(0, 1),
         reachable_occupancies=reachable,
     ) is False
+def test_possible_next_positions_from_uncertain_state():
+    shield = SafetyShield([
+        [0, 0, 0],
+        [0, 0, 0],
+    ])
+
+    possible_current = {
+        (0, 0),
+        (1, 0),
+    }
+
+    next_positions = shield.possible_next_positions(
+        possible_current_positions=possible_current,
+        action=Action.EAST,
+    )
+
+    assert next_positions == {
+        (1, 0),
+        (2, 0),
+    }
+
