@@ -73,3 +73,17 @@ class SafetyShield:
                 return True
 
         return False
+    def intersects_reachable_occupancy(
+        self,
+        agent_id,
+        candidate_position,
+        reachable_occupancies,
+    ):
+        for other_agent_id, occupancy in reachable_occupancies.items():
+            if other_agent_id == agent_id:
+                continue
+
+            if candidate_position in occupancy:
+                return True
+
+        return False

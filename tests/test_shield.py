@@ -79,3 +79,25 @@ def test_edge_swap_conflict_detection():
         other_current_positions=current_positions,
         other_next_positions=next_positions,
     ) is True
+def test_reachable_occupancy_conflict_detection():
+    shield = SafetyShield([
+        [0, 0, 0],
+        [0, 0, 0],
+    ])
+
+    reachable = {
+        1: {(1, 0), (2, 0)},
+        2: {(2, 1)},
+    }
+
+    assert shield.intersects_reachable_occupancy(
+        agent_id=0,
+        candidate_position=(1, 0),
+        reachable_occupancies=reachable,
+    ) is True
+
+    assert shield.intersects_reachable_occupancy(
+        agent_id=0,
+        candidate_position=(0, 1),
+        reachable_occupancies=reachable,
+    ) is False
