@@ -159,3 +159,35 @@ def test_combined_action_safety_check():
         other_next_positions=other_next,
         reachable_occupancies=reachable,
     ) is True
+def test_invalid_actions_are_unsafe():
+    shield = SafetyShield([
+        [0, 1],
+        [0, 0],
+    ])
+
+    assert shield.is_action_safe(
+        agent_id=0,
+        possible_current_positions={(0, 0)},
+        action=Action.EAST,
+        other_current_positions={},
+        other_next_positions={},
+        reachable_occupancies={},
+    ) is False
+
+    assert shield.is_action_safe(
+        agent_id=0,
+        possible_current_positions={(0, 0)},
+        action=Action.WEST,
+        other_current_positions={},
+        other_next_positions={},
+        reachable_occupancies={},
+    ) is False
+
+    assert shield.is_action_safe(
+        agent_id=0,
+        possible_current_positions={(0, 0)},
+        action=Action.SOUTH,
+        other_current_positions={},
+        other_next_positions={},
+        reachable_occupancies={},
+    ) is True

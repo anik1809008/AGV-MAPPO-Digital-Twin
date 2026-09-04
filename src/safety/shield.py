@@ -35,6 +35,25 @@ class SafetyShield:
             return position
 
         return candidate
+
+
+
+    def is_action_valid(self, position, action):
+        dx, dy = ACTION_DELTAS[Action(action)]
+        candidate = (
+            position[0] + dx,
+            position[1] + dy,
+        )
+
+        if Action(action) == Action.WAIT:
+            return True
+
+        return self.is_free(candidate)
+
+
+
+
+
     def has_vertex_conflict(
         self,
         agent_id,
@@ -110,12 +129,19 @@ class SafetyShield:
             action,
         )
 
+
+
         for current_position in possible_current_positions:
+            if not self.is_action_valid(
+                current_position,
+                action,
+            ):
+                return False
+
             candidate_position = self.next_position(
                 current_position,
                 action,
             )
-
             if self.has_vertex_conflict(
                 agent_id=agent_id,
                 candidate_position=candidate_position,
