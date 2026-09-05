@@ -8,12 +8,12 @@ def run_episode(
     method,
     multi_agent_buffer,
     digital_twin=None,
+    telemetry_channel=None,
     trusted_positions=None,
     reachable_occupancies=None,
     aoi_values=None,
     max_steps=200,
 ):
-
 
 
 
@@ -31,6 +31,22 @@ def run_episode(
     steps = 0
 
     for step in range(max_steps):
+
+        if (
+            telemetry_channel is not None
+            and digital_twin is not None
+        ):
+            messages = telemetry_channel.receive_ready(
+                current_timestep=step
+            )
+
+            for message in messages:
+                digital_twin.process_telemetry(
+                    message
+                )
+
+
+
 
         if digital_twin is not None:
             dt_inputs = get_digital_twin_inputs(
