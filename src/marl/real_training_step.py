@@ -15,6 +15,7 @@ def run_real_training_step(
     multi_agent_buffer=None,
     delayed_executor=None,
     current_timestep=0,
+    m4_controller=None,
 ):
 
 
@@ -43,12 +44,41 @@ def run_real_training_step(
         agent_observations=observations,
     )
 
-    actions = {
-        agent_id: action
-        for agent_id, action in enumerate(
-            rollout["actions"]
-        )
-    }
+
+
+
+    if method == "M4" and m4_controller is not None:
+        actions = {}
+
+        for agent_id, observation in enumerate(observations):
+            action, _ = m4_controller.select_action(
+                observation_vector=observation,
+                agent_id=agent_id,
+                possible_current_positions=reachable_occupancies.get(
+                    agent_id,
+                    {agent_positions[agent_id]},
+                ),
+                other_current_positions={
+                    other_id: trusted_positions[other_id]
+                    for other_id in trusted_positions
+                    if other_id != agent_id
+                },
+                other_next_positions={},
+                reachable_occupancies=reachable_occupancies,
+            )
+
+            actions[agent_id] = action
+
+    else:
+        actions = {
+            agent_id: action
+            for agent_id, action in enumerate(
+                rollout["actions"]
+            )
+        }
+
+
+
 
 
     if delayed_executor is not None:

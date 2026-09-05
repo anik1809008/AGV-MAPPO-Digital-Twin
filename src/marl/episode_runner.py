@@ -11,6 +11,7 @@ def run_episode(
     digital_twin=None,
     telemetry_channel=None,
     delayed_executor=None,
+    m4_controller=None,
     trusted_positions=None,
     reachable_occupancies=None,
     aoi_values=None,
@@ -92,7 +93,7 @@ def run_episode(
             multi_agent_buffer=multi_agent_buffer,
             delayed_executor=delayed_executor,
             current_timestep=step,
-
+            m4_controller=m4_controller,
         )
 
 
