@@ -43,3 +43,27 @@ def test_multi_agent_edge_swap_conflict():
             1: (0, 0),
         },
     ) is True
+from src.environment.actions import Action
+from src.baselines.multi_agent_classical import resolve_joint_conflicts
+
+
+def test_resolve_vertex_conflict_with_wait():
+    resolved = resolve_joint_conflicts(
+        current_positions={
+            0: (0, 0),
+            1: (2, 0),
+        },
+        proposed_next_positions={
+            0: (1, 0),
+            1: (1, 0),
+        },
+        proposed_actions={
+            0: Action.EAST,
+            1: Action.WEST,
+        },
+    )
+
+    assert resolved == {
+        0: Action.EAST,
+        1: Action.WAIT,
+    }

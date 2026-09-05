@@ -64,3 +64,40 @@ def has_joint_conflict(
                 return True
 
     return False
+def resolve_joint_conflicts(
+    current_positions,
+    proposed_next_positions,
+    proposed_actions,
+):
+    resolved_actions = dict(proposed_actions)
+
+    agent_ids = list(current_positions.keys())
+
+    # Vertex conflicts
+    for i in range(len(agent_ids)):
+        for j in range(i + 1, len(agent_ids)):
+            a = agent_ids[i]
+            b = agent_ids[j]
+
+            if (
+                proposed_next_positions[a]
+                == proposed_next_positions[b]
+            ):
+                # Higher agent ID waits
+                resolved_actions[b] = Action.WAIT
+
+    # Edge-swap conflicts
+    for i in range(len(agent_ids)):
+        for j in range(i + 1, len(agent_ids)):
+            a = agent_ids[i]
+            b = agent_ids[j]
+
+            if (
+                proposed_next_positions[a]
+                == current_positions[b]
+                and proposed_next_positions[b]
+                == current_positions[a]
+            ):
+                resolved_actions[b] = Action.WAIT
+
+    return resolved_actions
