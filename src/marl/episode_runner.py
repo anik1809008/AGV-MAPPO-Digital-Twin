@@ -1,14 +1,24 @@
+from src.marl.digital_twin_adapter import get_digital_twin_inputs
+
+
 def run_episode(
     actor,
     critic,
     simulator,
     method,
-    trusted_positions,
-    reachable_occupancies,
-    aoi_values,
     multi_agent_buffer,
+    digital_twin=None,
+    trusted_positions=None,
+    reachable_occupancies=None,
+    aoi_values=None,
     max_steps=200,
 ):
+
+
+
+
+
+
     from src.marl.real_training_step import run_real_training_step
 
     total_rewards = [
@@ -21,6 +31,26 @@ def run_episode(
     steps = 0
 
     for step in range(max_steps):
+
+        if digital_twin is not None:
+            dt_inputs = get_digital_twin_inputs(
+                digital_twin=digital_twin,
+                grid=simulator.grid,
+                current_timestep=step,
+            )
+
+            trusted_positions = dt_inputs[
+                "trusted_positions"
+            ]
+
+            reachable_occupancies = dt_inputs[
+                "reachable_occupancies"
+            ]
+
+            aoi_values = dt_inputs[
+                "aoi_values"
+            ]
+
         result = run_real_training_step(
             actor=actor,
             critic=critic,
@@ -31,7 +61,6 @@ def run_episode(
             aoi_values=aoi_values,
             multi_agent_buffer=multi_agent_buffer,
         )
-
         for agent_id, reward in enumerate(
             result["rewards"]
         ):
