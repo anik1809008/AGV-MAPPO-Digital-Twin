@@ -4,6 +4,10 @@ import os
 
 RESULT_FIELDS = [
     "method",
+    "scenario_id",
+    "agent_count",
+    "latency_steps",
+    "m5_threshold",
     "success",
     "collision",
     "deadlock",
@@ -12,6 +16,9 @@ RESULT_FIELDS = [
     "planning_time",
     "shield_interventions",
 ]
+
+
+
 
 
 def append_result_csv(
@@ -39,9 +46,13 @@ def append_result_csv(
         if not file_exists:
             writer.writeheader()
 
+
         writer.writerow(
             {
-                field: metrics[field]
+                field: metrics.get(
+                    field,
+                    "",
+                )
                 for field in RESULT_FIELDS
             }
         )
