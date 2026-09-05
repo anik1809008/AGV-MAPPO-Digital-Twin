@@ -73,3 +73,30 @@ def collect_single_step(
         "value": float(value),
         "centralized_state": centralized_state,
     }
+def collect_and_store_step(
+    actor,
+    critic,
+    agent_observations,
+    rewards,
+    dones,
+    multi_agent_buffer,
+    deterministic=False,
+):
+    result = collect_single_step(
+        actor=actor,
+        critic=critic,
+        agent_observations=agent_observations,
+        deterministic=deterministic,
+    )
+
+    multi_agent_buffer.add_step(
+        agent_observations=agent_observations,
+        actions=result["actions"],
+        log_probs=result["log_probs"],
+        rewards=rewards,
+        value=result["value"],
+        dones=dones,
+        centralized_state=result["centralized_state"],
+    )
+
+    return result
