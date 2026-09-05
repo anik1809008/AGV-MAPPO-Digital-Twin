@@ -3,7 +3,6 @@ from src.marl.environment_step import execute_training_step
 from src.marl.rollout import collect_single_step
 
 
-
 def run_real_training_step(
     actor,
     critic,
@@ -17,9 +16,6 @@ def run_real_training_step(
     current_timestep=0,
     m4_controller=None,
 ):
-
-
-
     agent_positions = list(
         simulator.agent_positions.values()
     )
@@ -44,30 +40,43 @@ def run_real_training_step(
         agent_observations=observations,
     )
 
-
-
-
     if method == "M4" and m4_controller is not None:
         actions = {}
+        reserved_next_positions = {}
 
-        for agent_id, observation in enumerate(observations):
+        for agent_id, observation in enumerate(
+            observations
+        ):
             action, _ = m4_controller.select_action(
                 observation_vector=observation,
                 agent_id=agent_id,
-                possible_current_positions=reachable_occupancies.get(
-                    agent_id,
-                    {agent_positions[agent_id]},
+                possible_current_positions=(
+                    reachable_occupancies.get(
+                        agent_id,
+                        {agent_positions[agent_id]},
+                    )
                 ),
                 other_current_positions={
                     other_id: trusted_positions[other_id]
                     for other_id in trusted_positions
                     if other_id != agent_id
                 },
-                other_next_positions={},
-                reachable_occupancies=reachable_occupancies,
+                other_next_positions=(
+                    reserved_next_positions
+                ),
+                reachable_occupancies=(
+                    reachable_occupancies
+                ),
             )
 
             actions[agent_id] = action
+
+            reserved_next_positions[agent_id] = (
+                m4_controller.shield.next_position(
+                    agent_positions[agent_id],
+                    action,
+                )
+            )
 
     else:
         actions = {
@@ -77,18 +86,16 @@ def run_real_training_step(
             )
         }
 
-
-
-
-
     if delayed_executor is not None:
         delayed_executor.queue_commands(
             actions=actions,
             current_timestep=current_timestep,
         )
 
-        ready_actions = delayed_executor.get_ready_actions(
-            current_timestep=current_timestep,
+        ready_actions = (
+            delayed_executor.get_ready_actions(
+                current_timestep=current_timestep,
+            )
         )
 
         execution_actions = {
@@ -98,6 +105,7 @@ def run_real_training_step(
             )
             for agent_id in actions
         }
+
     else:
         execution_actions = actions
 
@@ -106,12 +114,15 @@ def run_real_training_step(
         actions=execution_actions,
     )
 
-
-
     if multi_agent_buffer is not None:
         multi_agent_buffer.add_step(
             agent_observations=observations,
-            actions=rollout["actions"],
+            actions=[
+                actions[agent_id]
+                for agent_id in range(
+                    len(agent_positions)
+                )
+            ],
             log_probs=rollout["log_probs"],
             rewards=environment_result["rewards"],
             value=rollout["value"],
@@ -121,12 +132,20 @@ def run_real_training_step(
             ],
         )
 
-
-
-
     return {
         "observations": observations,
-        "actions": rollout["actions"],
+        "actions": [
+            actions[agent_id]
+            for agent_id in range(
+                len(agent_positions)
+            )
+        ],
+        "executed_actions": [
+            execution_actions[agent_id]
+            for agent_id in range(
+                len(agent_positions)
+            )
+        ],
         "log_probs": rollout["log_probs"],
         "value": rollout["value"],
         "centralized_state": rollout[
