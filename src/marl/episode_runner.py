@@ -1,3 +1,4 @@
+from src.communication.telemetry import TelemetryMessage
 from src.marl.digital_twin_adapter import get_digital_twin_inputs
 
 
@@ -31,6 +32,18 @@ def run_episode(
     steps = 0
 
     for step in range(max_steps):
+
+
+        if telemetry_channel is not None:
+            for agent_id, position in simulator.agent_positions.items():
+                telemetry_channel.send(
+                    TelemetryMessage(
+                        agent_id=agent_id,
+                        position=position,
+                        source_timestamp=step,
+                    ),
+                    current_timestep=step,
+                )
 
         if (
             telemetry_channel is not None
