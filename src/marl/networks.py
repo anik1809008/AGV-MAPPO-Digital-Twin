@@ -19,10 +19,10 @@ class ActorNetwork(nn.Module):
 
 
 class CriticNetwork(nn.Module):
-    def __init__(self, input_dim: int):
+    def __init__(self, input_dim):
         super().__init__()
 
-        self.net = nn.Sequential(
+        self.network = nn.Sequential(
             nn.Linear(input_dim, 128),
             nn.ReLU(),
             nn.Linear(128, 128),
@@ -31,4 +31,4 @@ class CriticNetwork(nn.Module):
         )
 
     def forward(self, x):
-        return self.net(x)
+        return self.network(x)
