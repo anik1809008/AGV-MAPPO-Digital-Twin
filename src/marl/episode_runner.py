@@ -90,6 +90,20 @@ def run_episode(
             aoi_values=aoi_values,
             multi_agent_buffer=multi_agent_buffer,
         )
+
+
+        if digital_twin is not None:
+            for agent_id, action in enumerate(
+                result["actions"]
+            ):
+                digital_twin.record_command(
+                    agent_id=agent_id,
+                    action=action,
+                    timestep=step,
+                )
+
+
+
         for agent_id, reward in enumerate(
             result["rewards"]
         ):
