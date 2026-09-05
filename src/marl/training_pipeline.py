@@ -74,6 +74,8 @@ def train_from_buffer(
     next_value=0.0,
     gamma=0.99,
     gae_lambda=0.95,
+    epochs=4,
+    minibatch_size=64,
 ):
     batch = prepare_training_batch(
         buffer=buffer,
@@ -83,4 +85,8 @@ def train_from_buffer(
         gae_lambda=gae_lambda,
     )
 
-    return trainer.update(**batch)
+    return trainer.update_epochs(
+        **batch,
+        epochs=epochs,
+        minibatch_size=minibatch_size,
+    )
