@@ -80,3 +80,36 @@ class MAPPOTrainer:
             "critic_loss": float(losses["critic_loss"].detach()),
             "entropy": float(losses["entropy"].detach()),
         }
+    def update_epochs(
+        self,
+        observations,
+        centralized_states,
+        actions,
+        old_log_probs,
+        advantages,
+        returns,
+        epochs=4,
+        minibatch_size=64,
+    ):
+        batch_size = observations.shape[0]
+        metrics_history = []
+
+        for _ in range(epochs):
+            indices = torch.randperm(batch_size)
+
+            for start in range(0, batch_size, minibatch_size):
+                end = start + minibatch_size
+                batch_indices = indices[start:end]
+
+                metrics = self.update(
+                    observations=observations[batch_indices],
+                    centralized_states=centralized_states[batch_indices],
+                    actions=actions[batch_indices],
+                    old_log_probs=old_log_probs[batch_indices],
+                    advantages=advantages[batch_indices],
+                    returns=returns[batch_indices],
+                )
+
+                metrics_history.append(metrics)
+
+        return metrics_history
