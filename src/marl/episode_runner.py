@@ -1,3 +1,4 @@
+from src.evaluation.path_length import compute_step_path_length
 from src.communication.telemetry import TelemetryMessage
 from src.marl.digital_twin_adapter import get_digital_twin_inputs
 
@@ -33,7 +34,7 @@ def run_episode(
     collision = False
     all_goals_reached = False
     steps = 0
-
+    total_path_length = 0
     for step in range(max_steps):
 
 
@@ -83,6 +84,11 @@ def run_episode(
                 "aoi_values"
             ]
 
+
+        previous_positions = dict(
+            simulator.agent_positions
+        )
+
         result = run_real_training_step(
             actor=actor,
             critic=critic,
@@ -110,6 +116,19 @@ def run_episode(
                 )
 
 
+        current_positions = dict(
+            simulator.agent_positions
+        )
+
+        total_path_length += compute_step_path_length(
+            previous_positions,
+            current_positions,
+        )
+
+
+
+
+
 
         for agent_id, reward in enumerate(
             result["rewards"]
@@ -131,4 +150,5 @@ def run_episode(
         "total_rewards": total_rewards,
         "collision": collision,
         "all_goals_reached": all_goals_reached,
+        "path_length": total_path_length,
     }
