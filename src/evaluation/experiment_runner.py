@@ -9,15 +9,31 @@ def run_experiment_sweep(
     scenario_id,
     agent_count,
     m5_threshold=None,
+    context_factory=None,
 ):
     results = []
 
     for latency_steps in latency_levels:
         for method in methods:
-            metrics = run_method_fn(
-                method=method,
-                latency_steps=latency_steps,
-            )
+            context = None
+
+            if context_factory is not None:
+                context = context_factory(
+                    method=method,
+                    latency_steps=latency_steps,
+                )
+
+            if context is None:
+                metrics = run_method_fn(
+                    method=method,
+                    latency_steps=latency_steps,
+                )
+            else:
+                metrics = run_method_fn(
+                    method=method,
+                    latency_steps=latency_steps,
+                    context=context,
+                )
 
             metrics["scenario_id"] = scenario_id
             metrics["agent_count"] = agent_count
