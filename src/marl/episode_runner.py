@@ -35,6 +35,8 @@ def run_episode(
     all_goals_reached = False
     steps = 0
     total_path_length = 0
+    deadlock = False
+
     for step in range(max_steps):
 
 
@@ -137,18 +139,19 @@ def run_episode(
 
         steps = step + 1
         collision = result["collision"]
-
+        deadlock = simulator.is_deadlocked()
         all_goals_reached = (
             simulator.all_goals_reached()
         )
 
-        if collision or all_goals_reached:
+        if collision or deadlock or all_goals_reached:
             break
-
     return {
         "steps": steps,
         "total_rewards": total_rewards,
         "collision": collision,
         "all_goals_reached": all_goals_reached,
         "path_length": total_path_length,
+        "deadlock": deadlock,
+        "makespan": steps,
     }
