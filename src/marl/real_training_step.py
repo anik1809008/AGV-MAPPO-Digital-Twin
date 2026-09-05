@@ -1,3 +1,4 @@
+from src.baselines.stale_wait import ReachableSetWaitBaseline
 from src.marl.environment_adapter import build_all_agent_inputs
 from src.marl.environment_step import execute_training_step
 from src.marl.rollout import collect_single_step
@@ -15,6 +16,7 @@ def run_real_training_step(
     delayed_executor=None,
     current_timestep=0,
     m4_controller=None,
+    m5_baseline=None,
 ):
     agent_positions = list(
         simulator.agent_positions.values()
@@ -77,6 +79,27 @@ def run_real_training_step(
                     action,
                 )
             )
+
+
+
+    elif method == "M5" and m5_baseline is not None:
+        actions = {}
+
+        for agent_id, proposed_action in enumerate(
+            rollout["actions"]
+        ):
+            reachable_size = len(
+                reachable_occupancies.get(
+                    agent_id,
+                    {agent_positions[agent_id]},
+                )
+            )
+
+            actions[agent_id] = m5_baseline.select_action(
+                proposed_action,
+                reachable_size,
+            )
+
 
     else:
         actions = {
