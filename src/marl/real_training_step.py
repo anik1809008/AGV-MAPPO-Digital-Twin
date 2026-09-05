@@ -3,6 +3,7 @@ from src.marl.environment_step import execute_training_step
 from src.marl.rollout import collect_single_step
 
 
+
 def run_real_training_step(
     actor,
     critic,
@@ -12,7 +13,12 @@ def run_real_training_step(
     reachable_occupancies,
     aoi_values,
     multi_agent_buffer=None,
+    delayed_executor=None,
+    current_timestep=0,
 ):
+
+
+
     agent_positions = list(
         simulator.agent_positions.values()
     )
@@ -44,10 +50,32 @@ def run_real_training_step(
         )
     }
 
+
+    if delayed_executor is not None:
+        delayed_executor.queue_commands(
+            actions=actions,
+            current_timestep=current_timestep,
+        )
+
+        ready_actions = delayed_executor.get_ready_actions(
+            current_timestep=current_timestep,
+        )
+
+        execution_actions = {
+            agent_id: ready_actions.get(
+                agent_id,
+                0,
+            )
+            for agent_id in actions
+        }
+    else:
+        execution_actions = actions
+
     environment_result = execute_training_step(
         simulator=simulator,
-        actions=actions,
+        actions=execution_actions,
     )
+
 
 
     if multi_agent_buffer is not None:
