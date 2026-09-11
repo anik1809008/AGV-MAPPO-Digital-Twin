@@ -29,3 +29,23 @@ def test_build_marl_episode_metrics():
         "planning_time": 0.02,
         "shield_interventions": 3,
     }
+def test_build_m6_episode_metrics():
+    episode_result = {
+        "all_goals_reached": False,
+        "collision": False,
+        "deadlock": False,
+        "makespan": 15,
+        "path_length": 40,
+    }
+
+    metrics = build_marl_episode_metrics(
+        method="M6",
+        episode_result=episode_result,
+        planning_time=0.01,
+        shield_interventions=0,
+    )
+
+    assert metrics["method"] == "M6"
+    assert metrics["shield_interventions"] == 0
+    assert metrics["makespan"] == 15
+    assert metrics["path_length"] == 40

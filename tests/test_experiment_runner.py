@@ -20,7 +20,7 @@ def test_run_experiment_sweep(tmp_path):
         }
 
     results = run_experiment_sweep(
-        methods=["M2", "M3"],
+        methods=["M2", "M3", "M6"],
         latency_levels=[0, 1],
         run_method_fn=fake_run_method,
         results_path=str(path),
@@ -28,12 +28,12 @@ def test_run_experiment_sweep(tmp_path):
         agent_count=8,
     )
 
-    assert len(results) == 4
+    assert len(results) == 6
 
     assert results[0]["method"] == "M2"
     assert results[0]["latency_steps"] == 0
 
-    assert results[-1]["method"] == "M3"
+    assert results[-1]["method"] == "M6"
     assert results[-1]["latency_steps"] == 1
 
     assert path.exists()
