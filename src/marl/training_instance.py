@@ -6,19 +6,25 @@ def build_training_instance(
     map_path,
     scenario_path,
     agent_count,
+    start_index=0,
 ):
     if agent_count < 1:
         raise ValueError("agent_count must be >= 1")
 
+    if start_index < 0:
+        raise ValueError("start_index must be >= 0")
+
     map_data = load_movingai_map(map_path)
     scenarios = load_movingai_scenario(scenario_path)
 
-    if len(scenarios) < agent_count:
+    end_index = start_index + agent_count
+
+    if end_index > len(scenarios):
         raise ValueError(
             "scenario file does not contain enough agents"
         )
 
-    selected = scenarios[:agent_count]
+    selected = scenarios[start_index:end_index]
 
     starts = {
         agent_id: scenario["start"]
