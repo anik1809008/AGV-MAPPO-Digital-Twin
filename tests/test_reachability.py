@@ -52,3 +52,26 @@ def test_wall_blocks_reachable_motion():
     )
 
     assert reachable == {(0, 0)}
+def test_reachability_preserves_fifo_command_order():
+    grid = [
+        [0, 0, 0],
+        [0, 0, 0],
+        [0, 0, 0],
+    ]
+
+    reachable = compute_reachable_occupancy(
+        grid=grid,
+        last_trusted_position=(1, 1),
+        command_history=[
+            Action.WEST,
+            Action.NORTH,
+        ],
+    )
+
+    assert reachable == {
+        (1, 1),
+        (0, 1),
+        (0, 0),
+    }
+
+    assert (1, 0) not in reachable

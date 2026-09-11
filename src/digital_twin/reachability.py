@@ -27,6 +27,8 @@ def apply_action(grid, position, action):
     return position
 
 
+
+
 def compute_reachable_occupancy(
     grid,
     last_trusted_position,
@@ -34,6 +36,7 @@ def compute_reachable_occupancy(
 ):
     reachable = {last_trusted_position}
 
+    current_position = last_trusted_position
 
     for command_entry in command_history:
         if isinstance(command_entry, tuple):
@@ -41,18 +44,12 @@ def compute_reachable_occupancy(
         else:
             command = command_entry
 
+        current_position = apply_action(
+            grid,
+            current_position,
+            command,
+        )
 
-        next_reachable = set(reachable)
-
-        for position in reachable:
-            moved_position = apply_action(
-                grid,
-                position,
-                command,
-            )
-
-            next_reachable.add(moved_position)
-
-        reachable = next_reachable
+        reachable.add(current_position)
 
     return reachable
