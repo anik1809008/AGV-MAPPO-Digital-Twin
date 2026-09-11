@@ -16,4 +16,5 @@ def test_experiment_config_values():
         "M3",
         "M4",
         "M5",
+        "M6"
     ]

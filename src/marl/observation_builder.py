@@ -31,7 +31,20 @@ def build_agent_input(
             aoi=0,
             reachable_size=1,
         )
+    elif method == "M6":
+        spatial = build_m2_observation(
+            grid=grid,
+            center_position=center_position,
+            trusted_positions=trusted_positions,
+            window_size=window_size,
+        )
 
+        scalars = build_scalar_features(
+          center_position=center_position,
+          goal_position=goal_position,
+          aoi=aoi,
+          reachable_size=1,
+       )
     elif method in {"M3", "M4", "M5"}:
         spatial = build_m3_observation(
             grid=grid,

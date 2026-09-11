@@ -10,6 +10,7 @@ METHODS = [
     "M3",
     "M4",
     "M5",
+    "M6",
 ]
 
 DEFAULT_MAX_STEPS = 200
