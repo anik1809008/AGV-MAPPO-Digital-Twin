@@ -2,6 +2,7 @@ from src.marl.episode_runner import run_episode
 from src.marl.episode_training import train_from_episode
 
 
+
 def run_training_cycle(
     actor,
     critic,
@@ -12,6 +13,9 @@ def run_training_cycle(
     reachable_occupancies,
     aoi_values,
     multi_agent_buffer,
+    digital_twin=None,
+    telemetry_channel=None,
+    delayed_executor=None,
     max_steps=200,
     next_values=None,
     gamma=0.99,
@@ -19,6 +23,10 @@ def run_training_cycle(
     epochs=4,
     minibatch_size=64,
 ):
+
+
+
+
     episode_result = run_episode(
         actor=actor,
         critic=critic,
@@ -29,6 +37,10 @@ def run_training_cycle(
         aoi_values=aoi_values,
         multi_agent_buffer=multi_agent_buffer,
         max_steps=max_steps,
+        digital_twin=digital_twin,
+        telemetry_channel=telemetry_channel,
+        delayed_executor=delayed_executor,
+
     )
 
     training_history = train_from_episode(
