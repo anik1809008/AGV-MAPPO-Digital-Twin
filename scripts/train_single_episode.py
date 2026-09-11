@@ -34,6 +34,12 @@ def main():
         default=200,
     )
 
+    parser.add_argument(
+        "--start-index",
+        type=int,
+        default=0,
+    )
+
     args = parser.parse_args()
 
     instance = build_training_instance(
@@ -46,6 +52,7 @@ def main():
             "warehouse-10-20-10-2-1-random-1.scen"
         ),
         agent_count=args.agents,
+        start_index=args.start_index,
     )
 
     grid = instance["grid"]
