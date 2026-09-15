@@ -63,6 +63,8 @@ def main():
         agent_count=args.agents,
     )
 
+    previous_episodes = 0
+
 
     if args.resume:
         extra_state = load_checkpoint(
@@ -77,6 +79,11 @@ def main():
             ),
         )
 
+        previous_episodes = extra_state.get(
+            "total_episodes",
+            extra_state.get("episodes", 0),
+        )
+
         print(
             "Checkpoint loaded:",
             args.checkpoint,
@@ -85,7 +92,6 @@ def main():
             "Checkpoint state:",
             extra_state,
         )
-
 
 
 
@@ -163,6 +169,10 @@ def main():
             f"updates={len(result['training_history'])}"
         )
 
+
+
+    total_episodes = previous_episodes + args.episodes
+
     save_checkpoint(
         path=args.checkpoint,
         actor=components["actor"],
@@ -177,10 +187,15 @@ def main():
             "method": args.method,
             "agents": args.agents,
             "episodes": args.episodes,
+            "total_episodes": total_episodes,
             "latency": args.latency,
             "start_index": args.start_index,
+            
         },
     )
+
+    total_episodes = previous_episodes + args.episodes
+
 
     print(
         "Checkpoint saved:",
