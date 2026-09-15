@@ -4,12 +4,11 @@ from src.communication.latency_channel import FixedLatencyChannel
 from src.digital_twin.digital_twin import DigitalTwin
 from src.digital_twin.state import AgentTwinState
 from src.environment.simulator import GroundTruthSimulator
-from src.marl.checkpoint import save_checkpoint
 from src.marl.multi_agent_buffer import MultiAgentRolloutBuffer
 from src.marl.training_components import build_mappo_components
 from src.marl.training_cycle import run_training_cycle
 from src.marl.training_instance import build_training_instance
-
+from src.marl.checkpoint import load_checkpoint, save_checkpoint
 
 def main():
     parser = argparse.ArgumentParser()
@@ -50,11 +49,45 @@ def main():
         default="results/mappo_checkpoint.pt",
     )
 
+    parser.add_argument(
+        "--resume",
+        action="store_true",
+    )
+
+
+
+
     args = parser.parse_args()
 
     components = build_mappo_components(
         agent_count=args.agents,
     )
+
+
+    if args.resume:
+        extra_state = load_checkpoint(
+            path=args.checkpoint,
+            actor=components["actor"],
+            critic=components["critic"],
+            actor_optimizer=(
+                components["trainer"].actor_optimizer
+            ),
+            critic_optimizer=(
+                components["trainer"].critic_optimizer
+            ),
+        )
+
+        print(
+            "Checkpoint loaded:",
+            args.checkpoint,
+        )
+        print(
+            "Checkpoint state:",
+            extra_state,
+        )
+
+
+
 
     for episode in range(args.episodes):
         start_index = (
