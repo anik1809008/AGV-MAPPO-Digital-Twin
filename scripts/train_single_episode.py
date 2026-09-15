@@ -4,6 +4,7 @@ from src.communication.latency_channel import FixedLatencyChannel
 from src.digital_twin.digital_twin import DigitalTwin
 from src.digital_twin.state import AgentTwinState
 from src.environment.simulator import GroundTruthSimulator
+from src.marl.checkpoint import save_checkpoint
 from src.marl.multi_agent_buffer import MultiAgentRolloutBuffer
 from src.marl.training_components import build_mappo_components
 from src.marl.training_cycle import run_training_cycle
@@ -33,26 +34,23 @@ def main():
         type=int,
         default=200,
     )
-
     parser.add_argument(
         "--start-index",
         type=int,
         default=0,
     )
-
     parser.add_argument(
         "--episodes",
         type=int,
         default=1,
     )
-
+    parser.add_argument(
+        "--checkpoint",
+        type=str,
+        default="results/mappo_checkpoint.pt",
+    )
 
     args = parser.parse_args()
-
-
-
-
-
 
     components = build_mappo_components(
         agent_count=args.agents,
@@ -132,24 +130,29 @@ def main():
             f"updates={len(result['training_history'])}"
         )
 
+    save_checkpoint(
+        path=args.checkpoint,
+        actor=components["actor"],
+        critic=components["critic"],
+        actor_optimizer=(
+            components["trainer"].actor_optimizer
+        ),
+        critic_optimizer=(
+            components["trainer"].critic_optimizer
+        ),
+        extra_state={
+            "method": args.method,
+            "agents": args.agents,
+            "episodes": args.episodes,
+            "latency": args.latency,
+            "start_index": args.start_index,
+        },
+    )
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+    print(
+        "Checkpoint saved:",
+        args.checkpoint,
+    )
 
 
 if __name__ == "__main__":
