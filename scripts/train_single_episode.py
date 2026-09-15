@@ -63,6 +63,13 @@ def main():
     )
 
 
+    parser.add_argument(
+        "--seed",
+        type=int,
+        default=0,
+    )
+
+
 
 
     args = parser.parse_args()
@@ -146,9 +153,12 @@ def main():
             latency_steps=args.latency,
         )
 
+
         execution_delay_model = ExecutionDelayModel(
             immediate_probability=args.immediate_probability,
+            seed=args.seed + episode,
         )
+
 
         delayed_executor = DelayedCommandExecutor(
             delay_model=execution_delay_model,
@@ -209,6 +219,7 @@ def main():
             "latency": args.latency,
             "start_index": args.start_index,
             "immediate_probability": args.immediate_probability,
+            "seed": args.seed,
         },
     )
 
