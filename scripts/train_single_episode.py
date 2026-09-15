@@ -1,5 +1,6 @@
 import argparse
-
+from src.environment.delayed_execution import DelayedCommandExecutor
+from src.environment.execution_delay import ExecutionDelayModel
 from src.communication.latency_channel import FixedLatencyChannel
 from src.digital_twin.digital_twin import DigitalTwin
 from src.digital_twin.state import AgentTwinState
@@ -52,6 +53,13 @@ def main():
     parser.add_argument(
         "--resume",
         action="store_true",
+    )
+
+
+    parser.add_argument(
+        "--immediate-probability",
+        type=float,
+        default=0.8,
     )
 
 
@@ -138,6 +146,15 @@ def main():
             latency_steps=args.latency,
         )
 
+        execution_delay_model = ExecutionDelayModel(
+            immediate_probability=args.immediate_probability,
+        )
+
+        delayed_executor = DelayedCommandExecutor(
+            delay_model=execution_delay_model,
+        )
+
+
         buffer = MultiAgentRolloutBuffer(
             num_agents=args.agents,
         )
@@ -147,6 +164,7 @@ def main():
             critic=components["critic"],
             trainer=components["trainer"],
             simulator=simulator,
+            delayed_executor=delayed_executor,
             method=args.method,
             trusted_positions=starts,
             reachable_occupancies={
@@ -190,7 +208,7 @@ def main():
             "total_episodes": total_episodes,
             "latency": args.latency,
             "start_index": args.start_index,
-
+            "immediate_probability": args.immediate_probability,
         },
     )
 
