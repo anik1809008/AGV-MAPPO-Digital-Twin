@@ -69,3 +69,30 @@ def test_invalid_training_instance_start_index():
         raise AssertionError(
             "Expected ValueError"
         )
+def test_training_instance_rejects_out_of_range_request():
+    map_path = (
+        "benchmarks/movingai/"
+        "warehouse-10-20-10-2-1.map"
+    )
+
+    scenario_path = (
+        "benchmarks/movingai/scen-random/"
+        "warehouse-10-20-10-2-1-random-1.scen"
+    )
+
+    try:
+        build_training_instance(
+            map_path=map_path,
+            scenario_path=scenario_path,
+            agent_count=20,
+            start_index=990,
+        )
+    except ValueError as exc:
+        assert (
+            "scenario file does not contain enough agents"
+            in str(exc)
+        )
+    else:
+        raise AssertionError(
+            "Expected ValueError for out-of-range scenarios"
+        )
