@@ -1,3 +1,4 @@
+
 import argparse
 from src.environment.delayed_execution import DelayedCommandExecutor
 from src.environment.execution_delay import ExecutionDelayModel
@@ -10,6 +11,14 @@ from src.marl.training_components import build_mappo_components
 from src.marl.training_cycle import run_training_cycle
 from src.marl.training_instance import build_training_instance
 from src.marl.checkpoint import load_checkpoint, save_checkpoint
+
+import random
+
+import numpy as np
+import torch
+
+
+
 
 def main():
     parser = argparse.ArgumentParser()
@@ -73,6 +82,11 @@ def main():
 
 
     args = parser.parse_args()
+
+    random.seed(args.seed)
+    np.random.seed(args.seed)
+    torch.manual_seed(args.seed)
+
 
     components = build_mappo_components(
         agent_count=args.agents,
