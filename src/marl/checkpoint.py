@@ -68,3 +68,24 @@ def load_checkpoint(
         )
 
     return checkpoint.get("extra_state")
+def validate_checkpoint_compatibility(
+    extra_state,
+    method,
+    agents,
+):
+    checkpoint_method = extra_state.get("method")
+    checkpoint_agents = extra_state.get("agents")
+
+    if checkpoint_method != method:
+        raise ValueError(
+            "Checkpoint method does not match "
+            f"requested method: checkpoint="
+            f"{checkpoint_method}, requested={method}"
+        )
+
+    if checkpoint_agents != agents:
+        raise ValueError(
+            "Checkpoint agent count does not match "
+            f"requested agents: checkpoint="
+            f"{checkpoint_agents}, requested={agents}"
+        )

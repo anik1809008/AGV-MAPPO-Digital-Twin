@@ -10,7 +10,17 @@ from src.marl.multi_agent_buffer import MultiAgentRolloutBuffer
 from src.marl.training_components import build_mappo_components
 from src.marl.training_cycle import run_training_cycle
 from src.marl.training_instance import build_training_instance
-from src.marl.checkpoint import load_checkpoint, save_checkpoint
+
+
+from src.marl.checkpoint import (
+    load_checkpoint,
+    save_checkpoint,
+    validate_checkpoint_compatibility,
+)
+
+
+
+
 
 import random
 
@@ -136,6 +146,17 @@ def main():
                 components["trainer"].critic_optimizer
             ),
         )
+
+
+
+        validate_checkpoint_compatibility(
+            extra_state=extra_state,
+            method=args.method,
+            agents=args.agents,
+        )
+
+
+
 
         previous_episodes = extra_state.get(
             "total_episodes",
