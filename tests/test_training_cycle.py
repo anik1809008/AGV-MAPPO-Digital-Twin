@@ -8,6 +8,15 @@ from src.digital_twin.digital_twin import DigitalTwin
 from src.digital_twin.state import AgentTwinState
 
 
+import random
+
+import numpy as np
+import torch
+
+
+
+
+
 def test_training_cycle_with_dynamic_digital_twin():
     grid = [
         [0, 0, 0],
@@ -237,3 +246,95 @@ def test_m6_training_cycle_with_dynamic_digital_twin():
     assert 1 <= result["episode"]["steps"] <= 4
     assert len(result["training_history"]) > 0
     assert len(buffer) == 0
+def test_seeded_training_is_reproducible():
+    def run_once(seed):
+        random.seed(seed)
+        np.random.seed(seed)
+        torch.manual_seed(seed)
+
+        grid = [
+            [0, 0, 0],
+            [0, 0, 0],
+        ]
+
+        starts = {
+            0: (0, 0),
+            1: (2, 1),
+        }
+
+        goals = {
+            0: (2, 0),
+            1: (0, 1),
+        }
+
+        simulator = GroundTruthSimulator(
+            grid=grid,
+            agent_positions=starts,
+            agent_goals=goals,
+        )
+
+        actor = ActorNetwork(
+            input_dim=247,
+            action_dim=5,
+        )
+
+        critic = CriticNetwork(
+            input_dim=494,
+        )
+
+        trainer = MAPPOTrainer(
+            actor=actor,
+            critic=critic,
+        )
+
+        buffer = MultiAgentRolloutBuffer(
+            num_agents=2,
+        )
+
+        run_training_cycle(
+            actor=actor,
+            critic=critic,
+            trainer=trainer,
+            simulator=simulator,
+            method="M6",
+            trusted_positions=starts,
+            reachable_occupancies={
+                0: {(0, 0)},
+                1: {(2, 1)},
+            },
+            aoi_values={
+                0: 0,
+                1: 0,
+            },
+            multi_agent_buffer=buffer,
+            max_steps=4,
+            epochs=2,
+            minibatch_size=4,
+        )
+
+        actor_state = {
+            key: value.detach().clone()
+            for key, value in actor.state_dict().items()
+        }
+
+        critic_state = {
+            key: value.detach().clone()
+            for key, value in critic.state_dict().items()
+        }
+
+        return actor_state, critic_state
+
+    actor_a, critic_a = run_once(seed=42)
+    actor_b, critic_b = run_once(seed=42)
+
+    for key in actor_a:
+        assert torch.equal(
+            actor_a[key],
+            actor_b[key],
+        )
+
+    for key in critic_a:
+        assert torch.equal(
+            critic_a[key],
+            critic_b[key],
+        )
