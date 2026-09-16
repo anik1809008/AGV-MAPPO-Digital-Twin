@@ -103,18 +103,9 @@ def main():
         scenario_path
     )
 
-    required_scenarios = (
-        args.start_index
-        + args.episodes * args.agents
-    )
 
-    if required_scenarios > len(scenarios):
-        raise ValueError(
-            "Requested training range exceeds "
-            f"available scenarios: need "
-            f"{required_scenarios}, "
-            f"available {len(scenarios)}"
-        )
+
+
 
 
 
@@ -132,6 +123,9 @@ def main():
     )
 
     previous_episodes = 0
+    effective_start_index = args.start_index
+
+
 
 
     if args.resume:
@@ -169,22 +163,54 @@ def main():
             extra_state.get("episodes", 0),
         )
 
+        checkpoint_start_index = extra_state.get(
+            "start_index",
+            0,
+        )
+
+        checkpoint_episodes = extra_state.get(
+            "episodes",
+            0,
+        )
+
+        effective_start_index = (
+            checkpoint_start_index
+            + checkpoint_episodes * args.agents
+        )
+
         print(
             "Checkpoint loaded:",
             args.checkpoint,
         )
+
         print(
             "Checkpoint state:",
             extra_state,
         )
 
+    required_scenarios = (
+        effective_start_index
+        + args.episodes * args.agents
+    )
 
+    if required_scenarios > len(scenarios):
+        raise ValueError(
+            "Requested training range exceeds "
+            f"available scenarios: need "
+            f"{required_scenarios}, "
+            f"available {len(scenarios)}"
+        )
 
     for episode in range(args.episodes):
+
+
+
         start_index = (
-            args.start_index
+            effective_start_index
             + episode * args.agents
         )
+
+
 
         instance = build_training_instance(
             map_path=(
@@ -285,13 +311,12 @@ def main():
             "episodes": args.episodes,
             "total_episodes": total_episodes,
             "latency": args.latency,
-            "start_index": args.start_index,
+            "start_index": effective_start_index,
             "immediate_probability": args.immediate_probability,
             "seed": args.seed,
         },
     )
 
-    total_episodes = previous_episodes + args.episodes
 
 
     print(
