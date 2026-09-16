@@ -149,11 +149,17 @@ def main():
 
 
 
+
         validate_checkpoint_compatibility(
             extra_state=extra_state,
             method=args.method,
             agents=args.agents,
+            latency=args.latency,
+            immediate_probability=(
+                args.immediate_probability
+            ),
         )
+
 
 
 

@@ -101,3 +101,51 @@ def test_checkpoint_compatibility_rejects_agent_mismatch():
         raise AssertionError(
             "Expected agent-count mismatch ValueError"
         )
+def test_checkpoint_compatibility_rejects_latency_mismatch():
+    try:
+        validate_checkpoint_compatibility(
+            extra_state={
+                "method": "M6",
+                "agents": 8,
+                "latency": 2,
+                "immediate_probability": 0.8,
+            },
+            method="M6",
+            agents=8,
+            latency=3,
+            immediate_probability=0.8,
+        )
+    except ValueError as exc:
+        assert (
+            "Checkpoint latency does not match"
+            in str(exc)
+        )
+    else:
+        raise AssertionError(
+            "Expected latency mismatch ValueError"
+        )
+
+
+def test_checkpoint_compatibility_rejects_execution_delay_mismatch():
+    try:
+        validate_checkpoint_compatibility(
+            extra_state={
+                "method": "M6",
+                "agents": 8,
+                "latency": 2,
+                "immediate_probability": 0.8,
+            },
+            method="M6",
+            agents=8,
+            latency=2,
+            immediate_probability=0.6,
+        )
+    except ValueError as exc:
+        assert (
+            "Checkpoint immediate_probability does not match"
+            in str(exc)
+        )
+    else:
+        raise AssertionError(
+            "Expected execution-delay mismatch ValueError"
+        )

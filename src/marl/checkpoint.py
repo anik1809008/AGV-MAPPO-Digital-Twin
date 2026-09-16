@@ -68,11 +68,19 @@ def load_checkpoint(
         )
 
     return checkpoint.get("extra_state")
+
+
+
+
 def validate_checkpoint_compatibility(
     extra_state,
     method,
     agents,
+    latency=None,
+    immediate_probability=None,
 ):
+
+
     checkpoint_method = extra_state.get("method")
     checkpoint_agents = extra_state.get("agents")
 
@@ -88,4 +96,30 @@ def validate_checkpoint_compatibility(
             "Checkpoint agent count does not match "
             f"requested agents: checkpoint="
             f"{checkpoint_agents}, requested={agents}"
+        )
+    checkpoint_latency = extra_state.get("latency")
+    checkpoint_immediate_probability = extra_state.get(
+        "immediate_probability"
+    )
+
+    if (
+        latency is not None
+        and checkpoint_latency != latency
+    ):
+        raise ValueError(
+            "Checkpoint latency does not match "
+            f"requested latency: checkpoint="
+            f"{checkpoint_latency}, requested={latency}"
+        )
+
+    if (
+        immediate_probability is not None
+        and checkpoint_immediate_probability
+        != immediate_probability
+    ):
+        raise ValueError(
+            "Checkpoint immediate_probability does not match "
+            f"requested value: checkpoint="
+            f"{checkpoint_immediate_probability}, "
+            f"requested={immediate_probability}"
         )
