@@ -149,3 +149,17 @@ def test_checkpoint_compatibility_rejects_execution_delay_mismatch():
         raise AssertionError(
             "Expected execution-delay mismatch ValueError"
         )
+def test_resume_start_index_advances_to_next_block():
+    extra_state = {
+        "start_index": 64,
+        "episodes": 1,
+        "agents": 8,
+    }
+
+    next_start_index = (
+        extra_state["start_index"]
+        + extra_state["episodes"]
+        * extra_state["agents"]
+    )
+
+    assert next_start_index == 72
