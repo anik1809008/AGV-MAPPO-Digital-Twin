@@ -1,4 +1,4 @@
-
+from src.environment.movingai_scenario import load_movingai_scenario
 import argparse
 from src.environment.delayed_execution import DelayedCommandExecutor
 from src.environment.execution_delay import ExecutionDelayModel
@@ -83,6 +83,35 @@ def main():
 
     args = parser.parse_args()
 
+
+    scenario_path = (
+        "benchmarks/movingai/scen-random/"
+        "warehouse-10-20-10-2-1-random-1.scen"
+    )
+
+    scenarios = load_movingai_scenario(
+        scenario_path
+    )
+
+    required_scenarios = (
+        args.start_index
+        + args.episodes * args.agents
+    )
+
+    if required_scenarios > len(scenarios):
+        raise ValueError(
+            "Requested training range exceeds "
+            f"available scenarios: need "
+            f"{required_scenarios}, "
+            f"available {len(scenarios)}"
+        )
+
+
+
+
+
+
+
     random.seed(args.seed)
     np.random.seed(args.seed)
     torch.manual_seed(args.seed)
@@ -135,10 +164,8 @@ def main():
                 "benchmarks/movingai/"
                 "warehouse-10-20-10-2-1.map"
             ),
-            scenario_path=(
-                "benchmarks/movingai/scen-random/"
-                "warehouse-10-20-10-2-1-random-1.scen"
-            ),
+            scenario_path=scenario_path,
+
             agent_count=args.agents,
             start_index=start_index,
         )
