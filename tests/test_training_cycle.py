@@ -1,3 +1,6 @@
+from src.environment.delayed_execution import DelayedCommandExecutor
+from src.environment.execution_delay import ExecutionDelayModel
+
 from src.environment.simulator import GroundTruthSimulator
 from src.marl.mappo_trainer import MAPPOTrainer
 from src.marl.multi_agent_buffer import MultiAgentRolloutBuffer
@@ -338,3 +341,91 @@ def test_seeded_training_is_reproducible():
             critic_a[key],
             critic_b[key],
         )
+def test_training_cycle_with_execution_delay():
+    grid = [
+        [0, 0, 0],
+        [0, 0, 0],
+    ]
+
+    starts = {
+        0: (0, 0),
+        1: (2, 1),
+    }
+
+    goals = {
+        0: (2, 0),
+        1: (0, 1),
+    }
+
+    simulator = GroundTruthSimulator(
+        grid=grid,
+        agent_positions=starts,
+        agent_goals=goals,
+    )
+
+    digital_twin = DigitalTwin({
+        agent_id: AgentTwinState(
+            agent_id=agent_id,
+            last_trusted_position=starts[agent_id],
+            last_trusted_timestamp=0,
+            goal=goals[agent_id],
+        )
+        for agent_id in starts
+    })
+
+    telemetry_channel = FixedLatencyChannel(
+        latency_steps=2,
+    )
+
+    delayed_executor = DelayedCommandExecutor(
+        ExecutionDelayModel(
+            immediate_probability=0.0,
+            seed=1,
+        )
+    )
+
+    actor = ActorNetwork(
+        input_dim=247,
+        action_dim=5,
+    )
+
+    critic = CriticNetwork(
+        input_dim=494,
+    )
+
+    trainer = MAPPOTrainer(
+        actor=actor,
+        critic=critic,
+    )
+
+    buffer = MultiAgentRolloutBuffer(
+        num_agents=2,
+    )
+
+    result = run_training_cycle(
+        actor=actor,
+        critic=critic,
+        trainer=trainer,
+        simulator=simulator,
+        method="M6",
+        trusted_positions=starts,
+        reachable_occupancies={
+            0: {(0, 0)},
+            1: {(2, 1)},
+        },
+        aoi_values={
+            0: 0,
+            1: 0,
+        },
+        multi_agent_buffer=buffer,
+        digital_twin=digital_twin,
+        telemetry_channel=telemetry_channel,
+        delayed_executor=delayed_executor,
+        max_steps=4,
+        epochs=2,
+        minibatch_size=4,
+    )
+
+    assert 1 <= result["episode"]["steps"] <= 4
+    assert len(result["training_history"]) > 0
+    assert len(buffer) == 0
