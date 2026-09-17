@@ -166,3 +166,21 @@ def test_resume_start_index_advances_to_next_block():
     )
 
     assert next_start_index == 72
+def test_resume_range_uses_advanced_start_index():
+    extra_state = {
+        "start_index": 960,
+        "episodes": 1,
+    }
+
+    effective_start_index = get_resume_start_index(
+        extra_state=extra_state,
+        agents=20,
+    )
+
+    required_scenarios = (
+        effective_start_index
+        + 1 * 20
+    )
+
+    assert effective_start_index == 980
+    assert required_scenarios == 1000
