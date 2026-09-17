@@ -18,20 +18,10 @@ from src.marl.checkpoint import (
     save_checkpoint,
     validate_checkpoint_compatibility,
 )
-
-
-
-
-
-
 import random
 
 import numpy as np
 import torch
-
-
-
-
 def main():
     parser = argparse.ArgumentParser()
 
@@ -89,10 +79,6 @@ def main():
         type=int,
         default=0,
     )
-
-
-
-
     args = parser.parse_args()
 
 
@@ -104,17 +90,6 @@ def main():
     scenarios = load_movingai_scenario(
         scenario_path
     )
-
-
-
-
-
-
-
-
-
-
-
     random.seed(args.seed)
     np.random.seed(args.seed)
     torch.manual_seed(args.seed)
@@ -126,10 +101,6 @@ def main():
 
     previous_episodes = 0
     effective_start_index = args.start_index
-
-
-
-
     if args.resume:
         extra_state = load_checkpoint(
             path=args.checkpoint,
@@ -142,10 +113,6 @@ def main():
                 components["trainer"].critic_optimizer
             ),
         )
-
-
-
-
         validate_checkpoint_compatibility(
             extra_state=extra_state,
             method=args.method,
@@ -155,11 +122,6 @@ def main():
                 args.immediate_probability
             ),
         )
-
-
-
-
-
         previous_episodes = extra_state.get(
             "total_episodes",
             extra_state.get("episodes", 0),
@@ -283,9 +245,6 @@ def main():
             f"steps={result['episode']['steps']}, "
             f"updates={len(result['training_history'])}"
         )
-
-
-
     total_episodes = previous_episodes + args.episodes
 
     save_checkpoint(
