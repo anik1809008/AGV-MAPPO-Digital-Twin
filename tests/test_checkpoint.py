@@ -5,10 +5,13 @@ from src.marl.mappo_trainer import MAPPOTrainer
 
 
 from src.marl.checkpoint import (
+    get_resume_start_index,
     load_checkpoint,
     save_checkpoint,
     validate_checkpoint_compatibility,
 )
+
+
 
 def test_checkpoint_save_and_load():
     actor = ActorNetwork(
@@ -149,17 +152,17 @@ def test_checkpoint_compatibility_rejects_execution_delay_mismatch():
         raise AssertionError(
             "Expected execution-delay mismatch ValueError"
         )
+
+
 def test_resume_start_index_advances_to_next_block():
     extra_state = {
         "start_index": 64,
         "episodes": 1,
-        "agents": 8,
     }
 
-    next_start_index = (
-        extra_state["start_index"]
-        + extra_state["episodes"]
-        * extra_state["agents"]
+    next_start_index = get_resume_start_index(
+        extra_state=extra_state,
+        agents=8,
     )
 
     assert next_start_index == 72

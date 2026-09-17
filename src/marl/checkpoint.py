@@ -123,3 +123,21 @@ def validate_checkpoint_compatibility(
             f"{checkpoint_immediate_probability}, "
             f"requested={immediate_probability}"
         )
+def get_resume_start_index(
+    extra_state,
+    agents,
+):
+    checkpoint_start_index = extra_state.get(
+        "start_index",
+        0,
+    )
+
+    checkpoint_episodes = extra_state.get(
+        "episodes",
+        0,
+    )
+
+    return (
+        checkpoint_start_index
+        + checkpoint_episodes * agents
+    )

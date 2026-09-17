@@ -13,10 +13,12 @@ from src.marl.training_instance import build_training_instance
 
 
 from src.marl.checkpoint import (
+    get_resume_start_index,
     load_checkpoint,
     save_checkpoint,
     validate_checkpoint_compatibility,
 )
+
 
 
 
@@ -163,19 +165,10 @@ def main():
             extra_state.get("episodes", 0),
         )
 
-        checkpoint_start_index = extra_state.get(
-            "start_index",
-            0,
-        )
 
-        checkpoint_episodes = extra_state.get(
-            "episodes",
-            0,
-        )
-
-        effective_start_index = (
-            checkpoint_start_index
-            + checkpoint_episodes * args.agents
+        effective_start_index = get_resume_start_index(
+            extra_state=extra_state,
+            agents=args.agents,
         )
 
         print(
