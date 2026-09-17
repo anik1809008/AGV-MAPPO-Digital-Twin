@@ -10,8 +10,7 @@ from src.marl.multi_agent_buffer import MultiAgentRolloutBuffer
 from src.marl.training_components import build_mappo_components
 from src.marl.training_cycle import run_training_cycle
 from src.marl.training_instance import build_training_instance
-
-
+from src.marl.scenario_split import get_random_scenario_path
 from src.marl.checkpoint import (
     get_resume_start_index,
     load_checkpoint,
@@ -80,13 +79,7 @@ def main():
         default=0,
     )
     args = parser.parse_args()
-
-
-    scenario_path = (
-        "benchmarks/movingai/scen-random/"
-        "warehouse-10-20-10-2-1-random-1.scen"
-    )
-
+    scenario_path = get_random_scenario_path(1)
     scenarios = load_movingai_scenario(
         scenario_path
     )
