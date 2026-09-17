@@ -32,3 +32,12 @@ def test_random_scenario_path():
     assert path.endswith(
         "warehouse-10-20-10-2-1-random-1.scen"
     )
+def test_training_split_contains_only_1_to_15():
+    assert TRAIN_SCENARIO_IDS == tuple(
+        range(1, 16)
+    )
+
+
+def test_validation_and_test_ids_not_in_training_split():
+    assert 16 not in TRAIN_SCENARIO_IDS
+    assert 21 not in TRAIN_SCENARIO_IDS

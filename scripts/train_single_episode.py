@@ -10,7 +10,10 @@ from src.marl.multi_agent_buffer import MultiAgentRolloutBuffer
 from src.marl.training_components import build_mappo_components
 from src.marl.training_cycle import run_training_cycle
 from src.marl.training_instance import build_training_instance
-from src.marl.scenario_split import get_random_scenario_path
+from src.marl.scenario_split import (
+    TRAIN_SCENARIO_IDS,
+    get_random_scenario_path,
+)
 from src.marl.checkpoint import (
     get_resume_start_index,
     load_checkpoint,
@@ -59,39 +62,43 @@ def main():
         type=str,
         default="results/mappo_checkpoint.pt",
     )
-
     parser.add_argument(
         "--resume",
         action="store_true",
     )
-
-
     parser.add_argument(
         "--immediate-probability",
         type=float,
         default=0.8,
     )
-
-
     parser.add_argument(
         "--seed",
         type=int,
         default=0,
     )
+    parser.add_argument(
+        "--scenario-id",
+        type=int,
+        default=1,
+    )
     args = parser.parse_args()
-    scenario_path = get_random_scenario_path(1)
+    scenario_path = get_random_scenario_path(
+        args.scenario_id
+    )
+    if args.scenario_id not in TRAIN_SCENARIO_IDS:
+        raise ValueError(
+            "Training scenario_id must be in "
+            "the training split: 1 to 15"
+        )
     scenarios = load_movingai_scenario(
         scenario_path
     )
     random.seed(args.seed)
     np.random.seed(args.seed)
     torch.manual_seed(args.seed)
-
-
     components = build_mappo_components(
         agent_count=args.agents,
     )
-
     previous_episodes = 0
     effective_start_index = args.start_index
     if args.resume:
