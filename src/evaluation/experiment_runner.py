@@ -1,6 +1,4 @@
 from src.evaluation.results_writer import append_result_csv
-
-
 def run_experiment_sweep(
     methods,
     latency_levels,
@@ -10,6 +8,9 @@ def run_experiment_sweep(
     agent_count,
     m5_threshold=None,
     context_factory=None,
+    seed=None,
+    uncertainty_condition="latency_only",
+    immediate_probability=1.0,
 ):
     results = []
 
@@ -34,11 +35,18 @@ def run_experiment_sweep(
                     latency_steps=latency_steps,
                     context=context,
                 )
-
             metrics["scenario_id"] = scenario_id
             metrics["agent_count"] = agent_count
+            metrics["seed"] = (
+                "" if seed is None else seed
+            )
+            metrics["uncertainty_condition"] = (
+                uncertainty_condition
+            )
             metrics["latency_steps"] = latency_steps
-
+            metrics["immediate_probability"] = (
+                immediate_probability
+            )
             if method == "M5":
                 metrics["m5_threshold"] = m5_threshold
             else:

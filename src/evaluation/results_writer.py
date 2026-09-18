@@ -1,12 +1,13 @@
 import csv
 import os
-
-
 RESULT_FIELDS = [
     "method",
     "scenario_id",
     "agent_count",
+    "seed",
+    "uncertainty_condition",
     "latency_steps",
+    "immediate_probability",
     "m5_threshold",
     "success",
     "collision",
@@ -16,11 +17,6 @@ RESULT_FIELDS = [
     "planning_time",
     "shield_interventions",
 ]
-
-
-
-
-
 def append_result_csv(
     path,
     metrics,

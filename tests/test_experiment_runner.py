@@ -18,7 +18,6 @@ def test_run_experiment_sweep(tmp_path):
             "planning_time": 0.01,
             "shield_interventions": 0,
         }
-
     results = run_experiment_sweep(
         methods=["M2", "M3", "M6"],
         latency_levels=[0, 1],
@@ -26,13 +25,23 @@ def test_run_experiment_sweep(tmp_path):
         results_path=str(path),
         scenario_id="test-001",
         agent_count=8,
+        seed=42,
+        uncertainty_condition="combined",
+        immediate_probability=0.8,
     )
-
     assert len(results) == 6
 
     assert results[0]["method"] == "M2"
     assert results[0]["latency_steps"] == 0
-
+    assert results[0]["seed"] == 42
+    assert (
+        results[0]["uncertainty_condition"]
+        == "combined"
+    )
+    assert (
+        results[0]["immediate_probability"]
+        == 0.8
+    )
     assert results[-1]["method"] == "M6"
     assert results[-1]["latency_steps"] == 1
 
