@@ -84,3 +84,41 @@ def expand_uncertainty_conditions():
             )
 
     return expanded
+def build_experiment_matrix(
+    methods,
+    agent_counts,
+    seeds,
+    scenario_ids,
+):
+    matrix = []
+
+    uncertainty_conditions = (
+        expand_uncertainty_conditions()
+    )
+
+    for method in methods:
+        for agent_count in agent_counts:
+            for seed in seeds:
+                for scenario_id in scenario_ids:
+                    for condition in uncertainty_conditions:
+                        matrix.append(
+                            {
+                                "method": method,
+                                "agent_count": agent_count,
+                                "seed": seed,
+                                "scenario_id": scenario_id,
+                                "uncertainty_condition": (
+                                    condition["name"]
+                                ),
+                                "latency": condition[
+                                    "latency"
+                                ],
+                                "immediate_probability": (
+                                    condition[
+                                        "immediate_probability"
+                                    ]
+                                ),
+                            }
+                        )
+
+    return matrix

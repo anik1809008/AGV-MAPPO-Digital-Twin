@@ -9,9 +9,8 @@ from src.evaluation.experiment_config import (
     UNCERTAINTY_CONDITIONS,
     UNCERTAIN_EXECUTION_PROBABILITY,
     expand_uncertainty_conditions,
+    build_experiment_matrix,
 )
-
-
 def test_experiment_configuration():
     assert LATENCY_LEVELS == [0, 1, 2, 3, 4]
 
@@ -95,3 +94,33 @@ def test_expand_uncertainty_conditions():
             "latency": latency,
             "immediate_probability": 0.8,
         } in expanded
+def test_build_experiment_matrix():
+    matrix = build_experiment_matrix(
+        methods=["M2", "M3"],
+        agent_counts=[8],
+        seeds=[0, 1],
+        scenario_ids=[21, 22],
+    )
+
+    assert len(matrix) == 80
+
+    first = matrix[0]
+
+    assert first["method"] == "M2"
+    assert first["agent_count"] == 8
+    assert first["seed"] == 0
+    assert first["scenario_id"] == 21
+
+    assert first["uncertainty_condition"] in {
+        "perfect",
+        "latency_only",
+        "execution_only",
+        "combined",
+    }
+
+    assert first["latency"] in [0, 1, 2, 3, 4]
+
+    assert first["immediate_probability"] in {
+        1.0,
+        0.8,
+    }
