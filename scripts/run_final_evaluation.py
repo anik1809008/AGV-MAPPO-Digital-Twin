@@ -70,7 +70,11 @@ def main():
         type=int,
         required=True,
     )
-
+    parser.add_argument(
+        "--checkpoint-scenario-id",
+        type=int,
+        default=None,
+    )
     parser.add_argument(
         "--start-index",
         type=int,
@@ -106,8 +110,16 @@ def main():
         type=str,
         default="results/final_evaluation.csv",
     )
-
     args = parser.parse_args()
+
+    if (
+        args.method != "M1"
+        and args.checkpoint_scenario_id is None
+    ):
+        raise ValueError(
+            "--checkpoint-scenario-id is required "
+            "for learned evaluation methods"
+        )
 
     if args.scenario_id not in TEST_SCENARIO_IDS:
         raise ValueError(
@@ -138,9 +150,13 @@ def main():
         method=args.method,
         agent_count=args.agents,
         seed=args.seed,
-        scenario_id=args.scenario_id,
+        scenario_id=(
+            args.checkpoint_scenario_id
+            if args.checkpoint_scenario_id
+            is not None
+            else args.scenario_id
+        ),
     )
-
     controllers = build_method_controllers(
         method=args.method,
         actor=models["actor"],

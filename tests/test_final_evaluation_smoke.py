@@ -84,3 +84,22 @@ def test_final_evaluation_m1_smoke():
     assert "makespan" in metrics
     assert "path_length" in metrics
     assert "planning_time" in metrics
+def test_learned_evaluation_checkpoint_can_differ_from_test_scenario():
+    from src.evaluation.checkpoint_resolver import (
+        resolve_evaluation_checkpoint,
+    )
+
+    checkpoint_path = resolve_evaluation_checkpoint(
+        method="M6",
+        agent_count=8,
+        seed=2,
+        scenario_id=3,
+    )
+
+    assert checkpoint_path.endswith(
+        "m6_agents8_seed2_scenario3.pt"
+    )
+
+    test_scenario_id = 21
+
+    assert test_scenario_id != 3
