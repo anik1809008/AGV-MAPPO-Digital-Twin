@@ -1,9 +1,7 @@
 import argparse
 import random
-
 import numpy as np
 import torch
-
 from src.environment.execution_delay import ExecutionDelayModel
 from src.evaluation.context_factory import build_experiment_context
 from src.evaluation.controller_factory import (
@@ -28,7 +26,6 @@ from src.marl.scenario_split import (
 from src.marl.training_instance import (
     build_training_instance,
 )
-
 
 MAP_PATH = (
     "benchmarks/movingai/"
@@ -199,6 +196,11 @@ def main():
     metrics["scenario_id"] = args.scenario_id
     metrics["agent_count"] = args.agents
     metrics["seed"] = args.seed
+    metrics["checkpoint_scenario_id"] = (
+        ""
+        if args.method == "M1"
+        else args.checkpoint_scenario_id
+    )
     metrics["latency_steps"] = args.latency
     metrics["immediate_probability"] = (
         args.immediate_probability

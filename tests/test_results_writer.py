@@ -11,6 +11,7 @@ def test_append_result_csv(tmp_path):
         "method": "M4",
         "scenario_id": "random-1-000",
         "agent_count": 8,
+        "checkpoint_scenario_id": 15,
         "latency_steps": 2,
         "m5_threshold": "",
         "success": True,
@@ -45,6 +46,7 @@ def test_append_result_csv(tmp_path):
     assert rows[0]["makespan"] == "20"
     assert rows[0]["shield_interventions"] == "3"
     assert rows[0]["scenario_id"] == "random-1-000"
+    assert rows[0]["checkpoint_scenario_id"] == "15"
     assert rows[0]["agent_count"] == "8"
     assert rows[0]["latency_steps"] == "2"
     assert rows[0]["m5_threshold"] == ""
