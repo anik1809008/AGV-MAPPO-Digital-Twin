@@ -20,6 +20,9 @@ from src.marl.checkpoint import (
     save_checkpoint,
     validate_checkpoint_compatibility,
 )
+from src.marl.checkpoint_paths import (
+    build_training_checkpoint_path,
+)
 import random
 
 import numpy as np
@@ -60,7 +63,7 @@ def main():
     parser.add_argument(
         "--checkpoint",
         type=str,
-        default="results/mappo_checkpoint.pt",
+        default=None,
     )
     parser.add_argument(
         "--resume",
@@ -82,6 +85,14 @@ def main():
         default=1,
     )
     args = parser.parse_args()
+
+    if args.checkpoint is None:
+        args.checkpoint = build_training_checkpoint_path(
+            method=args.method,
+            agent_count=args.agents,
+            seed=args.seed,
+            scenario_id=args.scenario_id,
+        )
     scenario_path = get_random_scenario_path(
         args.scenario_id
     )

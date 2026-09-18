@@ -1,5 +1,6 @@
-import torch
+import os
 
+import torch
 
 def save_checkpoint(
     path,
@@ -27,6 +28,14 @@ def save_checkpoint(
     if extra_state is not None:
         checkpoint["extra_state"] = extra_state
 
+
+    parent_directory = os.path.dirname(path)
+
+    if parent_directory:
+        os.makedirs(
+            parent_directory,
+            exist_ok=True,
+        )
     torch.save(checkpoint, path)
 
 
