@@ -8,6 +8,7 @@ from src.evaluation.experiment_config import (
     TRAINING_METHODS,
     UNCERTAINTY_CONDITIONS,
     UNCERTAIN_EXECUTION_PROBABILITY,
+    expand_uncertainty_conditions,
 )
 
 
@@ -65,3 +66,32 @@ def test_uncertainty_conditions():
         "latency": None,
         "immediate_probability": 0.8,
     }
+def test_expand_uncertainty_conditions():
+    expanded = expand_uncertainty_conditions()
+
+    assert len(expanded) == 10
+
+    assert {
+        "name": "perfect",
+        "latency": 0,
+        "immediate_probability": 1.0,
+    } in expanded
+
+    assert {
+        "name": "execution_only",
+        "latency": 0,
+        "immediate_probability": 0.8,
+    } in expanded
+
+    for latency in [1, 2, 3, 4]:
+        assert {
+            "name": "latency_only",
+            "latency": latency,
+            "immediate_probability": 1.0,
+        } in expanded
+
+        assert {
+            "name": "combined",
+            "latency": latency,
+            "immediate_probability": 0.8,
+        } in expanded

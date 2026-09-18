@@ -59,3 +59,28 @@ UNCERTAINTY_CONDITIONS = {
         ),
     },
 }
+def expand_uncertainty_conditions():
+    expanded = []
+
+    for name, config in UNCERTAINTY_CONDITIONS.items():
+        if config["latency"] is None:
+            latencies = [
+                latency
+                for latency in LATENCY_LEVELS
+                if latency > 0
+            ]
+        else:
+            latencies = [config["latency"]]
+
+        for latency in latencies:
+            expanded.append(
+                {
+                    "name": name,
+                    "latency": latency,
+                    "immediate_probability": (
+                        config["immediate_probability"]
+                    ),
+                }
+            )
+
+    return expanded
