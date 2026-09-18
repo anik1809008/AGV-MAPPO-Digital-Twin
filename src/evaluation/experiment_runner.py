@@ -9,6 +9,7 @@ def run_experiment_sweep(
     m5_threshold=None,
     context_factory=None,
     seed=None,
+    checkpoint_scenario_id=None,
     uncertainty_condition="latency_only",
     immediate_probability=1.0,
 ):
@@ -39,6 +40,11 @@ def run_experiment_sweep(
             metrics["agent_count"] = agent_count
             metrics["seed"] = (
                 "" if seed is None else seed
+            )
+            metrics["checkpoint_scenario_id"] = (
+                ""
+                if checkpoint_scenario_id is None
+                else checkpoint_scenario_id
             )
             metrics["uncertainty_condition"] = (
                 uncertainty_condition

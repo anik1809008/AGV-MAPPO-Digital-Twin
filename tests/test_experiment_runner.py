@@ -1,6 +1,5 @@
 from src.evaluation.experiment_runner import run_experiment_sweep
 
-
 def test_run_experiment_sweep(tmp_path):
     path = tmp_path / "sweep.csv"
 
@@ -26,6 +25,7 @@ def test_run_experiment_sweep(tmp_path):
         scenario_id="test-001",
         agent_count=8,
         seed=42,
+        checkpoint_scenario_id=15,
         uncertainty_condition="combined",
         immediate_probability=0.8,
     )
@@ -34,6 +34,7 @@ def test_run_experiment_sweep(tmp_path):
     assert results[0]["method"] == "M2"
     assert results[0]["latency_steps"] == 0
     assert results[0]["seed"] == 42
+    assert results[0]["checkpoint_scenario_id"] == 15
     assert (
         results[0]["uncertainty_condition"]
         == "combined"
