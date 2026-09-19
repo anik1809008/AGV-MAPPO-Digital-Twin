@@ -1,8 +1,7 @@
 from src.evaluation.checkpoint_resolver import (
     resolve_evaluation_checkpoint,
+    resolve_validation_checkpoint,
 )
-
-
 def test_m1_requires_no_checkpoint():
     path = resolve_evaluation_checkpoint(
         method="M1",
@@ -63,4 +62,39 @@ def test_m6_uses_m6_checkpoint():
 
     assert path.endswith(
         "m6_agents20_seed4_scenario6.pt"
+    )
+def test_validation_m1_requires_no_checkpoint():
+    path = resolve_validation_checkpoint(
+        method="M1",
+        agent_count=8,
+        seed=0,
+        episodes_per_scenario=5,
+    )
+
+    assert path is None
+
+
+def test_validation_m3_uses_budget_checkpoint():
+    path = resolve_validation_checkpoint(
+        method="M3",
+        agent_count=8,
+        seed=0,
+        episodes_per_scenario=5,
+    )
+
+    assert path.endswith(
+        "validation/m3_agents8_seed0_eps5.pt"
+    )
+
+
+def test_validation_m4_reuses_m3_checkpoint():
+    path = resolve_validation_checkpoint(
+        method="M4",
+        agent_count=20,
+        seed=2,
+        episodes_per_scenario=10,
+    )
+
+    assert path.endswith(
+        "validation/m3_agents20_seed2_eps10.pt"
     )
