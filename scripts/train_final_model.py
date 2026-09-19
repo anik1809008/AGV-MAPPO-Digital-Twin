@@ -1,9 +1,10 @@
 import argparse
 import random
-
 import numpy as np
 import torch
-
+from src.evaluation.experiment_config import (
+    TRAINING_BUDGETS,
+)
 from src.communication.latency_channel import FixedLatencyChannel
 from src.digital_twin.digital_twin import DigitalTwin
 from src.digital_twin.state import AgentTwinState
@@ -86,14 +87,13 @@ def main():
         )
 
     if args.training_budgets is None:
-        training_budgets = [
-            args.episodes_per_scenario
-        ]
+        training_budgets = list(
+            TRAINING_BUDGETS
+        )
     else:
         training_budgets = sorted(
             set(args.training_budgets)
         )
-
         if any(
             budget < 1
             for budget in training_budgets
