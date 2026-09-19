@@ -1,3 +1,4 @@
+import csv
 def summarize_validation_group(rows):
     if not rows:
         raise ValueError(
@@ -87,3 +88,123 @@ def select_best_validation_candidate(
         "candidate": best_candidate,
         "summary": best_summary,
     }
+def parse_csv_bool(value):
+    normalized = str(value).strip().lower()
+
+    if normalized == "true":
+        return True
+
+    if normalized == "false":
+        return False
+
+    raise ValueError(
+        f"Invalid boolean value: {value}"
+    )
+
+
+def load_validation_rows(path):
+    with open(
+        path,
+        "r",
+        encoding="utf-8",
+    ) as file:
+        rows = list(
+            csv.DictReader(file)
+        )
+
+    parsed_rows = []
+
+    for row in rows:
+        parsed = dict(row)
+
+        parsed["collision"] = parse_csv_bool(
+            row["collision"]
+        )
+        parsed["deadlock"] = parse_csv_bool(
+            row["deadlock"]
+        )
+        parsed["success"] = parse_csv_bool(
+            row["success"]
+        )
+
+        parsed["makespan"] = float(
+            row["makespan"]
+        )
+        parsed["path_length"] = float(
+            row["path_length"]
+        )
+        parsed["planning_time"] = float(
+            row["planning_time"]
+        )
+
+        if row["episodes_per_scenario"]:
+            parsed["episodes_per_scenario"] = int(
+                row["episodes_per_scenario"]
+            )
+        else:
+            parsed["episodes_per_scenario"] = None
+
+        if row["m5_threshold"]:
+            parsed["m5_threshold"] = int(
+                row["m5_threshold"]
+            )
+        else:
+            parsed["m5_threshold"] = None
+
+        parsed["scenario_id"] = int(
+            row["scenario_id"]
+        )
+        parsed["agent_count"] = int(
+            row["agent_count"]
+        )
+        parsed["seed"] = int(
+            row["seed"]
+        )
+
+        parsed_rows.append(parsed)
+
+    return parsed_rows
+
+
+def group_validation_candidates(
+    rows,
+    method,
+    agent_count,
+    seed,
+):
+    grouped = {}
+
+    for row in rows:
+        if row["method"] != method:
+            continue
+
+        if row["agent_count"] != agent_count:
+            continue
+
+        if row["seed"] != seed:
+            continue
+
+        scenario_id = row["scenario_id"]
+
+        if scenario_id < 16 or scenario_id > 20:
+            raise ValueError(
+                "Validation selection received "
+                "a non-validation scenario"
+            )
+
+        budget = row["episodes_per_scenario"]
+
+        if method == "M5":
+            candidate = (
+                budget,
+                row["m5_threshold"],
+            )
+        else:
+            candidate = budget
+
+        grouped.setdefault(
+            candidate,
+            [],
+        ).append(row)
+
+    return grouped
