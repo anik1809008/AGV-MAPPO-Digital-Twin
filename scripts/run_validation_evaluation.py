@@ -212,13 +212,11 @@ def main():
     metrics["agent_count"] = args.agents
     metrics["seed"] = args.seed
     metrics["checkpoint_scenario_id"] = ""
-    metrics["checkpoint_scenario_id"] = ""
     metrics["episodes_per_scenario"] = (
         ""
         if args.method == "M1"
         else args.episodes_per_scenario
     )
-    metrics["latency_steps"] = args.latency
     metrics["latency_steps"] = args.latency
     metrics["immediate_probability"] = (
         args.immediate_probability
