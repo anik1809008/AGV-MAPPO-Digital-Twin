@@ -55,7 +55,12 @@ def main():
         type=int,
         default=1,
     )
-
+    parser.add_argument(
+        "--training-budgets",
+        nargs="+",
+        type=int,
+        default=None,
+    )
     parser.add_argument(
         "--latency",
         type=int,
@@ -75,12 +80,27 @@ def main():
     )
 
     args = parser.parse_args()
-
     if args.episodes_per_scenario < 1:
         raise ValueError(
             "episodes-per-scenario must be >= 1"
         )
 
+    if args.training_budgets is None:
+        training_budgets = [
+            args.episodes_per_scenario
+        ]
+    else:
+        training_budgets = sorted(
+            set(args.training_budgets)
+        )
+
+        if any(
+            budget < 1
+            for budget in training_budgets
+        ):
+            raise ValueError(
+                "All training budgets must be >= 1"
+            )
     random.seed(args.seed)
     np.random.seed(args.seed)
     torch.manual_seed(args.seed)
@@ -90,151 +110,183 @@ def main():
     )
 
     schedule = build_training_schedule()
-
     total_episodes = 0
+    completed_budget = 0
 
-    for scenario_id in schedule:
-        scenario_path = get_random_scenario_path(
-            scenario_id
+    for target_budget in training_budgets:
+        additional_episodes = (
+            target_budget - completed_budget
         )
 
-        for episode in range(
-            args.episodes_per_scenario
-        ):
-            start_index = (
-                episode * args.agents
+        for scenario_id in schedule:
+            scenario_path = get_random_scenario_path(
+                scenario_id
             )
 
-            instance = build_training_instance(
-                map_path=MAP_PATH,
-                scenario_path=scenario_path,
-                agent_count=args.agents,
-                start_index=start_index,
-            )
-
-            grid = instance["grid"]
-            starts = instance["starts"]
-            goals = instance["goals"]
-
-            simulator = GroundTruthSimulator(
-                grid=grid,
-                agent_positions=starts,
-                agent_goals=goals,
-            )
-
-            digital_twin = DigitalTwin({
-                agent_id: AgentTwinState(
-                    agent_id=agent_id,
-                    last_trusted_position=(
-                        starts[agent_id]
-                    ),
-                    last_trusted_timestamp=0,
-                    goal=goals[agent_id],
+            for local_episode in range(
+                additional_episodes
+            ):
+                episode = (
+                    completed_budget
+                    + local_episode
                 )
-                for agent_id in starts
-            })
 
-            telemetry_channel = FixedLatencyChannel(
-                latency_steps=args.latency,
-            )
-
-            execution_delay_model = (
-                ExecutionDelayModel(
-                    immediate_probability=(
-                        args.immediate_probability
-                    ),
-                    seed=(
-                        args.seed
-                        + scenario_id * 1000
-                        + episode
-                    ),
+                start_index = (
+                    episode * args.agents
                 )
-            )
 
-            delayed_executor = DelayedCommandExecutor(
-                delay_model=execution_delay_model,
-            )
+                instance = build_training_instance(
+                    map_path=MAP_PATH,
+                    scenario_path=scenario_path,
+                    agent_count=args.agents,
+                    start_index=start_index,
+                )
 
-            buffer = MultiAgentRolloutBuffer(
-                num_agents=args.agents,
-            )
+                grid = instance["grid"]
+                starts = instance["starts"]
+                goals = instance["goals"]
 
-            result = run_training_cycle(
-                actor=components["actor"],
-                critic=components["critic"],
-                trainer=components["trainer"],
-                simulator=simulator,
-                method=args.method,
-                trusted_positions=starts,
-                reachable_occupancies={
-                    agent_id: {position}
-                    for agent_id, position
-                    in starts.items()
-                },
-                aoi_values={
-                    agent_id: 0
+                simulator = GroundTruthSimulator(
+                    grid=grid,
+                    agent_positions=starts,
+                    agent_goals=goals,
+                )
+
+                digital_twin = DigitalTwin({
+                    agent_id: AgentTwinState(
+                        agent_id=agent_id,
+                        last_trusted_position=(
+                            starts[agent_id]
+                        ),
+                        last_trusted_timestamp=0,
+                        goal=goals[agent_id],
+                    )
                     for agent_id in starts
-                },
-                multi_agent_buffer=buffer,
-                digital_twin=digital_twin,
-                telemetry_channel=telemetry_channel,
-                delayed_executor=delayed_executor,
-                max_steps=args.max_steps,
-            )
+                })
 
-            total_episodes += 1
+                telemetry_channel = FixedLatencyChannel(
+                    latency_steps=args.latency,
+                )
 
-            print(
-                f"Scenario {scenario_id}, "
-                f"episode {episode + 1}: "
-                f"steps={result['episode']['steps']}, "
-                f"updates="
-                f"{len(result['training_history'])}"
+                execution_delay_model = (
+                    ExecutionDelayModel(
+                        immediate_probability=(
+                            args.immediate_probability
+                        ),
+                        seed=(
+                            args.seed
+                            + scenario_id * 1000
+                            + episode
+                        ),
+                    )
+                )
+
+                delayed_executor = (
+                    DelayedCommandExecutor(
+                        delay_model=(
+                            execution_delay_model
+                        ),
+                    )
+                )
+
+                buffer = MultiAgentRolloutBuffer(
+                    num_agents=args.agents,
+                )
+
+                result = run_training_cycle(
+                    actor=components["actor"],
+                    critic=components["critic"],
+                    trainer=components["trainer"],
+                    simulator=simulator,
+                    method=args.method,
+                    trusted_positions=starts,
+                    reachable_occupancies={
+                        agent_id: {position}
+                        for agent_id, position
+                        in starts.items()
+                    },
+                    aoi_values={
+                        agent_id: 0
+                        for agent_id in starts
+                    },
+                    multi_agent_buffer=buffer,
+                    digital_twin=digital_twin,
+                    telemetry_channel=(
+                        telemetry_channel
+                    ),
+                    delayed_executor=(
+                        delayed_executor
+                    ),
+                    max_steps=args.max_steps,
+                )
+
+                total_episodes += 1
+
+                print(
+                    f"Budget {target_budget}, "
+                    f"scenario {scenario_id}, "
+                    f"episode {episode + 1}: "
+                    f"steps="
+                    f"{result['episode']['steps']}, "
+                    f"updates="
+                    f"{len(result['training_history'])}"
+                )
+
+        validation_checkpoint_path = (
+            build_validation_checkpoint_path(
+                method=args.method,
+                agent_count=args.agents,
+                seed=args.seed,
+                episodes_per_scenario=(
+                    target_budget
+                ),
             )
-    validation_checkpoint_path = (
-        build_validation_checkpoint_path(
-            method=args.method,
-            agent_count=args.agents,
-            seed=args.seed,
-            episodes_per_scenario=(
-                args.episodes_per_scenario
-            ),
         )
-    )
 
-    save_checkpoint(
-        path=validation_checkpoint_path,
-        actor=components["actor"],
-        critic=components["critic"],
-        actor_optimizer=(
-            components["trainer"].actor_optimizer
-        ),
-        critic_optimizer=(
-            components["trainer"].critic_optimizer
-        ),
-        extra_state={
-            "method": args.method,
-            "agents": args.agents,
-            "seed": args.seed,
-            "latency": args.latency,
-            "immediate_probability": (
-                args.immediate_probability
+        save_checkpoint(
+            path=validation_checkpoint_path,
+            actor=components["actor"],
+            critic=components["critic"],
+            actor_optimizer=(
+                components[
+                    "trainer"
+                ].actor_optimizer
             ),
-            "episodes_per_scenario": (
-                args.episodes_per_scenario
+            critic_optimizer=(
+                components[
+                    "trainer"
+                ].critic_optimizer
             ),
-            "total_episodes": total_episodes,
-            "training_scenario_ids": schedule,
-            "checkpoint_role": (
-                "validation_candidate"
-            ),
-        },
-    )
+            extra_state={
+                "method": args.method,
+                "agents": args.agents,
+                "seed": args.seed,
+                "latency": args.latency,
+                "immediate_probability": (
+                    args.immediate_probability
+                ),
+                "episodes_per_scenario": (
+                    target_budget
+                ),
+                "total_episodes": (
+                    target_budget
+                    * len(schedule)
+                ),
+                "training_scenario_ids": (
+                    schedule
+                ),
+                "checkpoint_role": (
+                    "validation_candidate"
+                ),
+            },
+        )
 
-    print(
-        "Validation checkpoint saved:",
-        validation_checkpoint_path,
-    )
+        print(
+            "Validation checkpoint saved:",
+            validation_checkpoint_path,
+        )
+
+        completed_budget = target_budget
     final_scenario_id = schedule[-1]
 
     checkpoint_path = (
