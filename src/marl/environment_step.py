@@ -65,9 +65,9 @@ def execute_training_step(
 
     done = (
         collision
+        or simulator.is_deadlocked()
         or simulator.all_goals_reached()
     )
-
     dones = [
         done
         for _ in current_positions
