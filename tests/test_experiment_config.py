@@ -10,6 +10,9 @@ from src.evaluation.experiment_config import (
     UNCERTAIN_EXECUTION_PROBABILITY,
     expand_uncertainty_conditions,
     build_experiment_matrix,
+    expand_uncertainty_conditions,
+    build_experiment_matrix,
+    build_validation_matrix,
 )
 def test_experiment_configuration():
     assert LATENCY_LEVELS == [0, 1, 2, 3, 4]
@@ -124,3 +127,40 @@ def test_build_experiment_matrix():
         1.0,
         0.8,
     }
+def test_build_validation_matrix():
+    matrix = build_validation_matrix(
+        methods=["M3"],
+        agent_counts=[8],
+        seeds=[0],
+        scenario_ids=[16, 17],
+        training_budgets=[1, 5],
+    )
+
+    assert len(matrix) == 40
+
+    first = matrix[0]
+
+    assert first["method"] == "M3"
+    assert first["agent_count"] == 8
+    assert first["seed"] == 0
+    assert first["scenario_id"] == 16
+    assert first["episodes_per_scenario"] == 1
+
+    assert first["uncertainty_condition"] in {
+        "perfect",
+        "latency_only",
+        "execution_only",
+        "combined",
+    }
+
+    assert first["latency"] in [0, 1, 2, 3, 4]
+
+    assert first["immediate_probability"] in {
+        1.0,
+        0.8,
+    }
+
+    assert {
+        row["episodes_per_scenario"]
+        for row in matrix
+    } == {1, 5}
