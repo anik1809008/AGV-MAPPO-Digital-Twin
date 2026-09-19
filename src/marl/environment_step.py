@@ -1,6 +1,5 @@
 from src.marl.reward import compute_reward
 
-
 def execute_training_step(
     simulator,
     actions,
@@ -45,10 +44,12 @@ def execute_training_step(
             )
         )
 
-        reached_goal = simulator.is_at_goal(
-            agent_id
+        reached_goal = (
+            previous_positions[agent_id]
+            != simulator.agent_goals[agent_id]
+            and position
+            == simulator.agent_goals[agent_id]
         )
-
         deadlock = simulator.is_deadlocked()
 
         reward = compute_reward(

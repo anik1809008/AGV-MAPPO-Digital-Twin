@@ -86,3 +86,33 @@ def test_deadlock_marks_episode_done(monkeypatch):
         True,
         True,
     ]
+def test_goal_reward_is_given_only_once():
+    grid = [[0, 0, 0]]
+
+    simulator = GroundTruthSimulator(
+        grid=grid,
+        agent_positions={
+            0: (0, 0),
+        },
+        agent_goals={
+            0: (1, 0),
+        },
+    )
+
+    first = execute_training_step(
+        simulator=simulator,
+        actions={
+            0: Action.EAST,
+        },
+    )
+
+    assert first["rewards"][0] == 10.08
+
+    second = execute_training_step(
+        simulator=simulator,
+        actions={
+            0: Action.WAIT,
+        },
+    )
+
+    assert second["rewards"][0] == -0.02
