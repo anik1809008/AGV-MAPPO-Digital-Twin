@@ -1,8 +1,7 @@
 from src.marl.checkpoint_paths import (
     build_training_checkpoint_path,
+    build_validation_checkpoint_path,
 )
-
-
 def test_build_training_checkpoint_path():
     path = build_training_checkpoint_path(
         method="M6",
@@ -30,6 +29,34 @@ def test_checkpoint_paths_change_with_configuration():
         agent_count=20,
         seed=1,
         scenario_id=2,
+    )
+
+    assert first != second
+def test_build_validation_checkpoint_path():
+    path = build_validation_checkpoint_path(
+        method="M3",
+        agent_count=8,
+        seed=0,
+        episodes_per_scenario=5,
+    )
+
+    assert path == (
+        "results/checkpoints/validation/"
+        "m3_agents8_seed0_eps5.pt"
+    )
+def test_validation_checkpoint_paths_change_with_budget():
+    first = build_validation_checkpoint_path(
+        method="M3",
+        agent_count=8,
+        seed=0,
+        episodes_per_scenario=1,
+    )
+
+    second = build_validation_checkpoint_path(
+        method="M3",
+        agent_count=8,
+        seed=0,
+        episodes_per_scenario=10,
     )
 
     assert first != second

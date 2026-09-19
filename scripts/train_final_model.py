@@ -13,6 +13,7 @@ from src.environment.simulator import GroundTruthSimulator
 from src.marl.checkpoint import save_checkpoint
 from src.marl.checkpoint_paths import (
     build_training_checkpoint_path,
+    build_validation_checkpoint_path,
 )
 from src.marl.multi_agent_buffer import MultiAgentRolloutBuffer
 from src.marl.scenario_split import get_random_scenario_path
@@ -20,7 +21,6 @@ from src.marl.training_components import build_mappo_components
 from src.marl.training_cycle import run_training_cycle
 from src.marl.training_instance import build_training_instance
 from src.marl.training_schedule import build_training_schedule
-
 
 MAP_PATH = (
     "benchmarks/movingai/"
@@ -191,7 +191,50 @@ def main():
                 f"updates="
                 f"{len(result['training_history'])}"
             )
+    validation_checkpoint_path = (
+        build_validation_checkpoint_path(
+            method=args.method,
+            agent_count=args.agents,
+            seed=args.seed,
+            episodes_per_scenario=(
+                args.episodes_per_scenario
+            ),
+        )
+    )
 
+    save_checkpoint(
+        path=validation_checkpoint_path,
+        actor=components["actor"],
+        critic=components["critic"],
+        actor_optimizer=(
+            components["trainer"].actor_optimizer
+        ),
+        critic_optimizer=(
+            components["trainer"].critic_optimizer
+        ),
+        extra_state={
+            "method": args.method,
+            "agents": args.agents,
+            "seed": args.seed,
+            "latency": args.latency,
+            "immediate_probability": (
+                args.immediate_probability
+            ),
+            "episodes_per_scenario": (
+                args.episodes_per_scenario
+            ),
+            "total_episodes": total_episodes,
+            "training_scenario_ids": schedule,
+            "checkpoint_role": (
+                "validation_candidate"
+            ),
+        },
+    )
+
+    print(
+        "Validation checkpoint saved:",
+        validation_checkpoint_path,
+    )
     final_scenario_id = schedule[-1]
 
     checkpoint_path = (
