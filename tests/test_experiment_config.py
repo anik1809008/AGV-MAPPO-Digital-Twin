@@ -5,6 +5,7 @@ from src.evaluation.experiment_config import (
     METHODS,
     PERFECT_EXECUTION_PROBABILITY,
     PRIMARY_AGENT_COUNTS,
+    TRAINING_BUDGETS,
     TRAINING_METHODS,
     UNCERTAINTY_CONDITIONS,
     UNCERTAIN_EXECUTION_PROBABILITY,
@@ -18,7 +19,12 @@ def test_experiment_configuration():
     assert LATENCY_LEVELS == [0, 1, 2, 3, 4]
 
     assert PRIMARY_AGENT_COUNTS == [8, 20]
-
+    assert TRAINING_BUDGETS == [
+        5,
+        10,
+        20,
+        40,
+    ]
     assert METHODS == [
         "M1",
         "M2",
@@ -41,7 +47,6 @@ def test_experiment_configuration():
         3,
         4,
     ]
-
     assert PERFECT_EXECUTION_PROBABILITY == 1.0
     assert UNCERTAIN_EXECUTION_PROBABILITY == 0.8
 
