@@ -206,4 +206,3 @@ class GroundTruthSimulator:
                 self.agent_positions
             ),
         }
-
