@@ -67,6 +67,7 @@ def test_vertex_conflict_blocks_joint_move():
     })
 
     assert result["success"] is False
+    assert result["collision"] is True
     assert result["vertex_conflicts"] == {
         (1, 1): [0, 1]
     }
@@ -92,6 +93,7 @@ def test_edge_swap_conflict_blocks_joint_move():
     })
 
     assert result["success"] is False
+    assert result["collision"] is True
     assert result["vertex_conflicts"] == {}
     assert result["edge_swap_conflicts"] == [(0, 1)]
 
@@ -119,6 +121,7 @@ def test_successful_joint_move():
     })
 
     assert result["success"] is True
+    assert result["collision"] is False
     assert result["vertex_conflicts"] == {}
     assert result["edge_swap_conflicts"] == []
 
@@ -158,4 +161,42 @@ def test_deadlock_after_ten_non_progress_steps():
         sim.update_progress(previous_positions)
 
     assert sim.non_progress_steps == 10
+    assert sim.is_deadlocked() is True
+def test_agent_at_goal_stays_at_goal():
+    grid = [[0, 0, 0]]
+
+    sim = GroundTruthSimulator(
+        grid=grid,
+        agent_positions={0: (1, 0)},
+        agent_goals={0: (1, 0)},
+    )
+
+    sim.step_joint({
+        0: Action.EAST,
+    })
+
+    assert sim.agent_positions[0] == (1, 0)
+    assert sim.is_at_goal(0) is True
+def test_step_joint_updates_deadlock_progress():
+    grid = [[0, 0, 0]]
+
+    sim = GroundTruthSimulator(
+        grid=grid,
+        agent_positions={0: (0, 0)},
+        agent_goals={0: (2, 0)},
+        deadlock_threshold=2,
+    )
+
+    sim.step_joint({
+        0: Action.WAIT,
+    })
+
+    assert sim.non_progress_steps == 1
+    assert sim.is_deadlocked() is False
+
+    sim.step_joint({
+        0: Action.WAIT,
+    })
+
+    assert sim.non_progress_steps == 2
     assert sim.is_deadlocked() is True
