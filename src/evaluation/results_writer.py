@@ -6,6 +6,7 @@ RESULT_FIELDS = [
     "agent_count",
     "seed",
     "checkpoint_scenario_id",
+    "episodes_per_scenario",
     "uncertainty_condition",
     "latency_steps",
     "immediate_probability",
