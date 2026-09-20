@@ -99,9 +99,23 @@ def build_scalar_features(
     goal_position,
     aoi=0,
     reachable_size=1,
+    map_width=None,
+    map_height=None,
 ):
     dx = goal_position[0] - center_position[0]
     dy = goal_position[1] - center_position[1]
+
+    if map_width is not None:
+        dx = dx / max(
+            map_width - 1,
+            1,
+        )
+
+    if map_height is not None:
+        dy = dy / max(
+            map_height - 1,
+            1,
+        )
 
     return np.array(
         [

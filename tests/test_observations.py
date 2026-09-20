@@ -76,7 +76,24 @@ def test_scalar_features():
     assert features.shape == (4,)
     assert features.tolist() == [-5.0, 4.0, 2.0, 3.0]
 from src.marl.observations import flatten_mappo_input
+def test_scalar_features_normalize_goal_offset():
+    features = build_scalar_features(
+        center_position=(8, 5),
+        goal_position=(3, 9),
+        aoi=2,
+        reachable_size=3,
+        map_width=11,
+        map_height=9,
+    )
 
+    assert features.shape == (4,)
+
+    assert features.tolist() == [
+        -0.5,
+        0.5,
+        2.0,
+        3.0,
+    ]
 
 def test_flatten_mappo_input():
     grid = [

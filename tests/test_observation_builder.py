@@ -57,7 +57,7 @@ def test_m6_uses_aoi_without_reachable_occupancy():
 
     # Last four values:
     # dx, dy, AoI, reachable_size
-    assert vector[-4] == 1.0
+    assert vector[-4] == 0.5
     assert vector[-3] == 0.0
     assert vector[-2] == 3.0
     assert vector[-1] == 1.0

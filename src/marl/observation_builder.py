@@ -30,7 +30,9 @@ def build_agent_input(
             goal_position=goal_position,
             aoi=0,
             reachable_size=1,
-        )
+            map_width=len(grid[0]),
+            map_height=len(grid),
+       )
     elif method == "M6":
         spatial = build_m2_observation(
             grid=grid,
@@ -44,6 +46,8 @@ def build_agent_input(
           goal_position=goal_position,
           aoi=aoi,
           reachable_size=1,
+          map_width=len(grid[0]),
+          map_height=len(grid),
        )
     elif method in {"M3", "M4", "M5"}:
         spatial = build_m3_observation(
@@ -59,13 +63,14 @@ def build_agent_input(
             goal_position=goal_position,
             aoi=aoi,
             reachable_size=reachable_size,
+            map_width=len(grid[0]),
+            map_height=len(grid),
         )
 
     else:
         raise ValueError(
-            "method must be one of: M2, M3, M4,M5"
+            "method must be one of: M2, M3, M4, M5, M6"
         )
-
     return flatten_mappo_input(
         spatial,
         scalars,
