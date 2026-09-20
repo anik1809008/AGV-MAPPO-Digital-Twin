@@ -9,7 +9,7 @@ def execute_training_step(
     )
 
     previous_distances = [
-        simulator.manhattan_distance(
+        simulator.navigation_distance(
             previous_positions[agent_id],
             simulator.agent_goals[agent_id],
         )
@@ -36,14 +36,13 @@ def execute_training_step(
         current_positions
     ):
         current_distance = (
-            simulator.manhattan_distance(
+            simulator.navigation_distance(
                 position,
                 simulator.agent_goals[
                     agent_id
                 ],
             )
         )
-
         reached_goal = (
             previous_positions[agent_id]
             != simulator.agent_goals[agent_id]

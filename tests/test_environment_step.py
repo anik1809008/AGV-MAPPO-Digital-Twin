@@ -116,3 +116,32 @@ def test_goal_reward_is_given_only_once():
     )
 
     assert second["rewards"][0] == -0.02
+def test_reward_recognizes_obstacle_aware_progress():
+    grid = [
+        [0, 0, 0, 0, 0],
+        [0, 1, 1, 1, 0],
+        [0, 0, 0, 0, 0],
+    ]
+
+    simulator = GroundTruthSimulator(
+        grid=grid,
+        agent_positions={
+            0: (0, 1),
+        },
+        agent_goals={
+            0: (4, 1),
+        },
+    )
+
+    result = execute_training_step(
+        simulator=simulator,
+        actions={
+            0: Action.NORTH,
+        },
+    )
+
+    assert result["current_positions"] == [
+        (0, 0),
+    ]
+
+    assert result["rewards"][0] == 0.08

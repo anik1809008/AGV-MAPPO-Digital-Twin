@@ -1,6 +1,15 @@
 from src.environment.actions import Action, ACTION_DELTAS
+from src.environment.pathfinding import shortest_path_distance
+
+
 class GroundTruthSimulator:
-    def __init__(self, grid, agent_positions, agent_goals=None,  deadlock_threshold=10):
+    def __init__(
+        self,
+        grid,
+        agent_positions,
+        agent_goals=None,
+        deadlock_threshold=10,
+    ):
         self.grid = grid
         self.height = len(grid)
         self.width = len(grid[0])
@@ -9,7 +18,6 @@ class GroundTruthSimulator:
         self.agent_goals = dict(agent_goals or {})
         self.deadlock_threshold = deadlock_threshold
         self.non_progress_steps = 0
-
     def is_inside(self, position):
         x, y = position
         return 0 <= x < self.width and 0 <= y < self.height
@@ -65,7 +73,16 @@ class GroundTruthSimulator:
 
     def manhattan_distance(self, position, goal):
         return abs(position[0] - goal[0]) + abs(position[1] - goal[1])
-
+    def navigation_distance(
+        self,
+        position,
+        goal,
+    ):
+        return shortest_path_distance(
+            grid=self.grid,
+            start=position,
+            goal=goal,
+        )
     def update_progress(self, previous_positions):
         if not self.agent_goals:
             return False
@@ -78,19 +95,22 @@ class GroundTruthSimulator:
                     progress_made = True
                 continue
 
-            previous_distance = self.manhattan_distance(
+            previous_distance = self.navigation_distance(
                 previous_positions[agent_id],
                 goal,
             )
 
-            current_distance = self.manhattan_distance(
+            current_distance = self.navigation_distance(
                 self.agent_positions[agent_id],
                 goal,
             )
 
-            if current_distance < previous_distance:
+            if (
+                previous_distance is not None
+                and current_distance is not None
+                and current_distance < previous_distance
+            ):
                 progress_made = True
-
         if progress_made:
             self.non_progress_steps = 0
         else:

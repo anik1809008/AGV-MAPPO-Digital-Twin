@@ -200,3 +200,29 @@ def test_step_joint_updates_deadlock_progress():
 
     assert sim.non_progress_steps == 2
     assert sim.is_deadlocked() is True
+def test_progress_uses_obstacle_aware_distance():
+    grid = [
+        [0, 0, 0, 0, 0],
+        [0, 1, 1, 1, 0],
+        [0, 0, 0, 0, 0],
+    ]
+
+    sim = GroundTruthSimulator(
+        grid=grid,
+        agent_positions={0: (0, 1)},
+        agent_goals={0: (4, 1)},
+        deadlock_threshold=2,
+    )
+
+    previous_positions = dict(
+        sim.agent_positions
+    )
+
+    sim.agent_positions[0] = (0, 0)
+
+    progress = sim.update_progress(
+        previous_positions
+    )
+
+    assert progress is True
+    assert sim.non_progress_steps == 0
