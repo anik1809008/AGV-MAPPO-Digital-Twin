@@ -38,10 +38,17 @@ class DelayedCommandExecutor:
             if not queue:
                 continue
 
-            execution_timestep, action = queue[0]
+            latest_ready_action = None
 
-            if execution_timestep <= current_timestep:
+            while queue:
+                execution_timestep, action = queue[0]
+
+                if execution_timestep > current_timestep:
+                    break
+
                 queue.popleft()
-                ready_actions[agent_id] = action
+                latest_ready_action = action
 
+            if latest_ready_action is not None:
+                ready_actions[agent_id] = latest_ready_action
         return ready_actions
