@@ -50,7 +50,7 @@ def test_experiment_configuration():
     assert PERFECT_EXECUTION_PROBABILITY == 1.0
     assert UNCERTAIN_EXECUTION_PROBABILITY == 0.8
 
-    assert DEFAULT_MAX_STEPS == 200
+    assert DEFAULT_MAX_STEPS == 400
 
 
 def test_uncertainty_conditions():
