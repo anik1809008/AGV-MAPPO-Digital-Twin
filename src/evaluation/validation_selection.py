@@ -45,19 +45,15 @@ def summarize_validation_group(rows):
         "mean_path_length": mean_path_length,
         "mean_planning_time": mean_planning_time,
     }
-
-
 def validation_selection_key(summary):
     return (
+        -summary["success_rate"],
         summary["collision_rate"],
         summary["deadlock_rate"],
-        -summary["success_rate"],
         summary["mean_makespan"],
         summary["mean_path_length"],
         summary["mean_planning_time"],
     )
-
-
 def select_best_validation_candidate(
     candidate_rows,
 ):

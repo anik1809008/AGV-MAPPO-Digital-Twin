@@ -35,8 +35,7 @@ def test_summarize_validation_group():
     assert summary["mean_makespan"] == 15.0
     assert summary["mean_path_length"] == 25.0
 
-
-def test_selection_prioritizes_collision_safety():
+def test_selection_prioritizes_success_rate():
     candidates = {
         1: [
             {
@@ -64,7 +63,7 @@ def test_selection_prioritizes_collision_safety():
         candidates
     )
 
-    assert result["candidate"] == 5
+    assert result["candidate"] == 1
 
 
 def test_selection_uses_success_after_safety():
