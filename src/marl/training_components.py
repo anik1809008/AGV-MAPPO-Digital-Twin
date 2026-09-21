@@ -2,7 +2,7 @@ from src.marl.mappo_trainer import MAPPOTrainer
 from src.marl.networks import ActorNetwork, CriticNetwork
 
 
-OBSERVATION_DIM = 247
+OBSERVATION_DIM = 249
 ACTION_DIM = 5
 
 

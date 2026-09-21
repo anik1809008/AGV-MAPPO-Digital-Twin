@@ -28,12 +28,12 @@ def test_real_method_callback_runs_m6():
     }
 
     actor = ActorNetwork(
-        input_dim=247,
+        input_dim=249,
         action_dim=5,
     )
 
     critic = CriticNetwork(
-        input_dim=494,
+        input_dim=498,
     )
 
     context = build_experiment_context(

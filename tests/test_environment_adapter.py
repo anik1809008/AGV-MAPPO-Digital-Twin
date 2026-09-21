@@ -44,5 +44,5 @@ def test_build_all_agent_inputs():
     )
 
     assert len(observations) == 2
-    assert observations[0].shape == (247,)
-    assert observations[1].shape == (247,)
+    assert observations[0].shape == (249,)
+    assert observations[1].shape == (249,)

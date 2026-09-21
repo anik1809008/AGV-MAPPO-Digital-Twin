@@ -7,7 +7,7 @@ from src.safety.shield import SafetyShield
 
 def test_m4_controller_returns_valid_action():
     actor = ActorNetwork(
-        input_dim=247,
+        input_dim=249,
         action_dim=5,
     )
 
@@ -22,7 +22,7 @@ def test_m4_controller_returns_valid_action():
     )
 
     observation = np.zeros(
-        247,
+        249,
         dtype=np.float32,
     )
 

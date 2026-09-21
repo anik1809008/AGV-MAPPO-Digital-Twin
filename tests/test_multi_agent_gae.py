@@ -10,7 +10,7 @@ def test_compute_multi_agent_gae():
     )
 
     observations = [
-        np.zeros(247, dtype=np.float32)
+        np.zeros(249, dtype=np.float32)
         for _ in range(2)
     ]
 
@@ -26,7 +26,7 @@ def test_compute_multi_agent_gae():
                 t == 1,
             ],
             centralized_state=np.zeros(
-                494,
+                498,
                 dtype=np.float32,
             ),
         )

@@ -23,12 +23,12 @@ def test_run_real_training_step_stores_buffer_data():
     )
 
     actor = ActorNetwork(
-        input_dim=247,
+        input_dim=249,
         action_dim=5,
     )
 
     critic = CriticNetwork(
-        input_dim=494,
+        input_dim=498,
     )
 
     buffer = MultiAgentRolloutBuffer(

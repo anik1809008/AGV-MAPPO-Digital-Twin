@@ -6,24 +6,24 @@ from src.marl.mappo_update import compute_mappo_losses
 
 def test_compute_mappo_losses():
     actor = ActorNetwork(
-        input_dim=247,
+        input_dim=249,
         action_dim=5,
     )
 
     critic = CriticNetwork(
-        input_dim=1976,
+        input_dim=1992,
     )
 
     batch_size = 4
 
     observations = torch.zeros(
         batch_size,
-        247,
+        249,
     )
 
     centralized_states = torch.zeros(
         batch_size,
-        1976,
+        1992,
     )
 
     actions = torch.tensor(

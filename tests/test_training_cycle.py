@@ -57,12 +57,12 @@ def test_training_cycle_with_dynamic_digital_twin():
     )
 
     actor = ActorNetwork(
-        input_dim=247,
+        input_dim=249,
         action_dim=5,
     )
 
     critic = CriticNetwork(
-        input_dim=494,
+        input_dim=498,
     )
 
     trainer = MAPPOTrainer(
@@ -125,12 +125,12 @@ def test_run_training_cycle():
     )
 
     actor = ActorNetwork(
-        input_dim=247,
+        input_dim=249,
         action_dim=5,
     )
 
     critic = CriticNetwork(
-        input_dim=494,
+        input_dim=498,
     )
 
     trainer = MAPPOTrainer(
@@ -206,12 +206,12 @@ def test_m6_training_cycle_with_dynamic_digital_twin():
     )
 
     actor = ActorNetwork(
-        input_dim=247,
+        input_dim=249,
         action_dim=5,
     )
 
     critic = CriticNetwork(
-        input_dim=494,
+        input_dim=498,
     )
 
     trainer = MAPPOTrainer(
@@ -277,12 +277,12 @@ def test_seeded_training_is_reproducible():
         )
 
         actor = ActorNetwork(
-            input_dim=247,
+            input_dim=249,
             action_dim=5,
         )
 
         critic = CriticNetwork(
-            input_dim=494,
+            input_dim=498,
         )
 
         trainer = MAPPOTrainer(
@@ -385,12 +385,12 @@ def test_training_cycle_with_execution_delay():
     )
 
     actor = ActorNetwork(
-        input_dim=247,
+        input_dim=249,
         action_dim=5,
     )
 
     critic = CriticNetwork(
-        input_dim=494,
+        input_dim=498,
     )
 
     trainer = MAPPOTrainer(

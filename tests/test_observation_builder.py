@@ -30,8 +30,8 @@ def test_m2_and_m3_have_same_shape_but_different_information():
         reachable_size=4,
     )
 
-    assert m2.shape == (247,)
-    assert m3.shape == (247,)
+    assert m2.shape == (249,)
+    assert m3.shape == (249,)
     assert not (m2 == m3).all()
 def test_m6_uses_aoi_without_reachable_occupancy():
     grid = [
@@ -57,11 +57,17 @@ def test_m6_uses_aoi_without_reachable_occupancy():
 
     # Last four values:
     # dx, dy, AoI, reachable_size
-    assert vector[-4] == 0.5
+# Last six values:
+# dx, dy, next_path_dx, next_path_dy, AoI, reachable_size
+    # Last six values:
+    # dx, dy, next_path_dx, next_path_dy, AoI, reachable_size
+    assert vector[-6] == 0.5
+    assert vector[-5] == 0.0
+    assert vector[-4] == 1.0
     assert vector[-3] == 0.0
     assert vector[-2] == 3.0
     assert vector[-1] == 1.0
 
     # Reachable-occupancy channel must remain empty.
-    spatial = vector[:-4].reshape(3, 3, 3)
+    spatial = vector[:-6].reshape(3, 3, 3)
     assert spatial[2].sum() == 0.0

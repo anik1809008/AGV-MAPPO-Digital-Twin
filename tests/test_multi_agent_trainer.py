@@ -12,7 +12,7 @@ def test_train_multi_agent_buffer():
     )
 
     observations = [
-        np.zeros(247, dtype=np.float32)
+        np.zeros(249, dtype=np.float32)
         for _ in range(2)
     ]
 
@@ -25,18 +25,18 @@ def test_train_multi_agent_buffer():
             value=0.5,
             dones=[t == 3, t == 3],
             centralized_state=np.zeros(
-                494,
+                498,
                 dtype=np.float32,
             ),
         )
 
     actor = ActorNetwork(
-        input_dim=247,
+        input_dim=249,
         action_dim=5,
     )
 
     critic = CriticNetwork(
-        input_dim=494,
+        input_dim=498,
     )
 
     trainer = MAPPOTrainer(

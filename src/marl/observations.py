@@ -1,3 +1,4 @@
+from src.environment.pathfinding import shortest_path_next_delta
 import numpy as np
 
 
@@ -101,6 +102,7 @@ def build_scalar_features(
     reachable_size=1,
     map_width=None,
     map_height=None,
+    grid=None,
 ):
     dx = goal_position[0] - center_position[0]
     dy = goal_position[1] - center_position[1]
@@ -117,10 +119,24 @@ def build_scalar_features(
             1,
         )
 
+    next_path_dx = 0.0
+    next_path_dy = 0.0
+
+    if grid is not None:
+        next_path_dx, next_path_dy = (
+            shortest_path_next_delta(
+                grid=grid,
+                start=center_position,
+                goal=goal_position,
+            )
+        )
+
     return np.array(
         [
             float(dx),
             float(dy),
+            float(next_path_dx),
+            float(next_path_dy),
             float(aoi),
             float(reachable_size),
         ],

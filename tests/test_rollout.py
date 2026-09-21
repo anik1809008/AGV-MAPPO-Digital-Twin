@@ -6,16 +6,16 @@ from src.marl.rollout import collect_single_step
 
 def test_collect_single_step_for_eight_agents():
     actor = ActorNetwork(
-        input_dim=247,
+        input_dim=249,
         action_dim=5,
     )
 
     critic = CriticNetwork(
-        input_dim=1976,
+        input_dim=1992,
     )
 
     observations = [
-        np.zeros(247, dtype=np.float32)
+        np.zeros(249, dtype=np.float32)
         for _ in range(8)
     ]
 
@@ -27,7 +27,7 @@ def test_collect_single_step_for_eight_agents():
 
     assert len(result["actions"]) == 8
     assert len(result["log_probs"]) == 8
-    assert result["centralized_state"].shape == (1976,)
+    assert result["centralized_state"].shape == (1992,)
     assert isinstance(result["value"], float)
 from src.marl.multi_agent_buffer import MultiAgentRolloutBuffer
 from src.marl.rollout import collect_and_store_step
@@ -35,12 +35,12 @@ from src.marl.rollout import collect_and_store_step
 
 def test_collect_and_store_step():
     actor = ActorNetwork(
-        input_dim=247,
+        input_dim=249,
         action_dim=5,
     )
 
     critic = CriticNetwork(
-        input_dim=1976,
+        input_dim=1992,
     )
 
     buffer = MultiAgentRolloutBuffer(
@@ -48,7 +48,7 @@ def test_collect_and_store_step():
     )
 
     observations = [
-        np.zeros(247, dtype=np.float32)
+        np.zeros(249, dtype=np.float32)
         for _ in range(8)
     ]
 

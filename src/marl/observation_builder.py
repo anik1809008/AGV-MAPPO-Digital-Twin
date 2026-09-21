@@ -32,6 +32,7 @@ def build_agent_input(
             reachable_size=1,
             map_width=len(grid[0]),
             map_height=len(grid),
+            grid=grid,
        )
     elif method == "M6":
         spatial = build_m2_observation(
@@ -48,6 +49,7 @@ def build_agent_input(
           reachable_size=1,
           map_width=len(grid[0]),
           map_height=len(grid),
+          grid=grid,
        )
     elif method in {"M3", "M4", "M5"}:
         spatial = build_m3_observation(
@@ -65,6 +67,7 @@ def build_agent_input(
             reachable_size=reachable_size,
             map_width=len(grid[0]),
             map_height=len(grid),
+            grid=grid,
         )
 
     else:

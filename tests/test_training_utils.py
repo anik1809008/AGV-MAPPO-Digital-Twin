@@ -8,7 +8,7 @@ def test_rollout_buffer_add_and_clear():
     buffer = RolloutBuffer()
 
     buffer.add(
-        observation=np.zeros(247, dtype=np.float32),
+        observation=np.zeros(249, dtype=np.float32),
         action=2,
         log_prob=-0.5,
         reward=0.1,

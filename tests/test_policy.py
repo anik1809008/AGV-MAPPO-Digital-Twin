@@ -5,7 +5,7 @@ from src.marl.policy import select_action
 
 
 def test_select_action_returns_valid_action():
-    input_dim = 247
+    input_dim = 249
 
     actor = ActorNetwork(
         input_dim=input_dim,
@@ -29,7 +29,7 @@ from src.marl.policy import rank_actions_by_probability
 
 
 def test_rank_actions_by_probability():
-    input_dim = 247
+    input_dim = 249
 
     actor = ActorNetwork(
         input_dim=input_dim,

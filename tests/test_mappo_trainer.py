@@ -6,12 +6,12 @@ from src.marl.mappo_trainer import MAPPOTrainer
 
 def test_mappo_trainer_update_returns_finite_metrics():
     actor = ActorNetwork(
-        input_dim=247,
+        input_dim=249,
         action_dim=5,
     )
 
     critic = CriticNetwork(
-        input_dim=1976,
+        input_dim=1992,
     )
 
     trainer = MAPPOTrainer(
@@ -22,8 +22,8 @@ def test_mappo_trainer_update_returns_finite_metrics():
     batch_size = 4
 
     metrics = trainer.update(
-        observations=torch.zeros(batch_size, 247),
-        centralized_states=torch.zeros(batch_size, 1976),
+        observations=torch.zeros(batch_size, 249),
+        centralized_states=torch.zeros(batch_size, 1992),
         actions=torch.tensor([0, 1, 2, 3], dtype=torch.long),
         old_log_probs=torch.zeros(batch_size),
         advantages=torch.tensor([1.0, 0.5, -0.2, 0.3]),
@@ -41,12 +41,12 @@ def test_mappo_trainer_update_returns_finite_metrics():
         assert torch.isfinite(torch.tensor(value))
 def test_mappo_trainer_multi_epoch_updates():
     actor = ActorNetwork(
-        input_dim=247,
+        input_dim=249,
         action_dim=5,
     )
 
     critic = CriticNetwork(
-        input_dim=1976,
+        input_dim=1992,
     )
 
     trainer = MAPPOTrainer(
@@ -57,8 +57,8 @@ def test_mappo_trainer_multi_epoch_updates():
     batch_size = 8
 
     history = trainer.update_epochs(
-        observations=torch.zeros(batch_size, 247),
-        centralized_states=torch.zeros(batch_size, 1976),
+        observations=torch.zeros(batch_size, 249),
+        centralized_states=torch.zeros(batch_size, 1992),
         actions=torch.tensor(
             [0, 1, 2, 3, 4, 0, 1, 2],
             dtype=torch.long,

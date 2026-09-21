@@ -10,7 +10,7 @@ def test_flatten_multi_agent_rollout():
     )
 
     observations = [
-        np.zeros(247, dtype=np.float32)
+        np.zeros(249, dtype=np.float32)
         for _ in range(8)
     ]
 
@@ -23,7 +23,7 @@ def test_flatten_multi_agent_rollout():
             value=0.5,
             dones=[False] * 8,
             centralized_state=np.zeros(
-                1976,
+                1992,
                 dtype=np.float32,
             ),
         )
@@ -34,7 +34,7 @@ def test_flatten_multi_agent_rollout():
 
     assert data["observations"].shape == (
         16,
-        247,
+        249,
     )
 
     assert data["actions"].shape == (
@@ -43,5 +43,5 @@ def test_flatten_multi_agent_rollout():
 
     assert data["centralized_states"].shape == (
         16,
-        1976,
+        1992,
     )

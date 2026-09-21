@@ -8,7 +8,7 @@ from src.safety.m4_controller import M4Controller
 
 def build_actor():
     return ActorNetwork(
-        input_dim=247,
+        input_dim=249,
         action_dim=5,
     )
 

@@ -10,7 +10,7 @@ def test_prepare_multi_agent_batch():
     )
 
     observations = [
-        np.zeros(247, dtype=np.float32)
+        np.zeros(249, dtype=np.float32)
         for _ in range(2)
     ]
 
@@ -23,7 +23,7 @@ def test_prepare_multi_agent_batch():
             value=0.5,
             dones=[t == 1, t == 1],
             centralized_state=np.zeros(
-                494,
+                498,
                 dtype=np.float32,
             ),
         )
@@ -34,7 +34,7 @@ def test_prepare_multi_agent_batch():
 
     assert batch["observations"].shape == (
         4,
-        247,
+        249,
     )
 
     assert batch["actions"].shape == (
@@ -43,7 +43,7 @@ def test_prepare_multi_agent_batch():
 
     assert batch["centralized_states"].shape == (
         4,
-        494,
+        498,
     )
 
     assert batch["advantages"].shape == (

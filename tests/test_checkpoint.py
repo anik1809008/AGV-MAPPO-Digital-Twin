@@ -15,12 +15,12 @@ from src.marl.checkpoint import (
 
 def test_checkpoint_save_and_load():
     actor = ActorNetwork(
-        input_dim=247,
+        input_dim=249,
         action_dim=5,
     )
 
     critic = CriticNetwork(
-        input_dim=1976,
+        input_dim=1992,
     )
 
     trainer = MAPPOTrainer(
@@ -186,12 +186,12 @@ def test_resume_range_uses_advanced_start_index():
     assert required_scenarios == 1000
 def test_checkpoint_creates_parent_directory(tmp_path):
     actor = ActorNetwork(
-        input_dim=247,
+        input_dim=249,
         action_dim=5,
     )
 
     critic = CriticNetwork(
-        input_dim=1976,
+        input_dim=1992,
     )
 
     path = (

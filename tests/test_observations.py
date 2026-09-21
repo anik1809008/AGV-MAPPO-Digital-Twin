@@ -63,8 +63,6 @@ def test_m2_vs_m3_reliability_channel():
     assert int(m2[2].sum()) == 0
     assert int(m3[2].sum()) == 2
 from src.marl.observations import build_scalar_features
-
-
 def test_scalar_features():
     features = build_scalar_features(
         center_position=(8, 5),
@@ -73,9 +71,20 @@ def test_scalar_features():
         reachable_size=3,
     )
 
-    assert features.shape == (4,)
-    assert features.tolist() == [-5.0, 4.0, 2.0, 3.0]
+    assert features.shape == (6,)
+    assert features.tolist() == [
+        -5.0,
+        4.0,
+        0.0,
+        0.0,
+        2.0,
+        3.0,
+    ]
+
+
 from src.marl.observations import flatten_mappo_input
+
+
 def test_scalar_features_normalize_goal_offset():
     features = build_scalar_features(
         center_position=(8, 5),
@@ -86,11 +95,13 @@ def test_scalar_features_normalize_goal_offset():
         map_height=9,
     )
 
-    assert features.shape == (4,)
+    assert features.shape == (6,)
 
     assert features.tolist() == [
         -0.5,
         0.5,
+        0.0,
+        0.0,
         2.0,
         3.0,
     ]
@@ -122,5 +133,26 @@ def test_flatten_mappo_input():
         scalars,
     )
 
-    assert vector.shape == (247,)
+    assert vector.shape == (249,)
     assert str(vector.dtype) == "float32"
+def test_scalar_features_include_shortest_path_direction():
+    grid = [
+        [0, 0, 0, 0, 0],
+        [0, 1, 1, 1, 0],
+        [0, 0, 0, 0, 0],
+    ]
+
+    features = build_scalar_features(
+        center_position=(0, 1),
+        goal_position=(4, 1),
+        aoi=0,
+        reachable_size=1,
+        map_width=5,
+        map_height=3,
+        grid=grid,
+    )
+
+    # Direct EAST movement is blocked by the shelf,
+    # so the shortest-path guidance should point NORTH.
+    assert features[2] == 0.0
+    assert features[3] == -1.0

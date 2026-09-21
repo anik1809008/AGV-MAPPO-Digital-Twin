@@ -11,7 +11,7 @@ def test_train_from_buffer_runs_multi_epoch_updates():
 
     for i in range(8):
         buffer.add(
-            observation=np.zeros(247, dtype=np.float32),
+            observation=np.zeros(249, dtype=np.float32),
             action=i % 5,
             log_prob=-1.0,
             reward=1.0,
@@ -20,17 +20,17 @@ def test_train_from_buffer_runs_multi_epoch_updates():
         )
 
     centralized_states = [
-        np.zeros(1976, dtype=np.float32)
+        np.zeros(1992, dtype=np.float32)
         for _ in range(8)
     ]
 
     actor = ActorNetwork(
-        input_dim=247,
+        input_dim=249,
         action_dim=5,
     )
 
     critic = CriticNetwork(
-        input_dim=1976,
+        input_dim=1992,
     )
 
     trainer = MAPPOTrainer(

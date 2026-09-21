@@ -9,7 +9,7 @@ def test_multi_agent_rollout_buffer():
     )
 
     observations = [
-        np.zeros(247, dtype=np.float32)
+        np.zeros(249, dtype=np.float32)
         for _ in range(8)
     ]
 
@@ -21,7 +21,7 @@ def test_multi_agent_rollout_buffer():
         value=0.5,
         dones=[False] * 8,
         centralized_state=np.zeros(
-            1976,
+            1992,
             dtype=np.float32,
         ),
     )

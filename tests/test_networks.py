@@ -37,23 +37,23 @@ from src.marl.centralized_state import build_centralized_state
 
 def test_centralized_state_shape_for_eight_agents():
     observations = [
-        np.zeros(247, dtype=np.float32)
+        np.zeros(249, dtype=np.float32)
         for _ in range(8)
     ]
 
     state = build_centralized_state(observations)
 
-    assert state.shape == (1976,)
+    assert state.shape == (1992,)
 
 
 def test_critic_accepts_centralized_state():
     critic = CriticNetwork(
-        input_dim=1976,
+        input_dim=1992,
     )
 
     state = torch.zeros(
         1,
-        1976,
+        1992,
         dtype=torch.float32,
     )
 

@@ -45,12 +45,12 @@ def test_episode_with_digital_twin_and_latency():
     )
 
     actor = ActorNetwork(
-        input_dim=247,
+        input_dim=249,
         action_dim=5,
     )
 
     critic = CriticNetwork(
-        input_dim=494,
+        input_dim=498,
     )
 
     buffer = MultiAgentRolloutBuffer(
