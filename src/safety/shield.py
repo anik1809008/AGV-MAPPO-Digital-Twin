@@ -178,15 +178,20 @@ class SafetyShield:
             action,
         )
 
-
+        if (
+            Action(action) != Action.WAIT
+            and all(
+                not self.is_action_valid(
+                    current_position,
+                    action,
+                )
+                for current_position
+                in possible_current_positions
+            )
+        ):
+            return False
 
         for current_position in possible_current_positions:
-            if not self.is_action_valid(
-                current_position,
-                action,
-            ):
-                return False
-
             candidate_position = self.next_position(
                 current_position,
                 action,
