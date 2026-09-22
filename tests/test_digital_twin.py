@@ -1,6 +1,7 @@
 from src.communication.telemetry import TelemetryMessage
 from src.digital_twin.digital_twin import DigitalTwin
 from src.digital_twin.state import AgentTwinState
+from src.environment.actions import Action
 
 
 def test_process_fresh_telemetry():
@@ -191,3 +192,40 @@ def test_reachable_occupancy_size():
     dt.record_command(1, Action.WEST, 22)
 
     assert dt.get_reachable_occupancy_size(1, grid) == 3
+def test_telemetry_keeps_previous_command_when_execution_can_be_delayed():
+    state = AgentTwinState(
+        agent_id=0,
+        last_trusted_position=(0, 0),
+        last_trusted_timestamp=0,
+        goal=(3, 0),
+    )
+
+    digital_twin = DigitalTwin({
+        0: state,
+    })
+
+    digital_twin.record_command(
+        agent_id=0,
+        action=Action.EAST,
+        timestep=0,
+    )
+
+    digital_twin.record_command(
+        agent_id=0,
+        action=Action.EAST,
+        timestep=1,
+    )
+
+    digital_twin.process_telemetry(
+        TelemetryMessage(
+            agent_id=0,
+            position=(0, 0),
+            source_timestamp=1,
+        ),
+        retain_previous_command=True,
+    )
+
+    assert state.command_history == [
+        (0, int(Action.EAST)),
+        (1, int(Action.EAST)),
+    ]

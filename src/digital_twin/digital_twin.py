@@ -9,7 +9,11 @@ class DigitalTwin:
     def __init__(self, agent_states):
         self.agent_states = dict(agent_states)
 
-    def process_telemetry(self, message):
+    def process_telemetry(
+        self,
+        message,
+        retain_previous_command=False,
+    ):
         state = self.agent_states[message.agent_id]
 
         if message.source_timestamp < state.last_trusted_timestamp:
@@ -17,10 +21,15 @@ class DigitalTwin:
 
         state.last_trusted_position = message.position
         state.last_trusted_timestamp = message.source_timestamp
+        minimum_timestamp = message.source_timestamp
+
+        if retain_previous_command:
+             minimum_timestamp -= 1
+
         state.command_history = [
-            (timestamp, action)
-            for timestamp, action in state.command_history
-            if timestamp >= message.source_timestamp
+             (timestamp, action)
+             for timestamp, action in state.command_history
+             if timestamp >= minimum_timestamp
         ]
         return True
 

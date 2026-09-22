@@ -60,11 +60,27 @@ def run_episode(
                 current_timestep=step
             )
 
-            for message in messages:
-                digital_twin.process_telemetry(
-                    message
+            retain_previous_command = False
+
+            if delayed_executor is not None:
+                delay_model = delayed_executor.delay_model
+
+                retain_previous_command = (
+                    getattr(
+                        delay_model,
+                        "immediate_probability",
+                        1.0,
+                    )
+                    < 1.0
                 )
 
+            for message in messages:
+                digital_twin.process_telemetry(
+                    message,
+                    retain_previous_command=(
+                        retain_previous_command
+                    ),
+                )
         allow_command_skip = False
 
         if delayed_executor is not None:
