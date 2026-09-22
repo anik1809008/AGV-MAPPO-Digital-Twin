@@ -17,15 +17,11 @@ class DigitalTwin:
 
         state.last_trusted_position = message.position
         state.last_trusted_timestamp = message.source_timestamp
-
         state.command_history = [
             (timestamp, action)
             for timestamp, action in state.command_history
-            if timestamp > message.source_timestamp
+            if timestamp >= message.source_timestamp
         ]
-
-
-
         return True
 
     def get_aoi(self, agent_id, current_timestep):

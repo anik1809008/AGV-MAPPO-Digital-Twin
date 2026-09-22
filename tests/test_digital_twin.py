@@ -29,7 +29,7 @@ def test_process_fresh_telemetry():
     assert updated is True
     assert state.last_trusted_position == (7, 5)
     assert state.last_trusted_timestamp == 21
-    assert state.command_history == []
+    assert state.command_history == [(21, 4)]
     assert dt.get_aoi(1, 23) == 2
 
 
@@ -172,8 +172,9 @@ def test_reconnection_resynchronizes_digital_twin():
     assert dt.get_aoi(1, 22) == 0
     assert dt.get_reachable_occupancy(1, grid) == {
         (2, 0),
+        (1, 0),
     }
-    assert state.command_history == []
+    assert state.command_history == [(22, 4)]
 def test_reachable_occupancy_size():
     grid = [[0, 0, 0, 0, 0]]
 

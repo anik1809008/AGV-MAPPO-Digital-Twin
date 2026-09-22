@@ -36,11 +36,14 @@ def test_delayed_telemetry_keeps_newer_unconfirmed_commands():
 
     assert state.last_trusted_position == (2, 0)
     assert state.last_trusted_timestamp == 21
-    assert state.command_history == [(22, 4)]
-
+    assert state.command_history == [
+        (21, 4),
+        (22, 4),
+    ]
     assert dt.get_aoi(1, 23) == 2
 
     assert dt.get_reachable_occupancy(1, grid) == {
         (2, 0),
         (1, 0),
+        (0, 0),
     }
