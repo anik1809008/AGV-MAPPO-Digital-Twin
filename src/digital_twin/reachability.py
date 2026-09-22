@@ -25,14 +25,11 @@ def apply_action(grid, position, action):
         return next_position
 
     return position
-
-
-
-
 def compute_reachable_occupancy(
     grid,
     last_trusted_position,
     command_history,
+    goal=None,
 ):
     reachable = {last_trusted_position}
 
@@ -44,19 +41,25 @@ def compute_reachable_occupancy(
         else:
             command = command_entry
 
-        current_position = apply_action(
-            grid,
-            current_position,
-            command,
-        )
+        if goal is not None and current_position == goal:
+            next_position = current_position
+        else:
+            next_position = apply_action(
+                grid,
+                current_position,
+                command,
+            )
 
+        current_position = next_position
         reachable.add(current_position)
 
     return reachable
+
 def compute_possible_transitions(
     grid,
     last_trusted_position,
     command_history,
+    goal=None,
 ):
     transitions = {
         (
@@ -73,11 +76,14 @@ def compute_possible_transitions(
         else:
             command = command_entry
 
-        next_position = apply_action(
-            grid,
-            current_position,
-            command,
-        )
+        if goal is not None and current_position == goal:
+            next_position = current_position
+        else:
+            next_position = apply_action(
+                grid,
+                current_position,
+                command,
+            )
 
         transitions.add(
             (

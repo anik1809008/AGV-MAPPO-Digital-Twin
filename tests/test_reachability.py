@@ -102,3 +102,44 @@ def test_possible_transitions_follow_command_prefixes():
         ((1, 0), (2, 0)),
         ((2, 0), (2, 0)),
     }
+def test_reachability_stays_locked_after_goal():
+    grid = [
+        [0, 0, 0, 0],
+    ]
+
+    reachable = compute_reachable_occupancy(
+        grid=grid,
+        last_trusted_position=(1, 0),
+        command_history=[
+            (1, Action.EAST),
+            (2, Action.EAST),
+        ],
+        goal=(2, 0),
+    )
+
+    assert reachable == {
+        (1, 0),
+        (2, 0),
+    }
+
+
+def test_possible_transitions_stay_locked_after_goal():
+    grid = [
+        [0, 0, 0, 0],
+    ]
+
+    transitions = compute_possible_transitions(
+        grid=grid,
+        last_trusted_position=(1, 0),
+        command_history=[
+            (1, Action.EAST),
+            (2, Action.EAST),
+        ],
+        goal=(2, 0),
+    )
+
+    assert transitions == {
+        ((1, 0), (1, 0)),
+        ((1, 0), (2, 0)),
+        ((2, 0), (2, 0)),
+    }

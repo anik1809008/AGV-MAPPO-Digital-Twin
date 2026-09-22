@@ -79,4 +79,5 @@ def test_latency_updates_aoi_and_reachable_occupancy():
     ) == {
         (0, 0),
         (1, 0),
+        (2, 0),
     }
