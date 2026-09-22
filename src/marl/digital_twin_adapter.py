@@ -2,6 +2,7 @@ def get_digital_twin_inputs(
     digital_twin,
     grid,
     current_timestep,
+    allow_command_skip=False,
 ):
     trusted_positions = {}
     reachable_occupancies = {}
@@ -22,12 +23,14 @@ def get_digital_twin_inputs(
             digital_twin.get_reachable_occupancy(
                 agent_id,
                 grid,
+                allow_command_skip=allow_command_skip,
             )
         )
         possible_transitions[agent_id] = (
             digital_twin.get_possible_transitions(
                 agent_id,
                 grid,
+                allow_command_skip=allow_command_skip,
             )
         )
     return {

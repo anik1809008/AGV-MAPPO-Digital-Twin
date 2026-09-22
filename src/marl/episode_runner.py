@@ -65,14 +65,25 @@ def run_episode(
                     message
                 )
 
+        allow_command_skip = False
 
+        if delayed_executor is not None:
+            delay_model = delayed_executor.delay_model
 
-
+            allow_command_skip = (
+                getattr(
+                    delay_model,
+                    "immediate_probability",
+                    1.0,
+                )
+                < 1.0
+            )
         if digital_twin is not None:
             dt_inputs = get_digital_twin_inputs(
                 digital_twin=digital_twin,
                 grid=simulator.grid,
                 current_timestep=step,
+                allow_command_skip=allow_command_skip,
             )
 
             trusted_positions = dt_inputs[

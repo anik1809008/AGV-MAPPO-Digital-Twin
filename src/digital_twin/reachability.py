@@ -30,10 +30,10 @@ def compute_reachable_occupancy(
     last_trusted_position,
     command_history,
     goal=None,
+    allow_command_skip=False,
 ):
     reachable = {last_trusted_position}
-
-    current_position = last_trusted_position
+    current_positions = {last_trusted_position}
 
     for command_entry in command_history:
         if isinstance(command_entry, tuple):
@@ -41,25 +41,33 @@ def compute_reachable_occupancy(
         else:
             command = command_entry
 
-        if goal is not None and current_position == goal:
-            next_position = current_position
-        else:
-            next_position = apply_action(
-                grid,
-                current_position,
-                command,
-            )
+        next_positions = set()
 
-        current_position = next_position
-        reachable.add(current_position)
+        for current_position in current_positions:
+            if allow_command_skip:
+                next_positions.add(current_position)
+
+            if goal is not None and current_position == goal:
+                next_position = current_position
+            else:
+                next_position = apply_action(
+                    grid,
+                    current_position,
+                    command,
+                )
+
+            next_positions.add(next_position)
+
+        current_positions = next_positions
+        reachable.update(current_positions)
 
     return reachable
-
 def compute_possible_transitions(
     grid,
     last_trusted_position,
     command_history,
     goal=None,
+    allow_command_skip=False,
 ):
     transitions = {
         (
@@ -68,7 +76,7 @@ def compute_possible_transitions(
         )
     }
 
-    current_position = last_trusted_position
+    current_positions = {last_trusted_position}
 
     for command_entry in command_history:
         if isinstance(command_entry, tuple):
@@ -76,29 +84,43 @@ def compute_possible_transitions(
         else:
             command = command_entry
 
-        if goal is not None and current_position == goal:
-            next_position = current_position
-        else:
-            next_position = apply_action(
-                grid,
-                current_position,
-                command,
+        next_positions = set()
+
+        for current_position in current_positions:
+            if allow_command_skip:
+                transitions.add(
+                    (
+                        current_position,
+                        current_position,
+                    )
+                )
+                next_positions.add(current_position)
+
+            if goal is not None and current_position == goal:
+                next_position = current_position
+            else:
+                next_position = apply_action(
+                    grid,
+                    current_position,
+                    command,
+                )
+
+            transitions.add(
+                (
+                    current_position,
+                    next_position,
+                )
             )
 
-        transitions.add(
-            (
-                current_position,
-                next_position,
+            transitions.add(
+                (
+                    next_position,
+                    next_position,
+                )
             )
-        )
 
-        transitions.add(
-            (
-                next_position,
-                next_position,
-            )
-        )
+            next_positions.add(next_position)
 
-        current_position = next_position
+        current_positions = next_positions
 
     return transitions

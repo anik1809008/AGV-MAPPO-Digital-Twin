@@ -143,3 +143,46 @@ def test_possible_transitions_stay_locked_after_goal():
         ((1, 0), (2, 0)),
         ((2, 0), (2, 0)),
     }
+def test_reachability_can_include_skipped_delayed_command():
+    grid = [
+        [0, 0, 0],
+        [0, 0, 0],
+        [0, 0, 0],
+        [0, 0, 0],
+    ]
+
+    reachable = compute_reachable_occupancy(
+        grid=grid,
+        last_trusted_position=(0, 3),
+        command_history=[
+            (1, Action.EAST),
+            (2, Action.NORTH),
+            (3, Action.NORTH),
+            (4, Action.NORTH),
+        ],
+        allow_command_skip=True,
+    )
+
+    assert (0, 0) in reachable
+    assert (1, 0) in reachable
+def test_possible_transitions_include_skipped_command_branch():
+    grid = [
+        [0, 0, 0],
+        [0, 0, 0],
+        [0, 0, 0],
+        [0, 0, 0],
+    ]
+
+    transitions = compute_possible_transitions(
+        grid=grid,
+        last_trusted_position=(0, 3),
+        command_history=[
+            (1, Action.EAST),
+            (2, Action.NORTH),
+            (3, Action.NORTH),
+            (4, Action.NORTH),
+        ],
+        allow_command_skip=True,
+    )
+
+    assert ((0, 1), (0, 0)) in transitions

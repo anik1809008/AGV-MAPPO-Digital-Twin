@@ -33,19 +33,25 @@ class DigitalTwin:
             (timestep, int(action))
         )
 
-
-    def get_reachable_occupancy(self, agent_id, grid):
+    def get_reachable_occupancy(
+        self,
+        agent_id,
+        grid,
+        allow_command_skip=False,
+        ):
         state = self.agent_states[agent_id]
         return compute_reachable_occupancy(
             grid=grid,
             last_trusted_position=state.last_trusted_position,
             command_history=state.command_history,
             goal=state.goal,
+            allow_command_skip=allow_command_skip,
         )
     def get_possible_transitions(
         self,
         agent_id,
         grid,
+        allow_command_skip=False,
     ):
         state = self.agent_states[agent_id]
         return compute_possible_transitions(
@@ -55,6 +61,7 @@ class DigitalTwin:
             ),
             command_history=state.command_history,
             goal=state.goal,
+            allow_command_skip=allow_command_skip,
         )
     def get_reachable_occupancy_size(self, agent_id, grid):
         return len(
