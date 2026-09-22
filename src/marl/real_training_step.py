@@ -52,6 +52,9 @@ def run_real_training_step(
             action, _ = m4_controller.select_action(
                 observation_vector=observation,
                 agent_id=agent_id,
+                preferred_action=rollout["actions"][
+                    agent_id
+                ],
                 possible_current_positions=(
                     reachable_occupancies.get(
                         agent_id,

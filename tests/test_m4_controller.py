@@ -40,3 +40,54 @@ def test_m4_controller_returns_valid_action():
     assert int(action) in {0, 1, 2, 3, 4}
     assert isinstance(probability, float)
     assert controller.action_filter.intervention_count in {0, 1}
+from src.environment.actions import Action
+
+
+def test_m4_prefers_sampled_policy_action_when_safe(
+    monkeypatch,
+):
+    actor = ActorNetwork(
+        input_dim=249,
+        action_dim=5,
+    )
+
+    shield = SafetyShield([
+        [0, 0, 0],
+        [0, 0, 0],
+    ])
+
+    controller = M4Controller(
+        actor=actor,
+        shield=shield,
+    )
+
+    monkeypatch.setattr(
+        "src.safety.m4_controller."
+        "rank_actions_by_probability",
+        lambda actor, observation_vector: [
+            (Action.EAST, 0.60),
+            (Action.SOUTH, 0.30),
+            (Action.WAIT, 0.10),
+        ],
+    )
+
+    observation = np.zeros(
+        249,
+        dtype=np.float32,
+    )
+
+    action, probability = controller.select_action(
+        observation_vector=observation,
+        agent_id=0,
+        preferred_action=Action.SOUTH,
+        possible_current_positions={(0, 0)},
+        other_current_positions={1: (2, 0)},
+        other_next_positions={1: (2, 0)},
+        reachable_occupancies={
+            1: {(1, 0), (2, 0)},
+        },
+    )
+
+    assert action == Action.SOUTH
+    assert probability == 0.30
+    assert controller.action_filter.intervention_count == 0
