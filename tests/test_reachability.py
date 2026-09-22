@@ -75,3 +75,30 @@ def test_reachability_preserves_fifo_command_order():
     }
 
     assert (1, 0) not in reachable
+from src.digital_twin.reachability import (
+    compute_possible_transitions,
+)
+from src.environment.actions import Action
+
+
+def test_possible_transitions_follow_command_prefixes():
+    grid = [
+        [0, 0, 0],
+    ]
+
+    transitions = compute_possible_transitions(
+        grid=grid,
+        last_trusted_position=(0, 0),
+        command_history=[
+            (1, Action.EAST),
+            (2, Action.EAST),
+        ],
+    )
+
+    assert transitions == {
+        ((0, 0), (0, 0)),
+        ((0, 0), (1, 0)),
+        ((1, 0), (1, 0)),
+        ((1, 0), (2, 0)),
+        ((2, 0), (2, 0)),
+    }

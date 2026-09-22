@@ -17,6 +17,7 @@ def run_episode(
     trusted_positions=None,
     reachable_occupancies=None,
     aoi_values=None,
+    possible_transitions=None,
     max_steps=200,
 ):
 
@@ -85,7 +86,9 @@ def run_episode(
             aoi_values = dt_inputs[
                 "aoi_values"
             ]
-
+            possible_transitions = dt_inputs[
+                "possible_transitions"
+            ]
 
         previous_positions = dict(
             simulator.agent_positions
@@ -99,6 +102,7 @@ def run_episode(
             trusted_positions=trusted_positions,
             reachable_occupancies=reachable_occupancies,
             aoi_values=aoi_values,
+            possible_transitions=possible_transitions,
             multi_agent_buffer=multi_agent_buffer,
             delayed_executor=delayed_executor,
             current_timestep=step,

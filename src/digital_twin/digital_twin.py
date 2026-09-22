@@ -1,4 +1,7 @@
-from src.digital_twin.reachability import compute_reachable_occupancy
+from src.digital_twin.reachability import (
+    compute_possible_transitions,
+    compute_reachable_occupancy,
+)
 from src.digital_twin.state import AgentTwinState
 
 
@@ -41,6 +44,21 @@ class DigitalTwin:
         return compute_reachable_occupancy(
             grid=grid,
             last_trusted_position=state.last_trusted_position,
+            command_history=state.command_history,
+        )
+
+    def get_possible_transitions(
+        self,
+        agent_id,
+        grid,
+    ):
+        state = self.agent_states[agent_id]
+
+        return compute_possible_transitions(
+            grid=grid,
+            last_trusted_position=(
+                state.last_trusted_position
+            ),
             command_history=state.command_history,
         )
     def get_reachable_occupancy_size(self, agent_id, grid):

@@ -53,3 +53,46 @@ def compute_reachable_occupancy(
         reachable.add(current_position)
 
     return reachable
+def compute_possible_transitions(
+    grid,
+    last_trusted_position,
+    command_history,
+):
+    transitions = {
+        (
+            last_trusted_position,
+            last_trusted_position,
+        )
+    }
+
+    current_position = last_trusted_position
+
+    for command_entry in command_history:
+        if isinstance(command_entry, tuple):
+            _, command = command_entry
+        else:
+            command = command_entry
+
+        next_position = apply_action(
+            grid,
+            current_position,
+            command,
+        )
+
+        transitions.add(
+            (
+                current_position,
+                next_position,
+            )
+        )
+
+        transitions.add(
+            (
+                next_position,
+                next_position,
+            )
+        )
+
+        current_position = next_position
+
+    return transitions

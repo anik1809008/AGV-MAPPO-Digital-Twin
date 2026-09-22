@@ -12,6 +12,7 @@ def run_real_training_step(
     trusted_positions,
     reachable_occupancies,
     aoi_values,
+    possible_transitions=None,
     multi_agent_buffer=None,
     delayed_executor=None,
     current_timestep=0,
@@ -71,6 +72,11 @@ def run_real_training_step(
                 ),
                 reachable_occupancies=(
                     reachable_occupancies
+                ),
+                other_possible_transitions=(
+                    {}
+                    if possible_transitions is None
+                    else possible_transitions
                 ),
             )
 

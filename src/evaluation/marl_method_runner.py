@@ -14,6 +14,7 @@ def run_marl_method(
     m5_baseline=None,
     trusted_positions=None,
     reachable_occupancies=None,
+    possible_transitions=None,
     aoi_values=None,
     max_steps=200,
 ):
@@ -42,5 +43,6 @@ def run_marl_method(
         trusted_positions=trusted_positions,
         reachable_occupancies=reachable_occupancies,
         aoi_values=aoi_values,
+        possible_transitions=possible_transitions,
         max_steps=max_steps,
     )
