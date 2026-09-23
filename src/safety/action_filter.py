@@ -18,22 +18,51 @@ class ShieldActionFilter:
     ):
         original_action = ranked_actions[0][0]
 
-        for action, probability in ranked_actions:
-            if shield.is_action_safe(
+        def is_safe(action):
+            return shield.is_action_safe(
                 agent_id=agent_id,
-                possible_current_positions=possible_current_positions,
+                possible_current_positions=(
+                    possible_current_positions
+                ),
                 action=action,
-                other_current_positions=other_current_positions,
-                other_next_positions=other_next_positions,
-                reachable_occupancies=reachable_occupancies,
-                other_possible_transitions=other_possible_transitions,
-            ):
-                if action != original_action:
-                    self.intervention_count += 1
+                other_current_positions=(
+                    other_current_positions
+                ),
+                other_next_positions=(
+                    other_next_positions
+                ),
+                reachable_occupancies=(
+                    reachable_occupancies
+                ),
+                other_possible_transitions=(
+                    other_possible_transitions
+                ),
+            )
 
+        original_probability = ranked_actions[0][1]
+
+        if is_safe(original_action):
+            return (
+                original_action,
+                original_probability,
+            )
+
+        for action, probability in ranked_actions:
+            if Action(action) == Action.WAIT:
+                continue
+
+            if is_safe(action):
+                self.intervention_count += 1
                 return action, probability
 
-        if original_action != Action.WAIT:
-            self.intervention_count += 1
+        for action, probability in ranked_actions:
+            if Action(action) != Action.WAIT:
+                continue
+
+            if is_safe(action):
+                self.intervention_count += 1
+                return action, probability
+
+        self.intervention_count += 1
 
         return Action.WAIT, 0.0
