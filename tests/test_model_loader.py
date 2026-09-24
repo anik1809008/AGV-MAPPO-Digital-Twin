@@ -49,3 +49,18 @@ def test_missing_validation_checkpoint_raises_error():
             seed=999,
             episodes_per_scenario=999,
         )
+def test_m4_validation_loader_uses_m3_selected_budget_checkpoint():
+    from src.evaluation.checkpoint_resolver import (
+        resolve_validation_checkpoint,
+    )
+
+    checkpoint_path = resolve_validation_checkpoint(
+        method="M4",
+        agent_count=8,
+        seed=0,
+        episodes_per_scenario=20,
+    )
+
+    assert checkpoint_path.endswith(
+        "m3_agents8_seed0_eps20.pt"
+    )

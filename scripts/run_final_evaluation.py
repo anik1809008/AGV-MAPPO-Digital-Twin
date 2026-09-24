@@ -12,6 +12,7 @@ from src.evaluation.experiment_config import (
 )
 from src.evaluation.model_loader import (
     load_evaluation_models,
+    load_validation_models,
 )
 from src.evaluation.real_method_callback import (
     run_real_method,
@@ -73,6 +74,11 @@ def main():
         default=None,
     )
     parser.add_argument(
+        "--episodes-per-scenario",
+        type=int,
+        default=None,
+    )
+    parser.add_argument(
         "--start-index",
         type=int,
         default=0,
@@ -108,14 +114,25 @@ def main():
         default="results/final_evaluation.csv",
     )
     args = parser.parse_args()
-
     if (
         args.method != "M1"
         and args.checkpoint_scenario_id is None
+        and args.episodes_per_scenario is None
     ):
         raise ValueError(
-            "--checkpoint-scenario-id is required "
-            "for learned evaluation methods"
+            "Learned methods require either "
+            "--episodes-per-scenario or "
+            "--checkpoint-scenario-id"
+        )
+
+    if (
+        args.checkpoint_scenario_id is not None
+        and args.episodes_per_scenario is not None
+    ):
+        raise ValueError(
+            "Use only one of "
+            "--episodes-per-scenario or "
+            "--checkpoint-scenario-id"
         )
 
     if args.scenario_id not in TEST_SCENARIO_IDS:
@@ -142,18 +159,27 @@ def main():
     grid = instance["grid"]
     starts = instance["starts"]
     goals = instance["goals"]
-
-    models = load_evaluation_models(
-        method=args.method,
-        agent_count=args.agents,
-        seed=args.seed,
-        scenario_id=(
-            args.checkpoint_scenario_id
-            if args.checkpoint_scenario_id
-            is not None
-            else args.scenario_id
-        ),
-    )
+    if args.episodes_per_scenario is not None:
+        models = load_validation_models(
+            method=args.method,
+            agent_count=args.agents,
+            seed=args.seed,
+            episodes_per_scenario=(
+                args.episodes_per_scenario
+            ),
+        )
+    else:
+        models = load_evaluation_models(
+            method=args.method,
+            agent_count=args.agents,
+            seed=args.seed,
+            scenario_id=(
+                args.checkpoint_scenario_id
+                if args.checkpoint_scenario_id
+                is not None
+                else args.scenario_id
+            ),
+        )
     controllers = build_method_controllers(
         method=args.method,
         actor=models["actor"],
