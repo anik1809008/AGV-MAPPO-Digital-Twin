@@ -24,9 +24,10 @@ def run_marl_method(
         "M4",
         "M5",
         "M6",
+        "M7",
     }:
         raise ValueError(
-            "method must be one of: M2, M3, M4, M5, M6"
+            "method must be one of: M2, M3, M4, M5, M6, M7"
         )
 
     return run_episode(

@@ -17,7 +17,7 @@ def test_policy_mapping():
 
 def test_policy_mapping_rejects_unknown_method():
     try:
-        get_policy_method("M7")
+        get_policy_method("M99")
     except ValueError as exc:
         assert (
             "Unknown evaluation method"

@@ -43,7 +43,7 @@ def run_real_training_step(
         agent_observations=observations,
     )
 
-    if method == "M4" and m4_controller is not None:
+    if method in {"M4", "M7"} and m4_controller is not None:
         actions = {}
         reserved_next_positions = {}
 

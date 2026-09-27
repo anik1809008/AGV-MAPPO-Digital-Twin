@@ -32,6 +32,7 @@ def test_experiment_configuration():
         "M4",
         "M5",
         "M6",
+        "M7",
     ]
 
     assert TRAINING_METHODS == [

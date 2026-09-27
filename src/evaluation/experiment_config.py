@@ -11,6 +11,7 @@ METHODS = [
     "M4",
     "M5",
     "M6",
+    "M7",
 ]
 
 TRAINING_METHODS = [

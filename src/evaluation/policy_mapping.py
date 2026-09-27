@@ -5,8 +5,8 @@ POLICY_METHOD_BY_EVALUATION_METHOD = {
     "M4": "M3",
     "M5": "M3",
     "M6": "M6",
+    "M7": "M3",
 }
-
 
 def get_policy_method(method):
     if method not in POLICY_METHOD_BY_EVALUATION_METHOD:

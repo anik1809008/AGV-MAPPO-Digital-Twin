@@ -51,7 +51,7 @@ def build_agent_input(
           map_height=len(grid),
           grid=grid,
        )
-    elif method in {"M3", "M4", "M5"}:
+    elif method in {"M3", "M4", "M5", "M7"}:
         spatial = build_m3_observation(
             grid=grid,
             center_position=center_position,
@@ -72,7 +72,7 @@ def build_agent_input(
 
     else:
         raise ValueError(
-            "method must be one of: M2, M3, M4, M5, M6"
+            "method must be one of: M2, M3, M4, M5, M6, M7"
         )
     return flatten_mappo_input(
         spatial,

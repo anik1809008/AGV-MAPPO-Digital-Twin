@@ -12,7 +12,7 @@ def build_method_controllers(
     m4_controller = None
     m5_baseline = None
 
-    if method == "M4":
+    if method in {"M4", "M7"}:
         shield = SafetyShield(grid)
 
         m4_controller = M4Controller(

@@ -45,7 +45,7 @@ def run_real_method(
     shield_interventions = 0
 
     if (
-        method == "M4"
+        method in {"M4", "M7"}
         and context.get("m4_controller") is not None
     ):
         shield_interventions = (
