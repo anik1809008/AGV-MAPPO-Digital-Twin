@@ -60,3 +60,111 @@ def test_run_real_training_step_stores_buffer_data():
     assert len(buffer.agent_buffers[1]) == 1
     assert len(result["actions"]) == 2
     assert len(result["rewards"]) == 2
+def test_m7_updates_progress_monitor_but_m4_does_not():
+    from src.safety.m4_controller import M4Controller
+    from src.safety.shield import SafetyShield
+
+    class DummyMonitor:
+        def __init__(self):
+            self.calls = []
+
+        def update(self, agent_id, position, goal):
+            self.calls.append(
+                (agent_id, position, goal)
+            )
+
+    grid = [
+        [0, 0, 0],
+        [0, 0, 0],
+    ]
+
+    actor = ActorNetwork(
+        input_dim=249,
+        action_dim=5,
+    )
+
+    critic = CriticNetwork(
+        input_dim=498,
+    )
+
+    controller = M4Controller(
+        actor=actor,
+        shield=SafetyShield(grid),
+    )
+
+    simulator_m7 = GroundTruthSimulator(
+        grid=grid,
+        agent_positions={
+            0: (0, 0),
+            1: (2, 1),
+        },
+        agent_goals={
+            0: (2, 0),
+            1: (0, 1),
+        },
+    )
+
+    monitor = DummyMonitor()
+
+    run_real_training_step(
+        actor=actor,
+        critic=critic,
+        simulator=simulator_m7,
+        method="M7",
+        trusted_positions={
+            0: (0, 0),
+            1: (2, 1),
+        },
+        reachable_occupancies={
+            0: {(0, 0)},
+            1: {(2, 1)},
+        },
+        aoi_values={
+            0: 0,
+            1: 0,
+        },
+        m4_controller=controller,
+        m7_progress_monitor=monitor,
+    )
+
+    assert monitor.calls == [
+        (0, (0, 0), (2, 0)),
+        (1, (2, 1), (0, 1)),
+    ]
+
+    simulator_m4 = GroundTruthSimulator(
+        grid=grid,
+        agent_positions={
+            0: (0, 0),
+            1: (2, 1),
+        },
+        agent_goals={
+            0: (2, 0),
+            1: (0, 1),
+        },
+    )
+
+    monitor.calls.clear()
+
+    run_real_training_step(
+        actor=actor,
+        critic=critic,
+        simulator=simulator_m4,
+        method="M4",
+        trusted_positions={
+            0: (0, 0),
+            1: (2, 1),
+        },
+        reachable_occupancies={
+            0: {(0, 0)},
+            1: {(2, 1)},
+        },
+        aoi_values={
+            0: 0,
+            1: 0,
+        },
+        m4_controller=controller,
+        m7_progress_monitor=monitor,
+    )
+
+    assert monitor.calls == []

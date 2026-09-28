@@ -18,6 +18,7 @@ def run_real_training_step(
     current_timestep=0,
     m4_controller=None,
     m5_baseline=None,
+    m7_progress_monitor=None,
 ):
     agent_positions = list(
         simulator.agent_positions.values()
@@ -46,6 +47,16 @@ def run_real_training_step(
     if method in {"M4", "M7"} and m4_controller is not None:
         actions = {}
         reserved_next_positions = {}
+
+        if method == "M7" and m7_progress_monitor is not None:
+            for agent_id, position in enumerate(
+                agent_positions
+            ):
+                m7_progress_monitor.update(
+                    agent_id=agent_id,
+                    position=position,
+                    goal=agent_goals[agent_id],
+                )
 
         for agent_id, observation in enumerate(
             observations
@@ -88,9 +99,6 @@ def run_real_training_step(
                     action,
                 )
             )
-
-
-
     elif method == "M5" and m5_baseline is not None:
         actions = {}
 

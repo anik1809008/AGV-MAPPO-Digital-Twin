@@ -14,6 +14,7 @@ def run_episode(
     delayed_executor=None,
     m4_controller=None,
     m5_baseline=None,
+    m7_progress_monitor=None,
     trusted_positions=None,
     reachable_occupancies=None,
     aoi_values=None,
@@ -135,6 +136,7 @@ def run_episode(
             current_timestep=step,
             m4_controller=m4_controller,
             m5_baseline=m5_baseline,
+            m7_progress_monitor=m7_progress_monitor,
         )
 
 

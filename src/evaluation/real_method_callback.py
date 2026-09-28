@@ -4,8 +4,6 @@ from src.evaluation.episode_metrics_adapter import (
 )
 from src.evaluation.metrics import measure_planning_time
 from src.evaluation.marl_method_runner import run_marl_method
-
-
 def run_real_method(
     method,
     latency_steps,
@@ -17,11 +15,9 @@ def run_real_method(
             simulator=context["simulator"],
             max_steps=context["max_steps"],
         )
-
         metrics = dict(result["metrics"])
         metrics["planning_time"] = elapsed
         return metrics
-
     episode_result, elapsed = measure_planning_time(
         run_marl_method,
         method=method,
@@ -34,6 +30,9 @@ def run_real_method(
         delayed_executor=context.get("delayed_executor"),
         m4_controller=context.get("m4_controller"),
         m5_baseline=context.get("m5_baseline"),
+        m7_progress_monitor=context.get(
+           "m7_progress_monitor"
+        ),
         trusted_positions=context.get("trusted_positions"),
         reachable_occupancies=context.get(
             "reachable_occupancies"
@@ -41,9 +40,7 @@ def run_real_method(
         aoi_values=context.get("aoi_values"),
         max_steps=context["max_steps"],
     )
-
     shield_interventions = 0
-
     if (
         method in {"M4", "M7"}
         and context.get("m4_controller") is not None
@@ -53,7 +50,6 @@ def run_real_method(
             .action_filter
             .intervention_count
         )
-
     return build_marl_episode_metrics(
         method=method,
         episode_result=episode_result,

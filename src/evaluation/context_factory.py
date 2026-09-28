@@ -17,6 +17,7 @@ def build_experiment_context(
     max_steps,
     m4_controller=None,
     m5_baseline=None,
+    m7_progress_monitor=None,
     execution_delay_model=None,
 ):
     simulator = GroundTruthSimulator(
@@ -34,16 +35,13 @@ def build_experiment_context(
         )
         for agent_id in starts
     })
-
     telemetry_channel = FixedLatencyChannel(
         latency_steps=latency_steps,
     )
-
     if execution_delay_model is None:
         execution_delay_model = ExecutionDelayModel(
             immediate_probability=0.8,
         )
-
     delayed_executor = DelayedCommandExecutor(
         delay_model=execution_delay_model,
     )
@@ -51,7 +49,6 @@ def build_experiment_context(
     buffer = MultiAgentRolloutBuffer(
         num_agents=len(starts),
     )
-
     return {
         "simulator": simulator,
         "digital_twin": digital_twin,
@@ -63,4 +60,5 @@ def build_experiment_context(
         "m4_controller": m4_controller,
         "m5_baseline": m5_baseline,
         "max_steps": max_steps,
+        "m7_progress_monitor": m7_progress_monitor,
     }
