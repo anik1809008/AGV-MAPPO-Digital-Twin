@@ -2,8 +2,6 @@ from src.baselines.stale_wait import ReachableSetWaitBaseline
 from src.marl.environment_adapter import build_all_agent_inputs
 from src.marl.environment_step import execute_training_step
 from src.marl.rollout import collect_single_step
-
-
 def run_real_training_step(
     actor,
     critic,
@@ -67,6 +65,7 @@ def run_real_training_step(
                 preferred_action=rollout["actions"][
                     agent_id
                 ],
+
                 possible_current_positions=(
                     reachable_occupancies.get(
                         agent_id,
@@ -123,6 +122,14 @@ def run_real_training_step(
                 preferred_action=rollout["actions"][
                     agent_id
                 ],
+                current_position=agent_positions[agent_id],
+                goal_position=agent_goals[agent_id],
+                prefer_progress=(
+                    m7_progress_monitor is not None
+                    and m7_progress_monitor.is_stagnating(
+                        agent_id
+                    )
+                ),
                 possible_current_positions=(
                     reachable_occupancies.get(
                         agent_id,

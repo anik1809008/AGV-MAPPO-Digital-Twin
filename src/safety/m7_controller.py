@@ -1,7 +1,5 @@
 from src.marl.policy import rank_actions_by_probability
 from src.safety.m7_action_filter import M7ActionFilter
-
-
 class M7Controller:
     def __init__(self, actor, shield):
         self.actor = actor
@@ -18,6 +16,9 @@ class M7Controller:
         reachable_occupancies,
         other_possible_transitions=None,
         preferred_action=None,
+        current_position=None,
+        goal_position=None,
+        prefer_progress=False,
     ):
         ranked_actions = rank_actions_by_probability(
             self.actor,

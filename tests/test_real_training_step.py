@@ -3,8 +3,6 @@ from src.environment.simulator import GroundTruthSimulator
 from src.marl.multi_agent_buffer import MultiAgentRolloutBuffer
 from src.marl.networks import ActorNetwork, CriticNetwork
 from src.marl.real_training_step import run_real_training_step
-
-
 def test_run_real_training_step_stores_buffer_data():
     grid = [
         [0, 0, 0],
@@ -64,8 +62,17 @@ def test_run_real_training_step_stores_buffer_data():
 def test_m7_updates_progress_monitor_but_m4_does_not():
     from src.safety.m4_controller import M4Controller
     from src.safety.shield import SafetyShield
-
     class DummyMonitor:
+        def __init__(self):
+            self.calls = []
+
+        def update(self, agent_id, position, goal):
+            self.calls.append(
+                (agent_id, position, goal)
+            )
+
+        def is_stagnating(self, agent_id):
+            return False
         def __init__(self):
             self.calls = []
 
