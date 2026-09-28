@@ -45,12 +45,23 @@ def run_real_method(
         max_steps=context["max_steps"],
     )
     shield_interventions = 0
+
     if (
-        method in {"M4", "M7"}
+        method == "M4"
         and context.get("m4_controller") is not None
     ):
         shield_interventions = (
             context["m4_controller"]
+            .action_filter
+            .intervention_count
+        )
+
+    if (
+        method == "M7"
+        and context.get("m7_controller") is not None
+    ):
+        shield_interventions = (
+            context["m7_controller"]
             .action_filter
             .intervention_count
         )

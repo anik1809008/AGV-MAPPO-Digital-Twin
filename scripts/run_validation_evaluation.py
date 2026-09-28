@@ -1,9 +1,7 @@
 import argparse
 import random
-
 import numpy as np
 import torch
-
 from src.environment.execution_delay import ExecutionDelayModel
 from src.evaluation.context_factory import build_experiment_context
 from src.evaluation.controller_factory import (
@@ -48,6 +46,7 @@ def main():
             "M4",
             "M5",
             "M6",
+            "M7",
         ],
         required=True,
     )
@@ -196,6 +195,15 @@ def main():
         ],
         m5_baseline=controllers[
             "m5_baseline"
+        ],
+        m7_controller=controllers[
+            "m7_controller"
+        ],
+        m7_progress_monitor=controllers[
+            "m7_progress_monitor"
+        ],
+        m7_recovery_planner=controllers[
+            "m7_recovery_planner"
         ],
         execution_delay_model=(
             execution_delay_model
