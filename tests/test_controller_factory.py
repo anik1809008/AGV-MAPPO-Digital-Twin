@@ -1,3 +1,4 @@
+from src.safety.m7_controller import M7Controller
 from src.baselines.stale_wait import ReachableSetWaitBaseline
 from src.evaluation.controller_factory import (
     build_method_controllers,
@@ -76,3 +77,23 @@ def test_other_methods_need_no_extra_controller():
 
         assert result["m4_controller"] is None
         assert result["m5_baseline"] is None
+def test_build_m7_controller():
+    actor = build_actor()
+
+    result = build_method_controllers(
+        method="M7",
+        actor=actor,
+        grid=[
+            [0, 0],
+            [0, 0],
+        ],
+    )
+
+    assert result["m4_controller"] is None
+
+    assert isinstance(
+        result["m7_controller"],
+        M7Controller,
+    )
+
+    assert result["m7_progress_monitor"] is not None

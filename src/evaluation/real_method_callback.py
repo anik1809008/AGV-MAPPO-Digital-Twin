@@ -29,6 +29,7 @@ def run_real_method(
         telemetry_channel=context.get("telemetry_channel"),
         delayed_executor=context.get("delayed_executor"),
         m4_controller=context.get("m4_controller"),
+        m7_controller=context.get("m7_controller"),
         m5_baseline=context.get("m5_baseline"),
         m7_progress_monitor=context.get(
            "m7_progress_monitor"

@@ -18,6 +18,7 @@ def run_real_training_step(
     current_timestep=0,
     m4_controller=None,
     m5_baseline=None,
+    m7_controller=None,
     m7_progress_monitor=None,
 ):
     agent_positions = list(
@@ -43,8 +44,7 @@ def run_real_training_step(
         critic=critic,
         agent_observations=observations,
     )
-
-    if method in {"M4", "M7"} and m4_controller is not None:
+    if method == "M4" and m4_controller is not None:
         actions = {}
         reserved_next_positions = {}
 
@@ -95,6 +95,62 @@ def run_real_training_step(
 
             reserved_next_positions[agent_id] = (
                 m4_controller.shield.next_position(
+                    agent_positions[agent_id],
+                    action,
+                )
+            )
+
+    elif method == "M7" and m7_controller is not None:
+        actions = {}
+        reserved_next_positions = {}
+
+        if m7_progress_monitor is not None:
+            for agent_id, position in enumerate(
+                agent_positions
+            ):
+                m7_progress_monitor.update(
+                    agent_id=agent_id,
+                    position=position,
+                    goal=agent_goals[agent_id],
+                )
+
+        for agent_id, observation in enumerate(
+            observations
+        ):
+            action, _ = m7_controller.select_action(
+                observation_vector=observation,
+                agent_id=agent_id,
+                preferred_action=rollout["actions"][
+                    agent_id
+                ],
+                possible_current_positions=(
+                    reachable_occupancies.get(
+                        agent_id,
+                        {agent_positions[agent_id]},
+                    )
+                ),
+                other_current_positions={
+                    other_id: trusted_positions[other_id]
+                    for other_id in trusted_positions
+                    if other_id != agent_id
+                },
+                other_next_positions=(
+                    reserved_next_positions
+                ),
+                reachable_occupancies=(
+                    reachable_occupancies
+                ),
+                other_possible_transitions=(
+                    {}
+                    if possible_transitions is None
+                    else possible_transitions
+                ),
+            )
+
+            actions[agent_id] = action
+
+            reserved_next_positions[agent_id] = (
+                m7_controller.shield.next_position(
                     agent_positions[agent_id],
                     action,
                 )

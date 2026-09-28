@@ -1,6 +1,4 @@
 from src.marl.episode_runner import run_episode
-
-
 def run_marl_method(
     method,
     actor,
@@ -12,6 +10,7 @@ def run_marl_method(
     delayed_executor=None,
     m4_controller=None,
     m5_baseline=None,
+    m7_controller=None,
     m7_progress_monitor=None,
     trusted_positions=None,
     reachable_occupancies=None,
@@ -30,7 +29,6 @@ def run_marl_method(
         raise ValueError(
             "method must be one of: M2, M3, M4, M5, M6, M7"
         )
-
     return run_episode(
         actor=actor,
         critic=critic,
@@ -41,6 +39,7 @@ def run_marl_method(
         telemetry_channel=telemetry_channel,
         delayed_executor=delayed_executor,
         m4_controller=m4_controller,
+        m7_controller=m7_controller,
         m5_baseline=m5_baseline,
         m7_progress_monitor=m7_progress_monitor,
         trusted_positions=trusted_positions,

@@ -17,6 +17,7 @@ def build_experiment_context(
     max_steps,
     m4_controller=None,
     m5_baseline=None,
+    m7_controller=None,
     m7_progress_monitor=None,
     execution_delay_model=None,
 ):
@@ -59,6 +60,7 @@ def build_experiment_context(
         "critic": critic,
         "m4_controller": m4_controller,
         "m5_baseline": m5_baseline,
-        "max_steps": max_steps,
+        "m7_controller": m7_controller,
         "m7_progress_monitor": m7_progress_monitor,
+        "max_steps": max_steps,
     }

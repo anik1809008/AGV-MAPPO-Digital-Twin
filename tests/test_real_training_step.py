@@ -1,3 +1,4 @@
+from src.safety.m7_controller import M7Controller
 from src.environment.simulator import GroundTruthSimulator
 from src.marl.multi_agent_buffer import MultiAgentRolloutBuffer
 from src.marl.networks import ActorNetwork, CriticNetwork
@@ -86,12 +87,15 @@ def test_m7_updates_progress_monitor_but_m4_does_not():
     critic = CriticNetwork(
         input_dim=498,
     )
-
-    controller = M4Controller(
+    m4_controller = M4Controller(
         actor=actor,
         shield=SafetyShield(grid),
     )
 
+    m7_controller = M7Controller(
+         actor=actor,
+         shield=SafetyShield(grid),
+    )
     simulator_m7 = GroundTruthSimulator(
         grid=grid,
         agent_positions={
@@ -123,7 +127,7 @@ def test_m7_updates_progress_monitor_but_m4_does_not():
             0: 0,
             1: 0,
         },
-        m4_controller=controller,
+        m7_controller=m7_controller,
         m7_progress_monitor=monitor,
     )
 
@@ -163,7 +167,7 @@ def test_m7_updates_progress_monitor_but_m4_does_not():
             0: 0,
             1: 0,
         },
-        m4_controller=controller,
+        m4_controller=m4_controller,
         m7_progress_monitor=monitor,
     )
 
