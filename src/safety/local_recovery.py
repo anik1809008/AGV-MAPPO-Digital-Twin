@@ -22,19 +22,47 @@ class LocalRecoveryPlanner:
         if not path:
             return Action.WAIT
 
-        for action in path:
+        preferred_action = path[0]
+
+        preferred_candidate = self._next_position(
+            current_position,
+            preferred_action,
+        )
+
+        if preferred_candidate not in occupied_positions:
+            return preferred_action
+
+        for action in (
+            Action.NORTH,
+            Action.SOUTH,
+            Action.EAST,
+            Action.WEST,
+        ):
+            if action == preferred_action:
+                continue
+
             candidate = self._next_position(
                 current_position,
                 action,
             )
 
-            if candidate not in occupied_positions:
-                return action
+            x, y = candidate
 
-            break
+            if not (
+                0 <= y < len(self.grid)
+                and 0 <= x < len(self.grid[0])
+            ):
+                continue
+
+            if self.grid[y][x] != 0:
+                continue
+
+            if candidate in occupied_positions:
+                continue
+
+            return action
 
         return Action.WAIT
-
     def _next_position(self, position, action):
         x, y = position
 
