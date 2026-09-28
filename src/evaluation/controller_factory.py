@@ -3,6 +3,7 @@ from src.baselines.stale_wait import ReachableSetWaitBaseline
 from src.safety.m4_controller import M4Controller
 from src.safety.shield import SafetyShield
 from src.safety.progress_monitor import ProgressMonitor
+from src.safety.local_recovery import LocalRecoveryPlanner
 def build_method_controllers(
     method,
     actor,
@@ -13,7 +14,7 @@ def build_method_controllers(
     m7_controller = None
     m5_baseline = None
     m7_progress_monitor = None
-
+    m7_recovery_planner = None
     if method == "M4":
         shield = SafetyShield(grid)
 
@@ -34,6 +35,9 @@ def build_method_controllers(
             grid=grid,
             stagnation_steps=10,
         )
+        m7_recovery_planner = LocalRecoveryPlanner(
+            grid=grid,
+        )
     if method == "M5":
         m5_baseline = ReachableSetWaitBaseline(
             threshold=m5_threshold,
@@ -43,4 +47,5 @@ def build_method_controllers(
         "m5_baseline": m5_baseline,
         "m7_progress_monitor": m7_progress_monitor,
         "m7_controller": m7_controller,
+        "m7_recovery_planner": m7_recovery_planner,
     }

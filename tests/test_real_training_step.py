@@ -73,14 +73,6 @@ def test_m7_updates_progress_monitor_but_m4_does_not():
 
         def is_stagnating(self, agent_id):
             return False
-        def __init__(self):
-            self.calls = []
-
-        def update(self, agent_id, position, goal):
-            self.calls.append(
-                (agent_id, position, goal)
-            )
-
     grid = [
         [0, 0, 0],
         [0, 0, 0],
@@ -179,3 +171,74 @@ def test_m7_updates_progress_monitor_but_m4_does_not():
     )
 
     assert monitor.calls == []
+def test_m7_uses_recovery_action_when_stagnating():
+    from src.environment.actions import Action
+    from src.safety.m7_controller import M7Controller
+    from src.safety.shield import SafetyShield
+
+    class AlwaysStagnatingMonitor:
+        def update(self, agent_id, position, goal):
+            return True
+
+        def is_stagnating(self, agent_id):
+            return True
+
+    class DummyRecoveryPlanner:
+        def select_recovery_action(
+            self,
+            agent_id,
+            current_position,
+            goal_position,
+            occupied_positions,
+        ):
+            return Action.EAST
+
+    grid = [
+        [0, 0, 0],
+        [0, 0, 0],
+    ]
+
+    actor = ActorNetwork(
+        input_dim=249,
+        action_dim=5,
+    )
+
+    critic = CriticNetwork(
+        input_dim=249,
+    )
+
+    simulator = GroundTruthSimulator(
+        grid=grid,
+        agent_positions={
+            0: (0, 0),
+        },
+        agent_goals={
+            0: (2, 0),
+        },
+    )
+
+    controller = M7Controller(
+        actor=actor,
+        shield=SafetyShield(grid),
+    )
+
+    result = run_real_training_step(
+        actor=actor,
+        critic=critic,
+        simulator=simulator,
+        method="M7",
+        trusted_positions={
+            0: (0, 0),
+        },
+        reachable_occupancies={
+            0: {(0, 0)},
+        },
+        aoi_values={
+            0: 0,
+        },
+        m7_controller=controller,
+        m7_progress_monitor=AlwaysStagnatingMonitor(),
+        m7_recovery_planner=DummyRecoveryPlanner(),
+    )
+
+    assert result["actions"][0] == Action.EAST

@@ -6,7 +6,6 @@ from src.environment.execution_delay import ExecutionDelayModel
 from src.environment.simulator import GroundTruthSimulator
 from src.marl.multi_agent_buffer import MultiAgentRolloutBuffer
 
-
 def build_experiment_context(
     grid,
     starts,
@@ -19,6 +18,7 @@ def build_experiment_context(
     m5_baseline=None,
     m7_controller=None,
     m7_progress_monitor=None,
+    m7_recovery_planner=None,
     execution_delay_model=None,
 ):
     simulator = GroundTruthSimulator(
@@ -62,5 +62,6 @@ def build_experiment_context(
         "m5_baseline": m5_baseline,
         "m7_controller": m7_controller,
         "m7_progress_monitor": m7_progress_monitor,
+        "m7_recovery_planner": m7_recovery_planner,
         "max_steps": max_steps,
     }

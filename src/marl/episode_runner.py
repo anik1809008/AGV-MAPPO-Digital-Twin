@@ -16,6 +16,7 @@ def run_episode(
     m5_baseline=None,
     m7_controller=None,
     m7_progress_monitor=None,
+    m7_recovery_planner=None,
     trusted_positions=None,
     reachable_occupancies=None,
     aoi_values=None,
@@ -139,7 +140,8 @@ def run_episode(
             m7_controller=m7_controller,
             m5_baseline=m5_baseline,
             m7_progress_monitor=m7_progress_monitor,
-        )
+            m7_recovery_planner=m7_recovery_planner,
+       )
 
 
         if digital_twin is not None:

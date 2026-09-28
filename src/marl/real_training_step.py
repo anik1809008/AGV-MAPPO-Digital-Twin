@@ -18,6 +18,7 @@ def run_real_training_step(
     m5_baseline=None,
     m7_controller=None,
     m7_progress_monitor=None,
+    m7_recovery_planner=None,
 ):
     agent_positions = list(
         simulator.agent_positions.values()
@@ -65,7 +66,6 @@ def run_real_training_step(
                 preferred_action=rollout["actions"][
                     agent_id
                 ],
-
                 possible_current_positions=(
                     reachable_occupancies.get(
                         agent_id,
@@ -116,12 +116,41 @@ def run_real_training_step(
         for agent_id, observation in enumerate(
             observations
         ):
+            use_recovery = (
+                m7_progress_monitor is not None
+                and m7_recovery_planner is not None
+                and m7_progress_monitor.is_stagnating(
+                    agent_id
+                )
+            )
+            recovery_action = None
+
+            if use_recovery:
+                recovery_action = (
+                    m7_recovery_planner.select_recovery_action(
+                        agent_id=agent_id,
+                        current_position=(
+                            agent_positions[agent_id]
+                        ),
+                        goal_position=(
+                            agent_goals[agent_id]
+                        ),
+                        occupied_positions=set(
+                            trusted_positions.values()
+                        )
+                        - {
+                            agent_positions[agent_id]
+                        },
+                    )
+                )
             action, _ = m7_controller.select_action(
                 observation_vector=observation,
                 agent_id=agent_id,
-                preferred_action=rollout["actions"][
-                    agent_id
-                ],
+                preferred_action=(
+                   recovery_action
+                   if recovery_action is not None
+                   else rollout["actions"][agent_id]
+                ),
                 current_position=agent_positions[agent_id],
                 goal_position=agent_goals[agent_id],
                 prefer_progress=(
@@ -179,8 +208,6 @@ def run_real_training_step(
                 proposed_action,
                 reachable_size,
             )
-
-
     else:
         actions = {
             agent_id: action

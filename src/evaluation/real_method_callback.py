@@ -34,6 +34,9 @@ def run_real_method(
         m7_progress_monitor=context.get(
            "m7_progress_monitor"
         ),
+        m7_recovery_planner=context.get(
+           "m7_recovery_planner"
+        ),
         trusted_positions=context.get("trusted_positions"),
         reachable_occupancies=context.get(
             "reachable_occupancies"
