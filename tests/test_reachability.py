@@ -186,3 +186,52 @@ def test_possible_transitions_include_skipped_command_branch():
     )
 
     assert ((0, 1), (0, 0)) in transitions
+def test_possible_current_positions_returns_final_frontier():
+    from src.digital_twin.reachability import (
+        compute_possible_current_positions,
+    )
+
+    grid = [
+        [0, 0, 0],
+    ]
+
+    current_positions = (
+        compute_possible_current_positions(
+            grid=grid,
+            last_trusted_position=(0, 0),
+            command_history=[
+                (1, Action.EAST),
+                (2, Action.EAST),
+            ],
+        )
+    )
+
+    assert current_positions == {
+        (2, 0),
+    }
+
+
+def test_possible_current_positions_keeps_skip_branches():
+    from src.digital_twin.reachability import (
+        compute_possible_current_positions,
+    )
+
+    grid = [
+        [0, 0, 0],
+    ]
+
+    current_positions = (
+        compute_possible_current_positions(
+            grid=grid,
+            last_trusted_position=(0, 0),
+            command_history=[
+                (1, Action.EAST),
+            ],
+            allow_command_skip=True,
+        )
+    )
+
+    assert current_positions == {
+        (0, 0),
+        (1, 0),
+    }

@@ -1,4 +1,5 @@
 from src.digital_twin.reachability import (
+    compute_possible_current_positions,
     compute_possible_transitions,
     compute_reachable_occupancy,
 )
@@ -52,6 +53,23 @@ class DigitalTwin:
         return compute_reachable_occupancy(
             grid=grid,
             last_trusted_position=state.last_trusted_position,
+            command_history=state.command_history,
+            goal=state.goal,
+            allow_command_skip=allow_command_skip,
+        )
+    def get_possible_current_positions(
+        self,
+        agent_id,
+        grid,
+        allow_command_skip=False,
+    ):
+        state = self.agent_states[agent_id]
+
+        return compute_possible_current_positions(
+            grid=grid,
+            last_trusted_position=(
+                state.last_trusted_position
+            ),
             command_history=state.command_history,
             goal=state.goal,
             allow_command_skip=allow_command_skip,

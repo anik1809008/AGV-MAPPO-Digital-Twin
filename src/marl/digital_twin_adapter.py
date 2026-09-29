@@ -6,8 +6,10 @@ def get_digital_twin_inputs(
 ):
     trusted_positions = {}
     reachable_occupancies = {}
+    possible_current_positions = {}
     aoi_values = {}
     possible_transitions = {}
+
     for agent_id, state in digital_twin.agent_states.items():
         trusted_positions[agent_id] = (
             state.last_trusted_position
@@ -19,6 +21,7 @@ def get_digital_twin_inputs(
                 current_timestep,
             )
         )
+
         reachable_occupancies[agent_id] = (
             digital_twin.get_reachable_occupancy(
                 agent_id,
@@ -26,6 +29,15 @@ def get_digital_twin_inputs(
                 allow_command_skip=allow_command_skip,
             )
         )
+
+        possible_current_positions[agent_id] = (
+            digital_twin.get_possible_current_positions(
+                agent_id,
+                grid,
+                allow_command_skip=allow_command_skip,
+            )
+        )
+
         possible_transitions[agent_id] = (
             digital_twin.get_possible_transitions(
                 agent_id,
@@ -33,9 +45,13 @@ def get_digital_twin_inputs(
                 allow_command_skip=allow_command_skip,
             )
         )
+
     return {
         "trusted_positions": trusted_positions,
         "reachable_occupancies": reachable_occupancies,
+        "possible_current_positions": (
+            possible_current_positions
+        ),
         "aoi_values": aoi_values,
         "possible_transitions": possible_transitions,
     }

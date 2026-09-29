@@ -10,6 +10,7 @@ def run_real_training_step(
     trusted_positions,
     reachable_occupancies,
     aoi_values,
+    possible_current_positions=None,
     possible_transitions=None,
     multi_agent_buffer=None,
     delayed_executor=None,
@@ -67,7 +68,12 @@ def run_real_training_step(
                     agent_id
                 ],
                 possible_current_positions=(
-                    reachable_occupancies.get(
+                    possible_current_positions.get(
+                        agent_id,
+                        {agent_positions[agent_id]},
+                    )
+                    if possible_current_positions is not None
+                    else reachable_occupancies.get(
                         agent_id,
                         {agent_positions[agent_id]},
                     )
@@ -135,11 +141,11 @@ def run_real_training_step(
                         goal_position=(
                             agent_goals[agent_id]
                         ),
-                        occupied_positions=set(
-                            trusted_positions.values()
-                        )
-                        - {
-                            agent_positions[agent_id]
+                        occupied_positions={
+                             position
+                             for other_id, position
+                             in trusted_positions.items()
+                             if other_id != agent_id
                         },
                     )
                 )
@@ -160,7 +166,12 @@ def run_real_training_step(
                     )
                 ),
                 possible_current_positions=(
-                    reachable_occupancies.get(
+                    possible_current_positions.get(
+                        agent_id,
+                        {agent_positions[agent_id]},
+                    )
+                    if possible_current_positions is not None
+                    else reachable_occupancies.get(
                         agent_id,
                         {agent_positions[agent_id]},
                     )

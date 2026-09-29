@@ -62,6 +62,55 @@ def compute_reachable_occupancy(
         reachable.update(current_positions)
 
     return reachable
+def compute_possible_current_positions(
+    grid,
+    last_trusted_position,
+    command_history,
+    goal=None,
+    allow_command_skip=False,
+):
+    current_positions = {
+        last_trusted_position
+    }
+
+    for command_entry in command_history:
+        if isinstance(command_entry, tuple):
+            _, command = command_entry
+        else:
+            command = command_entry
+
+        next_positions = set()
+
+        for current_position in current_positions:
+            if allow_command_skip:
+                next_positions.add(
+                    current_position
+                )
+
+            if (
+                goal is not None
+                and current_position == goal
+            ):
+                next_position = (
+                    current_position
+                )
+            else:
+                next_position = apply_action(
+                    grid,
+                    current_position,
+                    command,
+                )
+
+            next_positions.add(
+                next_position
+            )
+
+        current_positions = (
+            next_positions
+        )
+
+    return current_positions
+
 def compute_possible_transitions(
     grid,
     last_trusted_position,

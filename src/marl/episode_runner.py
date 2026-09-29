@@ -24,10 +24,6 @@ def run_episode(
     max_steps=200,
 ):
 
-
-
-
-
     from src.marl.real_training_step import run_real_training_step
 
     total_rewards = [
@@ -40,7 +36,7 @@ def run_episode(
     steps = 0
     total_path_length = 0
     deadlock = False
-
+    possible_current_positions = None
     for step in range(max_steps):
 
 
@@ -112,7 +108,9 @@ def run_episode(
             reachable_occupancies = dt_inputs[
                 "reachable_occupancies"
             ]
-
+            possible_current_positions = dt_inputs[
+                "possible_current_positions"
+            ]
             aoi_values = dt_inputs[
                 "aoi_values"
             ]
@@ -131,6 +129,9 @@ def run_episode(
             method=method,
             trusted_positions=trusted_positions,
             reachable_occupancies=reachable_occupancies,
+            possible_current_positions=(
+                possible_current_positions
+            ),
             aoi_values=aoi_values,
             possible_transitions=possible_transitions,
             multi_agent_buffer=multi_agent_buffer,
