@@ -260,3 +260,23 @@ def test_minimum_makespan_single_agent_is_shortest_path_length():
 
     assert result is not None
     assert result["makespan"] == 3
+def test_position_paths_to_actions():
+    from src.environment.actions import Action
+    from src.mapf.mdd_sat import position_paths_to_actions
+
+    paths = {
+        0: [
+            (0, 0),
+            (1, 0),
+            (1, 0),
+            (1, 1),
+        ],
+    }
+
+    actions = position_paths_to_actions(paths)
+
+    assert actions[0] == [
+        Action.EAST,
+        Action.WAIT,
+        Action.SOUTH,
+    ]

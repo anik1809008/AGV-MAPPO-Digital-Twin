@@ -414,3 +414,38 @@ def solve_minimum_makespan(
             }
 
     return None
+def position_paths_to_actions(paths):
+    from src.environment.actions import Action
+
+    delta_to_action = {
+        (0, 0): Action.WAIT,
+        (0, -1): Action.NORTH,
+        (0, 1): Action.SOUTH,
+        (1, 0): Action.EAST,
+        (-1, 0): Action.WEST,
+    }
+
+    action_paths = {}
+
+    for agent_id, path in paths.items():
+        actions = []
+
+        for timestep in range(len(path) - 1):
+            current = path[timestep]
+            next_position = path[timestep + 1]
+
+            delta = (
+                next_position[0] - current[0],
+                next_position[1] - current[1],
+            )
+
+            if delta not in delta_to_action:
+                raise ValueError(
+                    f"Invalid MAPF transition: {current} -> {next_position}"
+                )
+
+            actions.append(delta_to_action[delta])
+
+        action_paths[agent_id] = actions
+
+    return action_paths
