@@ -42,9 +42,13 @@ def shortest_distances(grid, goal):
             queue.append(next_pos)
 
     return distances
-
-
-def build_mdd(grid, start, goal, horizon):
+def build_mdd(
+    grid,
+    start,
+    goal,
+    horizon,
+    max_slack=None,
+):
     distances_from_start = shortest_distances(
         grid=grid,
         goal=start,
@@ -61,6 +65,8 @@ def build_mdd(grid, start, goal, horizon):
     ):
         return None
 
+    shortest = distances_to_goal[start]
+
     layers = []
 
     for timestep in range(horizon + 1):
@@ -68,7 +74,9 @@ def build_mdd(grid, start, goal, horizon):
         layer = set()
 
         for position, distance_to_goal in distances_to_goal.items():
-            distance_from_start = distances_from_start.get(position)
+            distance_from_start = distances_from_start.get(
+                position
+            )
 
             if distance_from_start is None:
                 continue
@@ -77,6 +85,13 @@ def build_mdd(grid, start, goal, horizon):
                 continue
 
             if distance_to_goal > remaining:
+                continue
+
+            if (
+                max_slack is not None
+                and distance_from_start + distance_to_goal
+                > shortest + max_slack
+            ):
                 continue
 
             layer.add(position)
@@ -90,6 +105,7 @@ def build_mdd(grid, start, goal, horizon):
         return None
 
     return layers
+
 def create_node_variables(mdds):
     variables = {}
     next_variable = 1

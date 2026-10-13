@@ -280,3 +280,21 @@ def test_position_paths_to_actions():
         Action.WAIT,
         Action.SOUTH,
     ]
+def test_build_mdd_with_zero_slack_keeps_global_horizon():
+    from src.mapf.mdd_sat import build_mdd
+
+    grid = [
+        [0, 0, 0, 0],
+    ]
+
+    mdd = build_mdd(
+        grid=grid,
+        start=(0, 0),
+        goal=(3, 0),
+        horizon=10,
+        max_slack=0,
+    )
+
+    assert len(mdd) == 11
+    assert mdd[0] == {(0, 0)}
+    assert mdd[-1] == {(3, 0)}
