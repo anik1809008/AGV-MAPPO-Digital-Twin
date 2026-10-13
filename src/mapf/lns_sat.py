@@ -160,14 +160,18 @@ def solve_local_repair(
         paths=paths,
         window=window,
     )
+    final_goals = {
+        agent_id: paths[agent_id][-1]
+        for agent_id in window["agents"]
+    }
 
     repaired = solve_fixed_makespan(
         grid=grid,
         starts=problem["starts"],
         goals=problem["goals"],
         makespan=problem["horizon"],
+        absorbing_goals=final_goals,
     )
-
     return repaired
 def expand_repair_window(
     window,
@@ -189,7 +193,7 @@ def solve_local_repair_with_expansion(
     grid,
     paths,
     window,
-    max_expansions=6,
+    max_expansions=20,
 ):
     horizon = len(next(iter(paths.values())))
     current_window = dict(window)
@@ -239,7 +243,7 @@ def repair_earliest_conflict(
     grid,
     paths,
     radius=1,
-    max_expansions=6,
+    max_expansions=20,
 ):
     conflict = find_earliest_conflict(paths)
 
@@ -282,7 +286,7 @@ def repair_until_conflict_free(
     grid,
     paths,
     radius=1,
-    max_expansions=6,
+    max_expansions=20,
     max_iterations=100,
 ):
     current_paths = {
@@ -319,7 +323,7 @@ def solve_lns_sat(
     starts,
     goals,
     radius=1,
-    max_expansions=6,
+    max_expansions=20,
     max_iterations=100,
     max_makespan_increase=10,
 ):

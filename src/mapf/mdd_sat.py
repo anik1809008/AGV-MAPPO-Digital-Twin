@@ -296,12 +296,60 @@ def add_edge_swap_constraints(
                                             ],
                                         ]
                                     )
+
+def add_goal_persistence_constraints(
+    cnf,
+    mdds,
+    variables,
+    goals,
+):
+    for agent_id in sorted(mdds):
+        goal = goals.get(agent_id)
+
+        if goal is None:
+            continue
+
+        mdd = mdds[agent_id]
+
+        for timestep in range(len(mdd) - 1):
+            current_key = (
+                agent_id,
+                timestep,
+                goal,
+            )
+
+            if current_key not in variables:
+                continue
+
+            next_key = (
+                agent_id,
+                timestep + 1,
+                goal,
+            )
+
+            current_variable = variables[
+                current_key
+            ]
+
+            if next_key in variables:
+                cnf.append(
+                    [
+                        -current_variable,
+                        variables[next_key],
+                    ]
+                )
+            else:
+                cnf.append(
+                    [-current_variable]
+                )
 def solve_fixed_makespan(
     grid,
     starts,
     goals,
     makespan,
+    absorbing_goals=None,
 ):
+
     from pysat.formula import CNF
     from pysat.solvers import Minisat22
 
@@ -334,7 +382,18 @@ def solve_fixed_makespan(
         mdds=mdds,
         variables=variables,
     )
+    persistence_goals = (
+        goals
+        if absorbing_goals is None
+        else absorbing_goals
+    )
 
+    add_goal_persistence_constraints(
+        cnf=cnf,
+        mdds=mdds,
+        variables=variables,
+        goals=persistence_goals,
+    )
     add_vertex_conflict_constraints(
         cnf=cnf,
         mdds=mdds,

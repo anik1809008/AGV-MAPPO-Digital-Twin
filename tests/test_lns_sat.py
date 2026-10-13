@@ -410,3 +410,33 @@ def test_extend_paths_to_makespan():
 
     assert len(extended[0]) == 5
     assert extended[0][-1] == (2, 0)
+def test_lns_sat_never_moves_agent_after_final_goal():
+    from src.mapf.lns_sat import solve_lns_sat
+
+    grid = [
+        [0, 0, 0],
+        [0, 0, 0],
+    ]
+
+    result = solve_lns_sat(
+        grid=grid,
+        starts={
+            0: (1, 0),
+            1: (0, 0),
+        },
+        goals={
+            0: (1, 0),
+            1: (2, 0),
+        },
+    )
+
+    assert result is not None
+
+    path = result["paths"][0]
+
+    first_goal = path.index((1, 0))
+
+    assert all(
+        position == (1, 0)
+        for position in path[first_goal:]
+    )
