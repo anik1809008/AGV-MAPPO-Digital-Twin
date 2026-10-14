@@ -155,7 +155,50 @@ def solve_local_repair(
     grid,
     paths,
     window,
+    conflict=None,
+    spatial_radius=3,
 ):
+    problem = build_local_repair_problem(
+        paths=paths,
+        window=window,
+    )
+
+    local_grid = grid
+
+    if conflict is not None:
+        zone = build_spatial_zone(
+            conflict=conflict,
+            grid=grid,
+            radius=spatial_radius,
+        )
+
+        required_positions = set(
+            problem["starts"].values()
+        )
+        required_positions.update(
+            problem["goals"].values()
+        )
+
+        local_grid = build_zone_restricted_grid(
+            grid=grid,
+            zone=zone,
+            required_positions=required_positions,
+        )
+
+    final_goals = {
+        agent_id: paths[agent_id][-1]
+        for agent_id in window["agents"]
+    }
+
+    repaired = solve_fixed_makespan(
+        grid=local_grid,
+        starts=problem["starts"],
+        goals=problem["goals"],
+        makespan=problem["horizon"],
+        absorbing_goals=final_goals,
+    )
+
+    return repaired
     problem = build_local_repair_problem(
         paths=paths,
         window=window,
@@ -193,8 +236,67 @@ def solve_local_repair_with_expansion(
     grid,
     paths,
     window,
+    conflict=None,
+    spatial_radius=3,
+    max_spatial_radius=20,
     max_expansions=20,
 ):
+    horizon = len(next(iter(paths.values())))
+
+    for current_spatial_radius in range(
+        spatial_radius,
+        max_spatial_radius + 1,
+    ):
+        current_window = dict(window)
+
+        for _ in range(max_expansions + 1):
+            repaired = solve_local_repair(
+                grid=grid,
+                paths=paths,
+                window=current_window,
+                conflict=conflict,
+                spatial_radius=current_spatial_radius,
+            )
+
+            if repaired is not None:
+                return {
+                    "window": current_window,
+                    "paths": repaired,
+                    "spatial_radius": current_spatial_radius,
+                }
+
+            current_window = expand_repair_window(
+                window=current_window,
+                horizon=horizon,
+                amount=1,
+            )
+
+    return None
+    horizon = len(next(iter(paths.values())))
+    current_window = dict(window)
+
+    for _ in range(max_expansions + 1):
+        repaired = solve_local_repair(
+            grid=grid,
+            paths=paths,
+            window=current_window,
+            conflict=conflict,
+            spatial_radius=spatial_radius,
+        )
+
+        if repaired is not None:
+            return {
+                "window": current_window,
+                "paths": repaired,
+            }
+
+        current_window = expand_repair_window(
+            window=current_window,
+            horizon=horizon,
+            amount=1,
+        )
+
+    return None
     horizon = len(next(iter(paths.values())))
     current_window = dict(window)
 
@@ -261,14 +363,13 @@ def repair_earliest_conflict(
         horizon=horizon,
         radius=radius,
     )
-
     repair_result = solve_local_repair_with_expansion(
         grid=grid,
         paths=paths,
         window=window,
+        conflict=conflict,
         max_expansions=max_expansions,
     )
-
     if repair_result is None:
         return None
 
@@ -389,3 +490,69 @@ def extend_paths_to_makespan(
         extended[agent_id] = extended_path
 
     return extended
+def build_spatial_zone(
+    conflict,
+    grid,
+    radius=3,
+):
+    height = len(grid)
+    width = len(grid[0])
+
+    if conflict["type"] == "vertex":
+        centers = [
+            conflict["position"],
+        ]
+    else:
+        centers = list(
+            conflict["positions"]
+        )
+
+    zone = set()
+
+    for cx, cy in centers:
+        for y in range(
+            max(0, cy - radius),
+            min(height, cy + radius + 1),
+        ):
+            for x in range(
+                max(0, cx - radius),
+                min(width, cx + radius + 1),
+            ):
+                if grid[y][x] != 0:
+                    continue
+
+                if (
+                    abs(x - cx)
+                    + abs(y - cy)
+                    <= radius
+                ):
+                    zone.add((x, y))
+
+    return zone
+def build_zone_restricted_grid(
+    grid,
+    zone,
+    required_positions=(),
+):
+    allowed = set(zone)
+    allowed.update(required_positions)
+
+    restricted = []
+
+    for y, row in enumerate(grid):
+        restricted_row = []
+
+        for x, cell in enumerate(row):
+            position = (x, y)
+
+            if (
+                cell == 0
+                and position in allowed
+            ):
+                restricted_row.append(0)
+            else:
+                restricted_row.append(1)
+
+        restricted.append(restricted_row)
+
+    return restricted

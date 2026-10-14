@@ -440,3 +440,63 @@ def test_lns_sat_never_moves_agent_after_final_goal():
         position == (1, 0)
         for position in path[first_goal:]
     )
+def test_build_spatial_zone_around_vertex_conflict():
+    from src.mapf.lns_sat import build_spatial_zone
+
+    grid = [
+        [0, 0, 0],
+        [0, 0, 0],
+        [0, 0, 0],
+    ]
+
+    conflict = {
+        "type": "vertex",
+        "timestep": 1,
+        "agents": (0, 1),
+        "position": (1, 1),
+    }
+
+    zone = build_spatial_zone(
+        conflict=conflict,
+        grid=grid,
+        radius=1,
+    )
+
+    assert zone == {
+        (1, 1),
+        (1, 0),
+        (1, 2),
+        (0, 1),
+        (2, 1),
+    }
+def test_build_zone_restricted_grid():
+    from src.mapf.lns_sat import (
+        build_zone_restricted_grid,
+    )
+
+    grid = [
+        [0, 0, 0],
+        [0, 0, 0],
+        [0, 0, 0],
+    ]
+
+    zone = {
+        (1, 0),
+        (1, 1),
+        (1, 2),
+    }
+
+    restricted = build_zone_restricted_grid(
+        grid=grid,
+        zone=zone,
+        required_positions={
+            (0, 1),
+            (2, 1),
+        },
+    )
+
+    assert restricted == [
+        [1, 0, 1],
+        [0, 0, 0],
+        [1, 0, 1],
+    ]
