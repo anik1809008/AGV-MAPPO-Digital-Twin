@@ -157,6 +157,7 @@ def solve_local_repair(
     window,
     conflict=None,
     spatial_radius=3,
+    fixed_obstacles=(),
 ):
     problem = build_local_repair_problem(
         paths=paths,
@@ -184,7 +185,8 @@ def solve_local_repair(
             zone=zone,
             required_positions=required_positions,
         )
-
+        for x, y in fixed_obstacles:
+            local_grid[y][x] = 1
     final_goals = {
         agent_id: paths[agent_id][-1]
         for agent_id in window["agents"]
@@ -198,23 +200,6 @@ def solve_local_repair(
         absorbing_goals=final_goals,
     )
 
-    return repaired
-    problem = build_local_repair_problem(
-        paths=paths,
-        window=window,
-    )
-    final_goals = {
-        agent_id: paths[agent_id][-1]
-        for agent_id in window["agents"]
-    }
-
-    repaired = solve_fixed_makespan(
-        grid=grid,
-        starts=problem["starts"],
-        goals=problem["goals"],
-        makespan=problem["horizon"],
-        absorbing_goals=final_goals,
-    )
     return repaired
 def expand_repair_window(
     window,
@@ -238,8 +223,9 @@ def solve_local_repair_with_expansion(
     window,
     conflict=None,
     spatial_radius=3,
-    max_spatial_radius=20,
+    max_spatial_radius=40,
     max_expansions=20,
+    fixed_obstacles=(),
 ):
     horizon = len(next(iter(paths.values())))
 
@@ -256,8 +242,8 @@ def solve_local_repair_with_expansion(
                 window=current_window,
                 conflict=conflict,
                 spatial_radius=current_spatial_radius,
+                fixed_obstacles=fixed_obstacles,
             )
-
             if repaired is not None:
                 return {
                     "window": current_window,
@@ -270,54 +256,6 @@ def solve_local_repair_with_expansion(
                 horizon=horizon,
                 amount=1,
             )
-
-    return None
-    horizon = len(next(iter(paths.values())))
-    current_window = dict(window)
-
-    for _ in range(max_expansions + 1):
-        repaired = solve_local_repair(
-            grid=grid,
-            paths=paths,
-            window=current_window,
-            conflict=conflict,
-            spatial_radius=spatial_radius,
-        )
-
-        if repaired is not None:
-            return {
-                "window": current_window,
-                "paths": repaired,
-            }
-
-        current_window = expand_repair_window(
-            window=current_window,
-            horizon=horizon,
-            amount=1,
-        )
-
-    return None
-    horizon = len(next(iter(paths.values())))
-    current_window = dict(window)
-
-    for _ in range(max_expansions + 1):
-        repaired = solve_local_repair(
-            grid=grid,
-            paths=paths,
-            window=current_window,
-        )
-
-        if repaired is not None:
-            return {
-                "window": current_window,
-                "paths": repaired,
-            }
-
-        current_window = expand_repair_window(
-            window=current_window,
-            horizon=horizon,
-            amount=1,
-        )
 
     return None
 def apply_local_repair(
@@ -345,6 +283,7 @@ def repair_earliest_conflict(
     grid,
     paths,
     radius=1,
+    neighborhood_time_radius=10,
     max_expansions=20,
 ):
     conflict = find_earliest_conflict(paths)
@@ -363,12 +302,60 @@ def repair_earliest_conflict(
         horizon=horizon,
         radius=radius,
     )
+    zone = build_spatial_zone(
+        conflict=conflict,
+        grid=grid,
+        radius=10,
+    )
+    neighborhood_start_t = max(
+        0,
+        conflict["timestep"]
+        - neighborhood_time_radius,
+    )
+
+    neighborhood_end_t = min(
+        horizon - 1,
+        conflict["timestep"]
+        + neighborhood_time_radius + 1,
+    )
+
+    interacting_agents = find_zone_interacting_agents(
+        paths=paths,
+        zone=zone,
+        start_t=neighborhood_start_t,
+        end_t=neighborhood_end_t,
+    )
+    final_goals = {
+        agent_id: paths[agent_id][-1]
+        for agent_id in paths
+    }
+
+    finished_agents = find_finished_agents_at_timestep(
+        paths=paths,
+        goals=final_goals,
+        timestep=conflict["timestep"],
+    )
+
+    repair_agents = tuple(
+        agent_id
+        for agent_id in interacting_agents
+        if agent_id not in finished_agents
+    )
+
+    if repair_agents:
+        window["agents"] = repair_agents
+
+    fixed_obstacles = {
+        final_goals[agent_id]
+        for agent_id in finished_agents
+    }
     repair_result = solve_local_repair_with_expansion(
         grid=grid,
         paths=paths,
         window=window,
         conflict=conflict,
         max_expansions=max_expansions,
+        fixed_obstacles=fixed_obstacles,
     )
     if repair_result is None:
         return None
@@ -556,3 +543,48 @@ def build_zone_restricted_grid(
         restricted.append(restricted_row)
 
     return restricted
+def find_zone_interacting_agents(
+    paths,
+    zone,
+    start_t,
+    end_t,
+):
+    interacting_agents = []
+
+    for agent_id in sorted(paths):
+        path = paths[agent_id]
+
+        if any(
+            path[t] in zone
+            for t in range(start_t, end_t + 1)
+        ):
+            interacting_agents.append(agent_id)
+
+    return tuple(interacting_agents)
+def find_finished_agents_at_timestep(
+    paths,
+    goals,
+    timestep,
+):
+    finished = []
+
+    for agent_id in sorted(paths):
+        goal = goals[agent_id]
+        path = paths[agent_id]
+
+        first_goal = next(
+            (
+                t
+                for t, position in enumerate(path)
+                if position == goal
+            ),
+            None,
+        )
+
+        if (
+            first_goal is not None
+            and first_goal <= timestep
+        ):
+            finished.append(agent_id)
+
+    return tuple(finished)

@@ -500,3 +500,69 @@ def test_build_zone_restricted_grid():
         [0, 0, 0],
         [1, 0, 1],
     ]
+def test_find_zone_interacting_agents():
+    from src.mapf.lns_sat import (
+        find_zone_interacting_agents,
+    )
+
+    paths = {
+        0: [
+            (0, 0),
+            (1, 0),
+            (2, 0),
+        ],
+        1: [
+            (0, 1),
+            (1, 1),
+            (2, 1),
+        ],
+        2: [
+            (0, 2),
+            (1, 2),
+            (2, 2),
+        ],
+    }
+
+    zone = {
+        (1, 0),
+        (1, 1),
+    }
+
+    agents = find_zone_interacting_agents(
+        paths=paths,
+        zone=zone,
+        start_t=0,
+        end_t=2,
+    )
+
+    assert agents == (0, 1)
+def test_find_finished_agents_at_timestep():
+    from src.mapf.lns_sat import (
+        find_finished_agents_at_timestep,
+    )
+
+    paths = {
+        0: [
+            (1, 0),
+            (1, 0),
+            (1, 0),
+        ],
+        1: [
+            (0, 0),
+            (1, 0),
+            (2, 0),
+        ],
+    }
+
+    goals = {
+        0: (1, 0),
+        1: (2, 0),
+    }
+
+    finished = find_finished_agents_at_timestep(
+        paths=paths,
+        goals=goals,
+        timestep=1,
+    )
+
+    assert finished == (0,)
