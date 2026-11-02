@@ -93,7 +93,10 @@ def main():
     print("Checkpoint:", models["checkpoint_path"])
     print("Scenario:", args.scenario_id)
     print("Seed:", args.seed)
-    print("Telemetry latency:", args.latency)
+    print(
+        "Telemetry schedule:",
+        context["telemetry_channel"].schedule,
+    )
     print("Execution immediate probability:",
           args.immediate_probability)
 
