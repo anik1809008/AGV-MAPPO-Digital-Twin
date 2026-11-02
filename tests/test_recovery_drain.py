@@ -67,3 +67,31 @@ def test_drain_reports_multi_agent_collision():
         0: (0, 0),
         1: (2, 0),
     }
+
+
+def test_repeated_recovery_waits_preserve_deadlock_detection():
+    """Recovery waiting must not silently reset genuine deadlocks."""
+    simulator = GroundTruthSimulator(
+        grid=[[0, 0, 0, 0]],
+        agent_positions={0: (0, 0)},
+        agent_goals={0: (3, 0)},
+        deadlock_threshold=3,
+    )
+
+    executor = DelayedCommandExecutor(
+        ExecutionDelayModel(
+            immediate_probability=1.0,
+            seed=1,
+        )
+    )
+
+    for timestep in range(3):
+        result = drain_pending_commands(
+            simulator,
+            executor,
+            timestep=timestep,
+        )
+        assert result["collision"] is False
+        assert result["pending_commands"] is False
+
+    assert simulator.is_deadlocked() is True
