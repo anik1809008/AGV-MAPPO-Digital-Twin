@@ -76,3 +76,48 @@ def test_switch_back_replans_from_dt_observation_after_recovery():
                for e in result["switch_events"])
     assert len(planner_starts) >= 2
     assert planner_starts[1] != planner_starts[0]
+
+
+def test_return_replanning_respects_cooldown():
+    """Repeated failed return plans must be separated by the cooldown."""
+    c = context(latency=2, length=20)
+    c["max_steps"] = 18
+    attempts = []
+
+    def controlled_plan(**kwargs):
+        if not attempts:
+            attempts.append("initial")
+            return planner(**kwargs)
+
+        attempts.append("return")
+        return None
+
+    def m7_step(**kwargs):
+        c["telemetry_channel"].latency_steps = 0
+        kwargs["simulator"].step_joint({0: 3})
+        return {"actions": [3], "collision": False}
+
+    supervisor = TwoWayHybridSupervisor(
+        aoi_threshold=2,
+        recovery_steps=2,
+        min_dwell_steps=2,
+    )
+
+    with patch(
+        "src.hybrid.two_way_episode_runner.solve_lns_sat",
+        side_effect=controlled_plan,
+    ), patch(
+        "src.hybrid.two_way_episode_runner.run_real_training_step",
+        side_effect=m7_step,
+    ):
+        result = run_two_way_episode(
+            c,
+            supervisor,
+            return_max_iterations=2,
+            replan_cooldown_steps=20,
+        )
+
+    assert attempts.count("return") == 1
+    assert result["return_replans"] == 1
+    assert result["planning_failures"] == 1
+    assert supervisor.mode == "M7"

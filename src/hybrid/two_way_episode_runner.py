@@ -37,7 +37,13 @@ def _has_pending(executor):
     return any(bool(queue) for queue in executor.pending_commands.values())
 
 
-def run_two_way_episode(context, supervisor, max_iterations=100):
+def run_two_way_episode(
+    context,
+    supervisor,
+    max_iterations=100,
+    return_max_iterations=10,
+    replan_cooldown_steps=20,
+):
     """Run an episode; start/replan from DT-trusted positions only on return.
 
     Requires a fresh TwoWayHybridSupervisor. Keeps full-timestep telemetry
@@ -56,6 +62,12 @@ def run_two_way_episode(context, supervisor, max_iterations=100):
         simulator.grid, dict(simulator.agent_positions),
         dict(simulator.agent_goals), max_iterations,
     )
+    if return_max_iterations < 1:
+        raise ValueError("return_max_iterations must be >= 1")
+    if replan_cooldown_steps < 1:
+        raise ValueError("replan_cooldown_steps must be >= 1")
+
+    next_return_attempt = 0
     planning_failures = 0
     if plan is None:
         planning_failures += 1
@@ -110,7 +122,11 @@ def run_two_way_episode(context, supervisor, max_iterations=100):
             possible_current_positions=dt["possible_current_positions"],
             pending_commands=_has_pending(executor),
         )
-        if supervisor.mode == "M7" and decision == "RETURN_READY":
+        if (
+            supervisor.mode == "M7"
+            and decision == "RETURN_READY"
+            and step >= next_return_attempt
+        ):
             candidates = dt["possible_current_positions"]
             # Observe() already verifies singleton sets and AoI=0.
             observed_starts = {
@@ -119,10 +135,11 @@ def run_two_way_episode(context, supervisor, max_iterations=100):
             }
             new_plan, elapsed = _plan(
                 simulator.grid, observed_starts,
-                dict(simulator.agent_goals), max_iterations,
+                dict(simulator.agent_goals), return_max_iterations,
             )
             planning_time += elapsed
             replans += 1
+            next_return_attempt = step + replan_cooldown_steps
             if new_plan is not None:
                 new_plan["offset"] = step
                 plan = new_plan
