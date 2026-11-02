@@ -5,6 +5,10 @@ Return decisions use only DT reachable positions, never simulator truth.
 import time
 
 from src.communication.telemetry import TelemetryMessage
+from src.hybrid.recovery_confirmation import recovery_state_confirmed
+from src.hybrid.recovery_drain import drain_pending_commands
+from src.hybrid.recovery_pause import RecoveryPause
+from src.hybrid.recovery_trigger import should_start_recovery
 from src.evaluation.path_length import compute_step_path_length
 from src.mapf.lns_sat import solve_lns_sat
 from src.mapf.mdd_sat import position_paths_to_actions
@@ -43,6 +47,8 @@ def run_two_way_episode(
     max_iterations=100,
     return_max_iterations=10,
     replan_cooldown_steps=20,
+    enable_recovery_pause=False,
+    recovery_max_pause_steps=8,
 ):
     """Run an episode; start/replan from DT-trusted positions only on return.
 
@@ -72,6 +78,15 @@ def run_two_way_episode(
     if plan is None:
         planning_failures += 1
         supervisor.fallback_to_m7(timestep=0)
+
+    recovery = RecoveryPause(
+        max_pause_steps=recovery_max_pause_steps,
+        cooldown_steps=replan_cooldown_steps,
+    )
+    recovery_pause_steps = 0
+    recovery_attempts = 0
+    last_drain_timestep = None
+    recovery_confirmed = False
 
     total_path_length = 0
     lns_steps = m7_steps = steps = replans = 0
@@ -116,15 +131,45 @@ def run_two_way_episode(
                                 position, actions[index],
                             )
 
+        if (
+            enable_recovery_pause
+            and not recovery.active
+            and supervisor.reliable_steps < supervisor.recovery_steps
+            and step >= next_return_attempt
+        ):
+            if should_start_recovery(
+                mode=supervisor.mode,
+                timestep=step,
+                last_switch_timestep=supervisor.last_switch_timestep,
+                aoi_values=dt["aoi_values"],
+                min_dwell_steps=supervisor.min_dwell_steps,
+            ) and recovery.start(step):
+                recovery_attempts += 1
+                last_drain_timestep = None
+                recovery_confirmed = False
+
+        if recovery.active:
+            recovery_confirmed = recovery_state_confirmed(
+                digital_twin=twin,
+                aoi_values=dt["aoi_values"],
+                possible_current_positions=dt["possible_current_positions"],
+                pending_commands=_has_pending(executor),
+                last_drain_timestep=last_drain_timestep,
+            )
+
         decision = supervisor.observe(
             timestep=step, aoi_values=dt["aoi_values"],
             planned_next_positions=planned_next,
             possible_current_positions=dt["possible_current_positions"],
-            pending_commands=_has_pending(executor),
+            pending_commands=(
+                _has_pending(executor)
+                or (recovery.active and not recovery_confirmed)
+            ),
         )
         if (
             supervisor.mode == "M7"
             and decision == "RETURN_READY"
+            and (not recovery.active or recovery_confirmed)
             and step >= next_return_attempt
         ):
             candidates = dt["possible_current_positions"]
@@ -144,10 +189,18 @@ def run_two_way_episode(
                 new_plan["offset"] = step
                 plan = new_plan
                 supervisor.confirm_return(timestep=step)
+                if recovery.active:
+                    recovery.finish(step)
+                    recovery_confirmed = False
+                    last_drain_timestep = None
             else:
                 # Stay in M7; avoid attempting the same replan every timestep.
                 planning_failures += 1
                 supervisor.reliable_steps = 0
+                if recovery.active:
+                    recovery.finish(step)
+                    recovery_confirmed = False
+                    last_drain_timestep = None
 
         before = dict(simulator.agent_positions)
         if supervisor.mode == "LNS-SAT":
@@ -158,7 +211,24 @@ def run_two_way_episode(
                 plan = None
                 planning_failures += 1
 
-        if supervisor.mode == "LNS-SAT":
+        if recovery.active and supervisor.mode == "M7":
+            drain = drain_pending_commands(simulator, executor, step)
+            collision = drain["collision"]
+            recovery_pause_steps += 1
+
+            if drain["executed_commands"]:
+                last_drain_timestep = step
+
+            if last_drain_timestep is None and not drain["pending_commands"]:
+                last_drain_timestep = step
+
+            if collision or recovery.expired(step):
+                recovery.finish(step)
+                recovery_confirmed = False
+                supervisor.reliable_steps = 0
+
+            commands = {}
+        elif supervisor.mode == "LNS-SAT":
             commands = {
                 agent_id: actions[index]
                 for agent_id, actions in plan["actions"].items()
@@ -211,4 +281,6 @@ def run_two_way_episode(
         "lns_steps": lns_steps,
         "m7_steps": m7_steps,
         "return_replans": replans,
+        "recovery_pause_steps": recovery_pause_steps,
+        "recovery_attempts": recovery_attempts,
     }

@@ -24,6 +24,7 @@ def drain_pending_commands(simulator, executor, timestep):
     )
 
     return {
+        "executed_commands": bool(ready),
         "collision": bool(outcome["collision"]),
         "path_length": compute_step_path_length(
             before,

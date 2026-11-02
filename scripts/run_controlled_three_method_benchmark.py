@@ -37,6 +37,7 @@ FIELDS = (
     "makespan", "path_length", "episode_wall_time",
     "lns_planning_time", "lns_steps", "m7_steps",
     "switch_count", "return_replans", "planning_failures",
+    "recovery_attempts", "recovery_pause_steps",
 )
 
 
@@ -108,6 +109,9 @@ def run_trial(method, instance, args, models):
             hybrid = run_two_way_episode(
                 context=context,
                 supervisor=supervisor,
+                enable_recovery_pause=getattr(
+                    args, "enable_recovery_pause", False
+                ),
             )
             result = {
                 "success": hybrid["all_goals_reached"],
@@ -124,6 +128,8 @@ def run_trial(method, instance, args, models):
                 "switch_count": len(hybrid["switch_events"]),
                 "return_replans": hybrid["return_replans"],
                 "planning_failures": hybrid["planning_failures"],
+                "recovery_attempts": hybrid.get("recovery_attempts", 0),
+                "recovery_pause_steps": hybrid.get("recovery_pause_steps", 0),
             }
 
     wall_time = time.perf_counter() - started
@@ -137,6 +143,11 @@ def main():
     parser.add_argument("--episodes-per-scenario", type=int, default=40)
     parser.add_argument("--immediate-probability", type=float, default=1.0)
     parser.add_argument("--aoi-threshold", type=int, default=2)
+    parser.add_argument(
+        "--enable-recovery-pause",
+        action="store_true",
+        help="Enable experimental recovery for TWO-WAY only",
+    )
     parser.add_argument("--max-steps", type=int, default=400)
     parser.add_argument(
         "--results-path",

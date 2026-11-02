@@ -95,3 +95,20 @@ def test_repeated_recovery_waits_preserve_deadlock_detection():
         assert result["pending_commands"] is False
 
     assert simulator.is_deadlocked() is True
+
+
+def test_drain_reports_when_no_command_is_executed():
+    simulator = GroundTruthSimulator(
+        grid=[[0, 0, 0]],
+        agent_positions={0: (0, 0)},
+        agent_goals={0: (2, 0)},
+    )
+    executor = DelayedCommandExecutor(
+        ExecutionDelayModel(immediate_probability=1.0, seed=1)
+    )
+
+    result = drain_pending_commands(simulator, executor, timestep=0)
+
+    assert result["executed_commands"] is False
+    assert result["pending_commands"] is False
+    assert result["collision"] is False

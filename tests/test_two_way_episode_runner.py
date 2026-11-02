@@ -121,3 +121,94 @@ def test_return_replanning_respects_cooldown():
     assert result["return_replans"] == 1
     assert result["planning_failures"] == 1
     assert supervisor.mode == "M7"
+
+
+def test_failed_return_replan_does_not_leave_recovery_active():
+    """Failed planning must resume M7 rather than strand recovery."""
+    c = context(latency=2, length=20)
+    c["max_steps"] = 12
+    attempts = []
+
+    def controlled_plan(**kwargs):
+        attempts.append(dict(kwargs["starts"]))
+        if len(attempts) == 1:
+            return planner(**kwargs)
+        return None
+
+    def m7_step(**kwargs):
+        c["telemetry_channel"].latency_steps = 0
+        kwargs["simulator"].step_joint({0: 3})
+        return {"actions": [3], "collision": False}
+
+    supervisor = TwoWayHybridSupervisor(
+        aoi_threshold=2,
+        recovery_steps=2,
+        min_dwell_steps=2,
+    )
+
+    with patch(
+        "src.hybrid.two_way_episode_runner.solve_lns_sat",
+        side_effect=controlled_plan,
+    ), patch(
+        "src.hybrid.two_way_episode_runner.run_real_training_step",
+        side_effect=m7_step,
+    ):
+        result = run_two_way_episode(
+            c,
+            supervisor,
+            return_max_iterations=2,
+            replan_cooldown_steps=20,
+        )
+
+    assert result["return_replans"] == 1
+    assert result["planning_failures"] == 1
+    assert supervisor.mode == "M7"
+
+
+def test_recovery_pause_returns_to_lns_after_confirmation():
+    """Optional recovery must complete a verified controller return."""
+    c = context(latency=2, length=20)
+    c["max_steps"] = 18
+    c["delayed_executor"].delay_model.immediate_probability = 0.8
+
+    def m7_step(**kwargs):
+        c["telemetry_channel"].latency_steps = 0
+        simulator = kwargs["simulator"]
+        outcome = simulator.step_joint({0: 3})
+        return {
+            "actions": [3],
+            "collision": outcome["collision"],
+        }
+
+    supervisor = TwoWayHybridSupervisor(
+        aoi_threshold=2,
+        recovery_steps=2,
+        min_dwell_steps=2,
+    )
+
+    with patch(
+        "src.hybrid.two_way_episode_runner.solve_lns_sat",
+        side_effect=planner,
+    ), patch(
+        "src.hybrid.two_way_episode_runner.run_real_training_step",
+        side_effect=m7_step,
+    ):
+        result = run_two_way_episode(
+            c,
+            supervisor,
+            enable_recovery_pause=True,
+            recovery_max_pause_steps=8,
+        )
+
+    switches = [
+        (event.previous_mode, event.new_mode)
+        for event in result["switch_events"]
+    ]
+
+    assert ("LNS-SAT", "M7") in switches
+    assert ("M7", "LNS-SAT") in switches
+    assert result["recovery_attempts"] >= 1
+    assert result["recovery_pause_steps"] >= 1
+    assert result["return_replans"] >= 1
+    assert result["collision"] is False
+    assert result["deadlock"] is False
