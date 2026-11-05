@@ -9,6 +9,7 @@ def test_all_four_methods_registered():
         "M7",
         "TWO-WAY",
         "RECOVERY-HYBRID",
+        "EXECUTION-AWARE-HYBRID",
     )
 
 

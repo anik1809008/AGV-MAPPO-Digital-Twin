@@ -15,6 +15,7 @@ from src.evaluation.model_loader import load_validation_models
 from src.evaluation.real_method_callback import run_real_method
 from src.hybrid.two_way_episode_runner import run_two_way_episode
 from src.hybrid.two_way_supervisor import TwoWayHybridSupervisor
+from src.hybrid.execution_aware_supervisor import ExecutionAwareTwoWaySupervisor
 from src.mapf.lns_sat_uncertain_runner import run_lns_sat_uncertain_episode
 from src.marl.scenario_split import get_random_scenario_path
 from src.marl.training_instance import build_training_instance
@@ -24,6 +25,7 @@ METHODS = (
     "M7",
     "TWO-WAY",
     "RECOVERY-HYBRID",
+    "EXECUTION-AWARE-HYBRID",
 )
 
 FIELDS = (
@@ -124,12 +126,18 @@ def run_episode(method, specification, models, max_steps=400):
             "planning_time": metrics["planning_time"],
         }
 
-    supervisor = TwoWayHybridSupervisor(aoi_threshold=2)
+    supervisor_class = (
+        ExecutionAwareTwoWaySupervisor
+        if method == "EXECUTION-AWARE-HYBRID"
+        else TwoWayHybridSupervisor
+    )
+    supervisor = supervisor_class(aoi_threshold=2)
 
     metrics = run_two_way_episode(
         context=context,
         supervisor=supervisor,
         enable_recovery_pause=(method == "RECOVERY-HYBRID"),
+        enable_execution_handover=(method == "EXECUTION-AWARE-HYBRID"),
     )
 
     return {

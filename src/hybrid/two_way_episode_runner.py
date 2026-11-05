@@ -7,6 +7,7 @@ import time
 from src.communication.telemetry import TelemetryMessage
 from src.hybrid.recovery_confirmation import recovery_state_confirmed
 from src.hybrid.recovery_drain import drain_pending_commands
+from src.hybrid.execution_aware_handover import ExecutionAwareHandover
 from src.hybrid.recovery_pause import RecoveryPause
 from src.hybrid.recovery_trigger import should_start_recovery
 from src.evaluation.path_length import compute_step_path_length
@@ -48,6 +49,7 @@ def run_two_way_episode(
     return_max_iterations=10,
     replan_cooldown_steps=20,
     enable_recovery_pause=False,
+    enable_execution_handover=False,
     recovery_max_pause_steps=8,
 ):
     """Run an episode; start/replan from DT-trusted positions only on return.
@@ -83,6 +85,8 @@ def run_two_way_episode(
         max_pause_steps=recovery_max_pause_steps,
         cooldown_steps=replan_cooldown_steps,
     )
+    handover = (ExecutionAwareHandover()
+                if enable_execution_handover else None)
     recovery_pause_steps = 0
     recovery_attempts = 0
     last_drain_timestep = None
@@ -167,6 +171,13 @@ def run_two_way_episode(
             ),
         )
         if (
+            handover is not None
+            and getattr(decision, 'previous_mode', None) == 'LNS-SAT'
+            and getattr(decision, 'new_mode', None) == 'M7'
+        ):
+            handover.start()
+
+        if (
             supervisor.mode == "M7"
             and decision == "RETURN_READY"
             and (not recovery.active or recovery_confirmed)
@@ -211,7 +222,11 @@ def run_two_way_episode(
                 plan = None
                 planning_failures += 1
 
-        if recovery.active and supervisor.mode == "M7":
+        if handover is not None and handover.active:
+            transition = handover.step(simulator, executor, step)
+            collision = transition['collision']
+            commands = {}
+        elif recovery.active and supervisor.mode == "M7":
             drain = drain_pending_commands(simulator, executor, step)
             collision = drain["collision"]
             recovery_pause_steps += 1
