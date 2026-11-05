@@ -10,6 +10,7 @@ def test_all_four_methods_registered():
         "TWO-WAY",
         "RECOVERY-HYBRID",
         "EXECUTION-AWARE-HYBRID",
+        "EARLY-SWITCH-ONLY",
     )
 
 

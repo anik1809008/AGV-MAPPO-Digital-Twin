@@ -26,6 +26,7 @@ METHODS = (
     "TWO-WAY",
     "RECOVERY-HYBRID",
     "EXECUTION-AWARE-HYBRID",
+    "EARLY-SWITCH-ONLY",
 )
 
 FIELDS = (
@@ -128,7 +129,7 @@ def run_episode(method, specification, models, max_steps=400):
 
     supervisor_class = (
         ExecutionAwareTwoWaySupervisor
-        if method == "EXECUTION-AWARE-HYBRID"
+        if method in {"EXECUTION-AWARE-HYBRID", "EARLY-SWITCH-ONLY"}
         else TwoWayHybridSupervisor
     )
     supervisor = supervisor_class(aoi_threshold=2)
