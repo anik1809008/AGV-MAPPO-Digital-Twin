@@ -11,6 +11,7 @@ def test_all_four_methods_registered():
         "RECOVERY-HYBRID",
         "EXECUTION-AWARE-HYBRID",
         "EARLY-SWITCH-ONLY",
+    "DT-OBSERVED-M7",
     )
 
 

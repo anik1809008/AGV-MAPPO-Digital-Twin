@@ -27,6 +27,7 @@ METHODS = (
     "RECOVERY-HYBRID",
     "EXECUTION-AWARE-HYBRID",
     "EARLY-SWITCH-ONLY",
+    "DT-OBSERVED-M7",
 )
 
 FIELDS = (
@@ -111,11 +112,12 @@ def run_episode(method, specification, models, max_steps=400):
         ),
     )
 
-    if method == "M7":
+    if method in {"M7", "DT-OBSERVED-M7"}:
         metrics = run_real_method(
             method="M7",
             latency_steps=int(specification["latency_steps"]),
             context=context,
+            use_dt_observations=(method == "DT-OBSERVED-M7"),
         )
 
         return {
