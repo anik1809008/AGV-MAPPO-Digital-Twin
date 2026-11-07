@@ -12,6 +12,11 @@ def test_all_four_methods_registered():
         "EXECUTION-AWARE-HYBRID",
         "EARLY-SWITCH-ONLY",
     "DT-OBSERVED-M7",
+    "DT-INFERRED-M7",
+    "DT-MEDOID-M7",
+    "DT-PROGRESS-M7",
+    "DT-ESTIMATED-PROGRESS-M7",
+    "DT-ROBUST-PROGRESS-M7",
     )
 
 

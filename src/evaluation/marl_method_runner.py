@@ -19,6 +19,8 @@ def run_marl_method(
     aoi_values=None,
     max_steps=200,
     use_dt_observations=False,
+    use_dt_inferred_centers=False,
+    use_dt_medoid_centers=False,
 ):
     if method not in {
         "M2",
@@ -51,4 +53,6 @@ def run_marl_method(
         possible_transitions=possible_transitions,
         max_steps=max_steps,
         use_dt_observations=use_dt_observations,
+        use_dt_inferred_centers=use_dt_inferred_centers,
+        use_dt_medoid_centers=use_dt_medoid_centers,
     )

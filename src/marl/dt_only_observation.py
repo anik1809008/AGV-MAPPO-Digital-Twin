@@ -10,6 +10,7 @@ def build_dt_only_agent_inputs(
     trusted_positions,
     reachable_occupancies,
     aoi_values,
+    observation_centers=None,
 ):
     agent_ids = set(agent_goals)
 
@@ -23,8 +24,14 @@ def build_dt_only_agent_inputs(
     ):
         raise ValueError("Complete Digital Twin observations are required")
 
+    if observation_centers is None:
+        observation_centers = trusted_positions
+
+    if set(observation_centers) != agent_ids:
+        raise ValueError("Complete observation centers required")
+
     centers = [
-        tuple(trusted_positions[agent_id])
+        tuple(observation_centers[agent_id])
         for agent_id in sorted(agent_ids)
     ]
 

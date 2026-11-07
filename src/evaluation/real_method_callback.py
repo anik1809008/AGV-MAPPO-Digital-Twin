@@ -9,6 +9,8 @@ def run_real_method(
     latency_steps,
     context,
     use_dt_observations=False,
+    use_dt_inferred_centers=False,
+    use_dt_medoid_centers=False,
 ):
     if method == "M1":
         result, elapsed = measure_planning_time(
@@ -45,6 +47,8 @@ def run_real_method(
         aoi_values=context.get("aoi_values"),
         max_steps=context["max_steps"],
         use_dt_observations=use_dt_observations,
+        use_dt_inferred_centers=use_dt_inferred_centers,
+        use_dt_medoid_centers=use_dt_medoid_centers,
     )
     shield_interventions = 0
 

@@ -28,6 +28,11 @@ METHODS = (
     "EXECUTION-AWARE-HYBRID",
     "EARLY-SWITCH-ONLY",
     "DT-OBSERVED-M7",
+    "DT-INFERRED-M7",
+    "DT-MEDOID-M7",
+    "DT-PROGRESS-M7",
+    "DT-ESTIMATED-PROGRESS-M7",
+    "DT-ROBUST-PROGRESS-M7",
 )
 
 FIELDS = (
@@ -112,12 +117,26 @@ def run_episode(method, specification, models, max_steps=400):
         ),
     )
 
-    if method in {"M7", "DT-OBSERVED-M7"}:
+    if method in {"M7", "DT-OBSERVED-M7", "DT-INFERRED-M7", "DT-MEDOID-M7", "DT-PROGRESS-M7", "DT-ESTIMATED-PROGRESS-M7", "DT-ROBUST-PROGRESS-M7"}:
+        if method in {"DT-PROGRESS-M7", "DT-ESTIMATED-PROGRESS-M7"}:
+            if context.get("m7_controller") is None:
+                raise RuntimeError("Missing M7 controller")
+            context["m7_controller"].enable_progress_forwarding = True
+            if method == "DT-ESTIMATED-PROGRESS-M7":
+                context["m7_controller"].enable_dt_estimated_progress = True
+
+        if method == "DT-ROBUST-PROGRESS-M7":
+            if context.get("m7_controller") is None:
+                raise RuntimeError("Missing M7 controller")
+            context["m7_controller"].enable_robust_progress = True
+
         metrics = run_real_method(
             method="M7",
             latency_steps=int(specification["latency_steps"]),
             context=context,
-            use_dt_observations=(method == "DT-OBSERVED-M7"),
+            use_dt_observations=(method in {"DT-OBSERVED-M7", "DT-INFERRED-M7", "DT-MEDOID-M7", "DT-PROGRESS-M7", "DT-ESTIMATED-PROGRESS-M7", "DT-ROBUST-PROGRESS-M7"}),
+            use_dt_inferred_centers=(method in {"DT-INFERRED-M7", "DT-PROGRESS-M7", "DT-ESTIMATED-PROGRESS-M7", "DT-ROBUST-PROGRESS-M7"}),
+            use_dt_medoid_centers=(method == "DT-MEDOID-M7"),
         )
 
         return {

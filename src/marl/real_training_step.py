@@ -1,6 +1,9 @@
 from src.baselines.stale_wait import ReachableSetWaitBaseline
 from src.marl.environment_adapter import build_all_agent_inputs
 from src.marl.dt_only_observation import build_dt_only_agent_inputs
+from src.marl.dt_position_center import select_dt_observation_centers
+from src.marl.dt_decision_support import update_dt_estimated_progress
+from src.marl.dt_medoid_center import select_dt_medoid_centers
 from src.marl.environment_step import execute_training_step
 from src.marl.rollout import collect_single_step
 from src.marl.dt_decision_support import (
@@ -28,6 +31,8 @@ def run_real_training_step(
     m7_progress_monitor=None,
     m7_recovery_planner=None,
     use_dt_observations=False,
+    use_dt_inferred_centers=False,
+    use_dt_medoid_centers=False,
 ):
     agent_positions = list(
         simulator.agent_positions.values()
@@ -36,6 +41,26 @@ def run_real_training_step(
     agent_goals = list(
         simulator.agent_goals.values()
     )
+
+    if use_dt_inferred_centers and not use_dt_observations:
+        raise ValueError("Inferred centers require DT observations")
+
+    if use_dt_medoid_centers and not use_dt_observations:
+        raise ValueError("Medoid centers require DT observations")
+    if use_dt_medoid_centers and use_dt_inferred_centers:
+        raise ValueError("Choose only one DT center mode")
+
+    observation_centers = None
+    if use_dt_medoid_centers:
+        observation_centers = select_dt_medoid_centers(
+            trusted_positions,
+            possible_current_positions or {},
+        )
+    if use_dt_inferred_centers:
+        observation_centers = select_dt_observation_centers(
+            trusted_positions,
+            possible_current_positions or {},
+        )
 
     if use_dt_observations:
         if method != "M7":
@@ -47,6 +72,7 @@ def run_real_training_step(
             trusted_positions=trusted_positions,
             reachable_occupancies=reachable_occupancies,
             aoi_values=aoi_values,
+            observation_centers=observation_centers,
         )
     else:
         observations = build_all_agent_inputs(
@@ -132,7 +158,8 @@ def run_real_training_step(
 
             agent_ids = range(len(agent_goals))
             dt_positions = get_dt_decision_positions(
-                trusted_positions,
+                observation_centers if (use_dt_inferred_centers or use_dt_medoid_centers)
+                else trusted_positions,
                 possible_current_positions,
                 agent_ids,
             )
@@ -148,13 +175,25 @@ def run_real_training_step(
 
             if m7_progress_monitor is not None:
                 for agent_id in agent_ids:
-                    update_dt_progress(
-                        monitor=m7_progress_monitor,
-                        agent_id=agent_id,
-                        position=dt_positions[agent_id],
-                        goal=agent_goals[agent_id],
-                        aoi=aoi_values[agent_id],
-                    )
+                    if getattr(
+                        m7_controller,
+                        "enable_dt_estimated_progress",
+                        False,
+                    ):
+                        update_dt_estimated_progress(
+                            monitor=m7_progress_monitor,
+                            agent_id=agent_id,
+                            possible_positions=possible_current_positions[agent_id],
+                            goal=agent_goals[agent_id],
+                        )
+                    else:
+                        update_dt_progress(
+                            monitor=m7_progress_monitor,
+                            agent_id=agent_id,
+                            position=dt_positions[agent_id],
+                            goal=agent_goals[agent_id],
+                            aoi=aoi_values[agent_id],
+                        )
 
             for agent_id, observation in enumerate(observations):
                 candidates = set(possible_current_positions[agent_id])

@@ -23,6 +23,8 @@ def run_episode(
     possible_transitions=None,
     max_steps=200,
     use_dt_observations=False,
+    use_dt_inferred_centers=False,
+    use_dt_medoid_centers=False,
 ):
 
     from src.marl.real_training_step import run_real_training_step
@@ -144,6 +146,8 @@ def run_episode(
             m7_progress_monitor=m7_progress_monitor,
             m7_recovery_planner=m7_recovery_planner,
             use_dt_observations=use_dt_observations,
+            use_dt_inferred_centers=use_dt_inferred_centers,
+            use_dt_medoid_centers=use_dt_medoid_centers,
        )
 
 

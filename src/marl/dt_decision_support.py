@@ -63,3 +63,40 @@ def reserve_dt_next_positions(shield, possible_positions, action):
         possible_current_positions=set(possible_positions),
         action=action,
     )
+
+
+def update_dt_estimated_progress(
+    monitor,
+    agent_id,
+    possible_positions,
+    goal,
+):
+    """Update progress only when the DT position is unambiguous."""
+    candidates = set(possible_positions)
+
+    if not candidates:
+        raise ValueError("Missing DT position candidates")
+
+    if len(candidates) != 1:
+        return monitor.is_stagnating(agent_id)
+
+    position = next(iter(candidates))
+
+    # An AGV already at its goal is not stagnating.
+    # Keep the monitor synchronized without accumulating
+    # false stagnation during subsequent goal-state steps.
+    if position == tuple(goal):
+        monitor.update(
+            agent_id=agent_id,
+            position=position,
+            goal=goal,
+        )
+        if hasattr(monitor, "no_progress_counts"):
+            monitor.no_progress_counts[agent_id] = 0
+        return False
+
+    return monitor.update(
+        agent_id=agent_id,
+        position=position,
+        goal=goal,
+    )
