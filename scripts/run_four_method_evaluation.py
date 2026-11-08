@@ -33,6 +33,8 @@ METHODS = (
     "DT-PROGRESS-M7",
     "DT-ESTIMATED-PROGRESS-M7",
     "DT-ROBUST-PROGRESS-M7",
+    "DT-ONLY-HYBRID",
+    "DT-ROBUST-HYBRID",
 )
 
 FIELDS = (
@@ -150,16 +152,39 @@ def run_episode(method, specification, models, max_steps=400):
 
     supervisor_class = (
         ExecutionAwareTwoWaySupervisor
-        if method in {"EXECUTION-AWARE-HYBRID", "EARLY-SWITCH-ONLY"}
+        if method in {
+            "EXECUTION-AWARE-HYBRID",
+            "EARLY-SWITCH-ONLY",
+            "DT-ONLY-HYBRID",
+            "DT-ROBUST-HYBRID",
+        }
         else TwoWayHybridSupervisor
     )
     supervisor = supervisor_class(aoi_threshold=2)
+
+    if method == "DT-ROBUST-HYBRID":
+        if context.get("m7_controller") is None:
+            raise RuntimeError("Missing M7 controller")
+        context["m7_controller"].enable_robust_progress = True
+
+    dt_hybrid = method in {
+        "DT-ONLY-HYBRID",
+        "DT-ROBUST-HYBRID",
+    }
 
     metrics = run_two_way_episode(
         context=context,
         supervisor=supervisor,
         enable_recovery_pause=(method == "RECOVERY-HYBRID"),
-        enable_execution_handover=(method == "EXECUTION-AWARE-HYBRID"),
+        enable_execution_handover=(
+            method in {
+                "EXECUTION-AWARE-HYBRID",
+                "DT-ONLY-HYBRID",
+                "DT-ROBUST-HYBRID",
+            }
+        ),
+        use_dt_observations=dt_hybrid,
+        use_dt_inferred_centers=dt_hybrid,
     )
 
     return {

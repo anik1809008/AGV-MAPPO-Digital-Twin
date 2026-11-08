@@ -51,6 +51,8 @@ def run_two_way_episode(
     enable_recovery_pause=False,
     enable_execution_handover=False,
     recovery_max_pause_steps=8,
+    use_dt_observations=False,
+    use_dt_inferred_centers=False,
 ):
     """Run an episode; start/replan from DT-trusted positions only on return.
 
@@ -268,6 +270,8 @@ def run_two_way_episode(
                 m7_controller=context["m7_controller"],
                 m7_progress_monitor=context.get("m7_progress_monitor"),
                 m7_recovery_planner=context.get("m7_recovery_planner"),
+                use_dt_observations=use_dt_observations,
+                use_dt_inferred_centers=use_dt_inferred_centers,
             )
             commands = dict(enumerate(result["actions"]))
             collision = bool(result["collision"])
