@@ -212,3 +212,109 @@ def test_recovery_pause_returns_to_lns_after_confirmation():
     assert result["return_replans"] >= 1
     assert result["collision"] is False
     assert result["deadlock"] is False
+
+
+def test_one_way_hybrid_never_returns_to_lns():
+    """One-way keeps using M7 even after reliable telemetry returns."""
+    c = context(latency=2, length=9)
+    planner_starts = []
+
+    def captured_plan(**kwargs):
+        planner_starts.append(dict(kwargs["starts"]))
+        return planner(**kwargs)
+
+    def m7_step(**kwargs):
+        c["telemetry_channel"].latency_steps = 0
+        outcome = kwargs["simulator"].step_joint({0: 3})
+        return {"actions": [3], "collision": outcome["collision"]}
+
+    sup = TwoWayHybridSupervisor(
+        aoi_threshold=2,
+        recovery_steps=2,
+        min_dwell_steps=2,
+    )
+
+    with patch(
+        "src.hybrid.two_way_episode_runner.solve_lns_sat",
+        side_effect=captured_plan,
+    ), patch(
+        "src.hybrid.two_way_episode_runner.run_real_training_step",
+        side_effect=m7_step,
+    ):
+        result = run_two_way_episode(
+            c,
+            sup,
+            allow_return_to_lns=False,
+        )
+
+    assert result["m7_steps"] > 0
+    assert result["return_replans"] == 0
+    assert len(planner_starts) == 1
+    assert not any(
+        e.previous_mode == "M7" and e.new_mode == "LNS-SAT"
+        for e in result["switch_events"]
+    )
+    assert sup.mode == "M7"
+
+
+def test_one_way_vs_two_way_controlled_comparison():
+    """Both start alike; only Two-Way may return after recovery."""
+
+    def run_variant(allow_return):
+        c = context(latency=2, length=9)
+        planned_starts = []
+        m7_calls = []
+
+        def captured_plan(**kwargs):
+            planned_starts.append(dict(kwargs["starts"]))
+            return planner(**kwargs)
+
+        def m7_step(**kwargs):
+            m7_calls.append(kwargs["current_timestep"])
+            c["telemetry_channel"].latency_steps = 0
+            outcome = kwargs["simulator"].step_joint({0: 3})
+            return {"actions": [3], "collision": outcome["collision"]}
+
+        sup = TwoWayHybridSupervisor(
+            aoi_threshold=2,
+            recovery_steps=2,
+            min_dwell_steps=2,
+        )
+
+        with patch(
+            "src.hybrid.two_way_episode_runner.solve_lns_sat",
+            side_effect=captured_plan,
+        ), patch(
+            "src.hybrid.two_way_episode_runner.run_real_training_step",
+            side_effect=m7_step,
+        ):
+            result = run_two_way_episode(
+                c, sup,
+                allow_return_to_lns=allow_return,
+            )
+
+        return result, planned_starts, m7_calls
+
+    one, one_plans, one_m7 = run_variant(False)
+    two, two_plans, two_m7 = run_variant(True)
+
+    assert one_plans[0] == two_plans[0]
+    assert one_m7 and two_m7
+    assert one_m7[0] == two_m7[0]
+
+    assert one["return_replans"] == 0
+    assert len(one_plans) == 1
+    assert not any(
+        e.previous_mode == "M7" and e.new_mode == "LNS-SAT"
+        for e in one["switch_events"]
+    )
+
+    assert two["return_replans"] >= 1
+    assert len(two_plans) >= 2
+    assert any(
+        e.previous_mode == "M7" and e.new_mode == "LNS-SAT"
+        for e in two["switch_events"]
+    )
+
+    assert one["collision"] is False
+    assert two["collision"] is False

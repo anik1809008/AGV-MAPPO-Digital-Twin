@@ -35,6 +35,7 @@ METHODS = (
     "DT-ROBUST-PROGRESS-M7",
     "DT-ONLY-HYBRID",
     "DT-ROBUST-HYBRID",
+    "ONE-WAY-ROBUST-HYBRID",
 )
 
 FIELDS = (
@@ -157,12 +158,13 @@ def run_episode(method, specification, models, max_steps=400):
             "EARLY-SWITCH-ONLY",
             "DT-ONLY-HYBRID",
             "DT-ROBUST-HYBRID",
+            "ONE-WAY-ROBUST-HYBRID",
         }
         else TwoWayHybridSupervisor
     )
     supervisor = supervisor_class(aoi_threshold=2)
 
-    if method == "DT-ROBUST-HYBRID":
+    if method in {"DT-ROBUST-HYBRID", "ONE-WAY-ROBUST-HYBRID"}:
         if context.get("m7_controller") is None:
             raise RuntimeError("Missing M7 controller")
         context["m7_controller"].enable_robust_progress = True
@@ -170,6 +172,7 @@ def run_episode(method, specification, models, max_steps=400):
     dt_hybrid = method in {
         "DT-ONLY-HYBRID",
         "DT-ROBUST-HYBRID",
+        "ONE-WAY-ROBUST-HYBRID",
     }
 
     metrics = run_two_way_episode(
@@ -181,10 +184,12 @@ def run_episode(method, specification, models, max_steps=400):
                 "EXECUTION-AWARE-HYBRID",
                 "DT-ONLY-HYBRID",
                 "DT-ROBUST-HYBRID",
+                "ONE-WAY-ROBUST-HYBRID",
             }
         ),
         use_dt_observations=dt_hybrid,
         use_dt_inferred_centers=dt_hybrid,
+        allow_return_to_lns=(method != "ONE-WAY-ROBUST-HYBRID"),
     )
 
     return {
@@ -231,11 +236,16 @@ def main():
     )
     args = parser.parse_args()
 
-    if args.limit < 1 or args.limit > 250:
-        parser.error("--limit must be between 1 and 250")
+    if args.limit < 1:
+        parser.error("--limit must be at least 1")
 
     with open(args.matrix, newline="") as handle:
         specifications = list(csv.DictReader(handle))
+
+    if args.limit > len(specifications):
+        parser.error(
+            f"--limit exceeds matrix size ({len(specifications)})"
+        )
 
     output = Path(args.output)
     output.parent.mkdir(parents=True, exist_ok=True)

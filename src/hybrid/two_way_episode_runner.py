@@ -53,6 +53,7 @@ def run_two_way_episode(
     recovery_max_pause_steps=8,
     use_dt_observations=False,
     use_dt_inferred_centers=False,
+    allow_return_to_lns=True,
 ):
     """Run an episode; start/replan from DT-trusted positions only on return.
 
@@ -180,7 +181,8 @@ def run_two_way_episode(
             handover.start()
 
         if (
-            supervisor.mode == "M7"
+            allow_return_to_lns
+            and supervisor.mode == "M7"
             and decision == "RETURN_READY"
             and (not recovery.active or recovery_confirmed)
             and step >= next_return_attempt

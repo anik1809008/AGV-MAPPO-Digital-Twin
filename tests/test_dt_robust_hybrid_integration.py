@@ -14,6 +14,7 @@ from src.hybrid.execution_aware_supervisor import (
     [
         ("DT-ONLY-HYBRID", False),
         ("DT-ROBUST-HYBRID", True),
+        ("ONE-WAY-ROBUST-HYBRID", True),
         ("EXECUTION-AWARE-HYBRID", False),
     ],
 )
@@ -105,6 +106,7 @@ def test_hybrid_configuration(method, expected_robust):
 
     assert kwargs["use_dt_observations"] is dt_mode
     assert kwargs["use_dt_inferred_centers"] is dt_mode
+    assert kwargs["allow_return_to_lns"] is (method != "ONE-WAY-ROBUST-HYBRID")
 
 
 def test_original_hybrid_runner_defaults_unchanged():

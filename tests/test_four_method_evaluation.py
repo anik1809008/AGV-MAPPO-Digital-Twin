@@ -19,6 +19,7 @@ def test_all_four_methods_registered():
     "DT-ROBUST-PROGRESS-M7",
     "DT-ONLY-HYBRID",
     "DT-ROBUST-HYBRID",
+        "ONE-WAY-ROBUST-HYBRID",
     )
 
 
