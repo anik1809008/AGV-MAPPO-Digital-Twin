@@ -1,0 +1,19 @@
+{
+  "git_commit": "4053085176fb2b406b0a0011c9812d3d2efbfd20",
+  "python_version": "3.12.3",
+  "evaluation_files": {
+    "dt_hybrid_heldout1000_matrix.csv": "d432967b787284bc99923aaeb9b732fcf3b1d4b93e74a254f529376e0fb6e3a7",
+    "eval1000_lns_sat.csv": "c0de9d71b1ab508f6fa688182e22d0b58408dbdf9c0919cdc314ba240b104bf6",
+    "eval1000_dt_robust_progress_m7.csv": "83430b7c8333e4433be6e1ee8b2f794758566ee3758961fb58f4fd92ec8fdf81",
+    "eval1000_one_way_robust_hybrid.csv": "c92f8d43122039c3da35d153cf8e04fbe262ee463ed3b74e3e48315a49fd4120",
+    "eval1000_dt_robust_hybrid.csv": "4952f7aa145f9294f598b13d6bb505d5b60172f4f1c49bb2d6ffafeacadc0cec",
+    "eval1000_dt_only_hybrid.csv": "17f7580ffd5266ee4ab8ba04e6851a955b9637abf66ec1de3d6df2821debf109"
+  },
+  "checkpoint_files": {
+    "results/checkpoints/validation/m3_agents8_seed0_eps20.pt": "a6f2778940d869d43c8c28079436106cd2e080b90081e5324389ff568690cb02",
+    "results/checkpoints/validation/m3_agents8_seed1_eps20.pt": "50260314eea6f0e33c88c14379f0f548b4d2035f1d9c76e0f860ac341527693a",
+    "results/checkpoints/validation/m3_agents8_seed2_eps20.pt": "fea5690568821d1dc27e8e7cefefb2ebccc15d2ad9c9c731d8d600403cf3f247",
+    "results/checkpoints/validation/m3_agents8_seed3_eps20.pt": "1071ed1e2d7d08d9bb0c3bb11295edc7755fe35b9ed19ea0771ceb147fb7a274",
+    "results/checkpoints/validation/m3_agents8_seed4_eps20.pt": "92b22ad9211e6e3e51c787e23ebea1ef6f897f5f41d7cb5bff92a8b777260405"
+  }
+}
