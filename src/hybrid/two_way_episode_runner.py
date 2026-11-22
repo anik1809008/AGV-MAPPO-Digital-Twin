@@ -2,6 +2,12 @@
 
 Return decisions use only DT reachable positions, never simulator truth.
 """
+from contextlib import contextmanager, nullcontext
+import cProfile
+import io
+import pstats
+import json
+import os
 import time
 
 from src.communication.telemetry import TelemetryMessage
@@ -12,18 +18,74 @@ from src.hybrid.recovery_pause import RecoveryPause
 from src.hybrid.recovery_trigger import should_start_recovery
 from src.evaluation.path_length import compute_step_path_length
 from src.mapf.lns_sat import solve_lns_sat
-from src.mapf.mdd_sat import position_paths_to_actions
+from src.hybrid.single_agv_completion import plan_single_agv_completion
+from src.hybrid.single_agv_progress import acknowledge_recovery_progress
+from src.environment.actions import Action, ACTION_DELTAS
+from src.mapf.mdd_sat import (
+    position_paths_to_actions,
+    return_planning_budget,
+    ReturnPlanningBudgetExceeded,
+)
 from src.marl.digital_twin_adapter import get_digital_twin_inputs
 from src.marl.real_training_step import run_real_training_step
 
 
-def _plan(grid, starts, goals, max_iterations):
+
+@contextmanager
+def _profile_return_planning(enabled):
+    path = os.environ.get("AGV_RETURN_PROFILE_PATH")
+
+    if not enabled or not path:
+        yield
+        return
+
+    profiler = cProfile.Profile()
+    profiler.enable()
+
+    try:
+        yield
+    finally:
+        profiler.disable()
+        stream = io.StringIO()
+
+        pstats.Stats(
+            profiler,
+            stream=stream,
+        ).sort_stats("cumulative").print_stats(35)
+
+        with open(path, "a") as handle:
+            handle.write("\n=== RETURN PLANNING PROFILE ===\n")
+            handle.write(stream.getvalue())
+
+
+def _plan(
+    grid, starts, goals, max_iterations,
+    budget_return=False, diagnostics=None,
+):
     began = time.perf_counter()
-    solution = solve_lns_sat(
-        grid=grid, starts=starts, goals=goals,
-        max_iterations=max_iterations,
+    context = (
+        return_planning_budget(diagnostics=diagnostics)
+        if budget_return else nullcontext()
     )
+    try:
+        with context, _profile_return_planning(budget_return):
+            solution = solve_lns_sat(
+                grid=grid, starts=starts, goals=goals,
+                max_iterations=max_iterations,
+            )
+    except ReturnPlanningBudgetExceeded as exc:
+        solution = None
+        if diagnostics is not None:
+            diagnostics["outcome"] = "BUDGET_EXHAUSTED"
+            diagnostics["reason"] = str(exc)
+
     elapsed = time.perf_counter() - began
+
+    if diagnostics is not None and "outcome" not in diagnostics:
+        diagnostics["outcome"] = (
+            "PLAN_FOUND" if solution is not None
+            else "NO_PLAN_WITHIN_LNS_LIMITS"
+        )
     if solution is None:
         return None, elapsed
     if set(solution["paths"]) != set(starts):
@@ -37,6 +99,24 @@ def _plan(grid, starts, goals, max_iterations):
         "offset": 0,
     }, elapsed
 
+
+
+def _positions_changed_since_failure(dt, failed_starts):
+    if failed_starts is None:
+        return True
+
+    candidates = dt["possible_current_positions"]
+    if set(candidates) != set(failed_starts):
+        return False
+
+    for agent_id, old_position in failed_starts.items():
+        positions = candidates[agent_id]
+        if len(positions) != 1:
+            return False
+        if tuple(next(iter(positions))) != tuple(old_position):
+            return True
+
+    return False
 
 def _has_pending(executor):
     return any(bool(queue) for queue in executor.pending_commands.values())
@@ -54,6 +134,8 @@ def run_two_way_episode(
     use_dt_observations=False,
     use_dt_inferred_centers=False,
     allow_return_to_lns=True,
+    diagnostic_episode_id=None,
+    enable_single_agv_completion=False,
 ):
     """Run an episode; start/replan from DT-trusted positions only on return.
 
@@ -79,6 +161,7 @@ def run_two_way_episode(
         raise ValueError("replan_cooldown_steps must be >= 1")
 
     next_return_attempt = 0
+    last_failed_return_starts = None
     planning_failures = 0
     if plan is None:
         planning_failures += 1
@@ -186,6 +269,9 @@ def run_two_way_episode(
             and decision == "RETURN_READY"
             and (not recovery.active or recovery_confirmed)
             and step >= next_return_attempt
+            and _positions_changed_since_failure(
+                dt, last_failed_return_starts
+            )
         ):
             candidates = dt["possible_current_positions"]
             # Observe() already verifies singleton sets and AoI=0.
@@ -193,14 +279,104 @@ def run_two_way_episode(
                 agent_id: next(iter(candidates[agent_id]))
                 for agent_id in sorted(candidates)
             }
-            new_plan, elapsed = _plan(
-                simulator.grid, observed_starts,
-                dict(simulator.agent_goals), return_max_iterations,
+            return_diagnostics = {}
+            new_plan = None
+            elapsed = 0.0
+
+            # Experimental return-only completion mode.
+            # Never use simulator positions to select this route.
+            use_single_agv = (
+                enable_single_agv_completion
+                and getattr(
+                    executor.delay_model,
+                    "immediate_probability", 0.0
+                ) == 1.0
+                and not _has_pending(executor)
+                and (handover is None or not handover.active)
+                and all(value == 0 for value in dt["aoi_values"].values())
+                and all(
+                    len(positions) == 1
+                    for positions in dt["possible_current_positions"].values()
+                )
             )
+
+            if use_single_agv:
+                began = time.perf_counter()
+                candidate = plan_single_agv_completion(
+                    grid=simulator.grid,
+                    positions=observed_starts,
+                    goals=dict(simulator.agent_goals),
+                )
+                elapsed = time.perf_counter() - began
+
+                if candidate is not None:
+                    agent_id, actions = candidate
+                    if len(actions) <= context["max_steps"] - step:
+                        new_plan = {
+                            "actions": {
+                                a: (
+                                    actions
+                                    if a == agent_id
+                                    else [0] * len(actions)
+                                )
+                                for a in observed_starts
+                            },
+                            "horizon": len(actions),
+                            "offset": 0,
+                        }
+                        # Expected positions come from the DT start
+                        # and the independently planned action sequence.
+                        route_positions = [observed_starts[agent_id]]
+                        for action in actions:
+                            dx, dy = ACTION_DELTAS[Action(action)]
+                            x, y = route_positions[-1]
+                            route_positions.append((x + dx, y + dy))
+
+                        new_plan["single_agv_completion"] = True
+                        new_plan["active_agent"] = agent_id
+                        new_plan["route_positions"] = route_positions
+
+                        return_diagnostics["outcome"] = (
+                            "SINGLE_AGV_PLAN_FOUND"
+                        )
+                        return_diagnostics["active_agent"] = agent_id
+
+            if new_plan is None:
+                new_plan, sat_elapsed = _plan(
+                    simulator.grid, observed_starts,
+                    dict(simulator.agent_goals), return_max_iterations,
+                    budget_return=True,
+                    diagnostics=return_diagnostics,
+                )
+                elapsed += sat_elapsed
+
             planning_time += elapsed
             replans += 1
+
+            diagnostic_path = os.environ.get("AGV_RETURN_DIAGNOSTICS_PATH")
+            if diagnostic_path:
+                goals = simulator.agent_goals
+                remaining_manhattan = sum(
+                    abs(observed_starts[a][0] - goals[a][0])
+                    + abs(observed_starts[a][1] - goals[a][1])
+                    for a in observed_starts
+                )
+                record = {
+                    "episode_id": diagnostic_episode_id,
+                    "timestep": step,
+                    "attempt_index": replans,
+                    "observed_starts": observed_starts,
+                    "remaining_manhattan": remaining_manhattan,
+                    "planning_seconds": elapsed,
+                    "plan_found": new_plan is not None,
+                    "budget_diagnostics": return_diagnostics,
+                }
+                with open(diagnostic_path, "a") as handle:
+                    handle.write(json.dumps(record) + "\n")
+
             next_return_attempt = step + replan_cooldown_steps
             if new_plan is not None:
+                last_failed_return_starts = None
                 new_plan["offset"] = step
                 plan = new_plan
                 supervisor.confirm_return(timestep=step)
@@ -209,6 +385,7 @@ def run_two_way_episode(
                     recovery_confirmed = False
                     last_drain_timestep = None
             else:
+                last_failed_return_starts = dict(observed_starts)
                 # Stay in M7; avoid attempting the same replan every timestep.
                 planning_failures += 1
                 supervisor.reliable_steps = 0
@@ -218,6 +395,7 @@ def run_two_way_episode(
                     last_drain_timestep = None
 
         before = dict(simulator.agent_positions)
+        progress_before = simulator.non_progress_steps
         if supervisor.mode == "LNS-SAT":
             index = step - plan["offset"]
             if index >= plan["horizon"]:
@@ -257,6 +435,17 @@ def run_two_way_episode(
             executed = {agent_id: ready.get(agent_id, 0) for agent_id in commands}
             result = simulator.step_joint(executed)
             collision = bool(result.get("collision", False))
+
+            if enable_single_agv_completion:
+                acknowledge_recovery_progress(
+                    simulator=simulator,
+                    plan=plan,
+                    index=index,
+                    before=before,
+                    executed=executed,
+                    collision=collision,
+                )
+
             lns_steps += 1
         else:
             result = run_real_training_step(
@@ -286,6 +475,46 @@ def run_two_way_episode(
         )
         steps = step + 1
         deadlock = simulator.is_deadlocked()
+
+        # Diagnostic only: never influences controller decisions.
+        trace_path = os.environ.get("AGV_SINGLE_AGV_TRACE_PATH")
+        if (
+            trace_path
+            and str(diagnostic_episode_id) in {"2", "12"}
+            and 110 <= step <= 140
+        ):
+            agent_id = 0
+            current = simulator.agent_positions[agent_id]
+            previous = before[agent_id]
+            goal = simulator.agent_goals[agent_id]
+
+            record = {
+                "episode_id": diagnostic_episode_id,
+                "step": step,
+                "mode": supervisor.mode,
+                "before": previous,
+                "after": current,
+                "goal": goal,
+                "command": commands.get(agent_id),
+                "moved": current != previous,
+                "distance_before": simulator.navigation_distance(
+                    previous, goal
+                ),
+                "distance_after": simulator.navigation_distance(
+                    current, goal
+                ),
+                "non_progress_before": progress_before,
+                "non_progress_after": simulator.non_progress_steps,
+                "deadlock": deadlock,
+                "collision": collision,
+                "plan_offset": (
+                    plan.get("offset") if plan is not None else None
+                ),
+            }
+
+            with open(trace_path, "a") as handle:
+                handle.write(json.dumps(record) + "\n")
+
         if collision or deadlock or simulator.all_goals_reached():
             break
 

@@ -1,4 +1,57 @@
 from collections import deque
+from contextlib import contextmanager
+from contextvars import ContextVar
+import time
+
+
+_RETURN_BUDGET = ContextVar("return_budget", default=None)
+
+
+class ReturnPlanningBudgetExceeded(Exception):
+    pass
+
+
+@contextmanager
+def return_planning_budget(
+    max_sat_calls=8,
+    max_conflicts_per_call=5000,
+    max_seconds=5.0,
+    diagnostics=None,
+):
+    budget = {
+        "calls_left": max_sat_calls,
+        "conflicts": max_conflicts_per_call,
+        "deadline": time.perf_counter() + max_seconds,
+        "sat_calls": 0,
+        "sat_sat": 0,
+        "sat_unsat": 0,
+        "sat_unknown": 0,
+    }
+    token = _RETURN_BUDGET.set(budget)
+    try:
+        yield
+    finally:
+        if diagnostics is not None:
+            diagnostics.update({
+                "sat_calls": budget["sat_calls"],
+                "sat_sat": budget["sat_sat"],
+                "sat_unsat": budget["sat_unsat"],
+                "sat_unknown": budget["sat_unknown"],
+                "calls_remaining": budget["calls_left"],
+            })
+        _RETURN_BUDGET.reset(token)
+
+
+
+def return_budget_active():
+    return _RETURN_BUDGET.get() is not None
+
+
+def _check_return_budget(budget):
+    if budget is not None and time.perf_counter() >= budget["deadline"]:
+        raise ReturnPlanningBudgetExceeded("Return planning deadline reached")
+
+
 
 
 MOVE_DELTAS = [
@@ -353,6 +406,9 @@ def solve_fixed_makespan(
     from pysat.formula import CNF
     from pysat.solvers import Minisat22
 
+    budget = _RETURN_BUDGET.get()
+    _check_return_budget(budget)
+
     mdds = {}
 
     for agent_id in sorted(starts):
@@ -406,10 +462,33 @@ def solve_fixed_makespan(
         variables=variables,
     )
 
+    _check_return_budget(budget)
+
+    if budget is not None:
+        if budget["calls_left"] <= 0:
+            raise ReturnPlanningBudgetExceeded("SAT call budget exhausted")
+        budget["calls_left"] -= 1
+        budget["sat_calls"] += 1
+
     with Minisat22(
         bootstrap_with=cnf.clauses
     ) as solver:
-        if not solver.solve():
+        if budget is None:
+            result = solver.solve()
+        else:
+            solver.conf_budget(budget["conflicts"])
+            result = solver.solve_limited()
+            if result is None:
+                budget["sat_unknown"] += 1
+                raise ReturnPlanningBudgetExceeded(
+                    "SAT conflict budget exhausted"
+                )
+            if result:
+                budget["sat_sat"] += 1
+            else:
+                budget["sat_unsat"] += 1
+
+        if result is False:
             return None
 
         model = set(

@@ -61,7 +61,10 @@ FIELDS = (
 )
 
 
-def run_episode(method, specification, models, max_steps=400):
+def run_episode(
+    method, specification, models, max_steps=400,
+    single_agv_completion=False,
+):
     seed = int(specification["seed"])
     random.seed(seed)
     np.random.seed(seed)
@@ -190,6 +193,9 @@ def run_episode(method, specification, models, max_steps=400):
         use_dt_observations=dt_hybrid,
         use_dt_inferred_centers=dt_hybrid,
         allow_return_to_lns=(method != "ONE-WAY-ROBUST-HYBRID"),
+        diagnostic_episode_id=specification.get("episode_id"),
+        enable_single_agv_completion=single_agv_completion,
+
     )
 
     return {
@@ -230,11 +236,24 @@ def main():
     parser.add_argument("--max-steps", type=int, default=400)
     parser.add_argument("--limit", type=int, default=1)
     parser.add_argument(
+        "--single-agv-completion",
+        action="store_true",
+        help="Enable experimental single-AGV completion",
+    )
+    parser.add_argument(
         "--resume",
         action="store_true",
         help="Resume an existing evaluation output",
     )
     args = parser.parse_args()
+
+    if (
+        args.single_agv_completion
+        and args.method != "DT-ROBUST-HYBRID"
+    ):
+        parser.error(
+            "--single-agv-completion requires DT-ROBUST-HYBRID"
+        )
 
     if args.limit < 1:
         parser.error("--limit must be at least 1")
@@ -318,6 +337,7 @@ def main():
                 specification,
                 models,
                 max_steps=args.max_steps,
+                single_agv_completion=args.single_agv_completion,
             )
 
             row = {

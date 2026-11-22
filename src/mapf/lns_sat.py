@@ -1,6 +1,7 @@
 from src.mapf.mdd_sat import (
     shortest_distances,
     solve_fixed_makespan,
+    return_budget_active,
 )
 def independent_shortest_paths(
     grid,
@@ -251,11 +252,19 @@ def solve_local_repair_with_expansion(
                     "spatial_radius": current_spatial_radius,
                 }
 
-            current_window = expand_repair_window(
+            next_window = expand_repair_window(
                 window=current_window,
                 horizon=horizon,
                 amount=1,
             )
+
+            if (
+                return_budget_active()
+                and next_window == current_window
+            ):
+                break
+
+            current_window = next_window
 
     return None
 def apply_local_repair(
@@ -523,6 +532,24 @@ def build_zone_restricted_grid(
 ):
     allowed = set(zone)
     allowed.update(required_positions)
+
+    # Fast path for budgeted Two-Way return planning only.
+    # Preserve the original grid construction for other methods.
+    if return_budget_active():
+        restricted = [
+            [1] * len(row)
+            for row in grid
+        ]
+
+        for x, y in allowed:
+            if (
+                0 <= y < len(grid)
+                and 0 <= x < len(grid[y])
+                and grid[y][x] == 0
+            ):
+                restricted[y][x] = 0
+
+        return restricted
 
     restricted = []
 
