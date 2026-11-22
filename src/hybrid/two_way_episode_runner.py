@@ -19,6 +19,11 @@ from src.hybrid.recovery_trigger import should_start_recovery
 from src.evaluation.path_length import compute_step_path_length
 from src.mapf.lns_sat import solve_lns_sat
 from src.hybrid.single_agv_completion import plan_single_agv_completion
+from src.hybrid.two_agv_completion import plan_two_agv_completion
+from src.hybrid.recovery_route_guard import (
+    build_expected_positions,
+    recovery_route_is_valid,
+)
 from src.hybrid.single_agv_progress import acknowledge_recovery_progress
 from src.environment.actions import Action, ACTION_DELTAS
 from src.mapf.mdd_sat import (
@@ -136,6 +141,7 @@ def run_two_way_episode(
     allow_return_to_lns=True,
     diagnostic_episode_id=None,
     enable_single_agv_completion=False,
+    enable_two_agv_completion=False,
 ):
     """Run an episode; start/replan from DT-trusted positions only on return.
 
@@ -341,6 +347,54 @@ def run_two_way_episode(
                         )
                         return_diagnostics["active_agent"] = agent_id
 
+            # Experimental sequential two-AGV recovery.
+            # Uses verified DT positions, never simulator positions.
+            use_two_agv = (
+                enable_two_agv_completion
+                and new_plan is None
+                and getattr(
+                    executor.delay_model,
+                    "immediate_probability", 0.0
+                ) == 1.0
+                and not _has_pending(executor)
+                and (handover is None or not handover.active)
+                and all(
+                    value == 0
+                    for value in dt["aoi_values"].values()
+                )
+                and set(observed_starts) == set(simulator.agent_goals)
+                and all(
+                    len(positions) == 1
+                    for positions in
+                    dt["possible_current_positions"].values()
+                )
+            )
+
+            if use_two_agv:
+                began = time.perf_counter()
+                candidate = plan_two_agv_completion(
+                    grid=simulator.grid,
+                    positions=observed_starts,
+                    goals=dict(simulator.agent_goals),
+                )
+                elapsed += time.perf_counter() - began
+
+                if (
+                    candidate is not None
+                    and candidate["horizon"]
+                    <= context["max_steps"] - step
+                ):
+                    new_plan = candidate
+                    return_diagnostics["outcome"] = (
+                        "TWO_AGV_PLAN_FOUND"
+                    )
+                    return_diagnostics["order"] = list(
+                        candidate["order"]
+                    )
+                    return_diagnostics["stages"] = (
+                        candidate["stages"]
+                    )
+
             if new_plan is None:
                 new_plan, sat_elapsed = _plan(
                     simulator.grid, observed_starts,
@@ -374,6 +428,18 @@ def run_two_way_episode(
                 with open(diagnostic_path, "a") as handle:
                     handle.write(json.dumps(record) + "\n")
 
+            if new_plan is not None and (
+                new_plan.get("single_agv_completion")
+                or new_plan.get("two_agv_completion")
+            ):
+                new_plan["recovery_expected_positions"] = (
+                    build_expected_positions(
+                        observed_starts,
+                        new_plan["actions"],
+                        new_plan["horizon"],
+                    )
+                )
+
             next_return_attempt = step + replan_cooldown_steps
             if new_plan is not None:
                 last_failed_return_starts = None
@@ -393,6 +459,45 @@ def run_two_way_episode(
                     recovery.finish(step)
                     recovery_confirmed = False
                     last_drain_timestep = None
+
+        # Fail closed if an experimental recovery route diverges
+        # from fresh, unambiguous Digital Twin observations.
+        if (
+            supervisor.mode == "LNS-SAT"
+            and plan is not None
+            and plan.get("recovery_expected_positions") is not None
+        ):
+            recovery_index = step - plan["offset"]
+
+            if not recovery_route_is_valid(
+                plan=plan,
+                dt=dt,
+                index=recovery_index,
+                pending_commands=_has_pending(executor),
+            ):
+                # Avoid repeated recovery attempts from an unchanged
+                # rejected DT state.
+                next_return_attempt = max(
+                    next_return_attempt,
+                    step + replan_cooldown_steps,
+                )
+
+                candidates = dt["possible_current_positions"]
+                if (
+                    set(candidates) == set(simulator.agent_goals)
+                    and all(len(p) == 1 for p in candidates.values())
+                ):
+                    last_failed_return_starts = {
+                        agent: next(iter(positions))
+                        for agent, positions in candidates.items()
+                    }
+
+                supervisor.fallback_to_m7(timestep=step)
+                plan = None
+                planning_failures += 1
+
+                if handover is not None and not handover.active:
+                    handover.start()
 
         before = dict(simulator.agent_positions)
         progress_before = simulator.non_progress_steps

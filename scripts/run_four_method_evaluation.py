@@ -64,6 +64,7 @@ FIELDS = (
 def run_episode(
     method, specification, models, max_steps=400,
     single_agv_completion=False,
+    two_agv_completion=False,
 ):
     seed = int(specification["seed"])
     random.seed(seed)
@@ -195,6 +196,7 @@ def run_episode(
         allow_return_to_lns=(method != "ONE-WAY-ROBUST-HYBRID"),
         diagnostic_episode_id=specification.get("episode_id"),
         enable_single_agv_completion=single_agv_completion,
+        enable_two_agv_completion=two_agv_completion,
 
     )
 
@@ -245,6 +247,11 @@ def main():
         action="store_true",
         help="Resume an existing evaluation output",
     )
+    parser.add_argument(
+        "--two-agv-completion",
+        action="store_true",
+        help="Enable experimental sequential two-AGV completion",
+    )
     args = parser.parse_args()
 
     if (
@@ -253,6 +260,14 @@ def main():
     ):
         parser.error(
             "--single-agv-completion requires DT-ROBUST-HYBRID"
+        )
+
+    if (
+        args.two_agv_completion
+        and args.method != "DT-ROBUST-HYBRID"
+    ):
+        parser.error(
+            "--two-agv-completion requires DT-ROBUST-HYBRID"
         )
 
     if args.limit < 1:
@@ -338,6 +353,7 @@ def main():
                 models,
                 max_steps=args.max_steps,
                 single_agv_completion=args.single_agv_completion,
+                two_agv_completion=args.two_agv_completion,
             )
 
             row = {
