@@ -25,6 +25,7 @@ from src.hybrid.recovery_route_guard import (
     recovery_route_is_valid,
 )
 from src.hybrid.single_agv_progress import acknowledge_recovery_progress
+from src.hybrid.two_agv_progress import acknowledge_two_agv_progress
 from src.environment.actions import Action, ACTION_DELTAS
 from src.mapf.mdd_sat import (
     position_paths_to_actions,
@@ -543,6 +544,16 @@ def run_two_way_episode(
 
             if enable_single_agv_completion:
                 acknowledge_recovery_progress(
+                    simulator=simulator,
+                    plan=plan,
+                    index=index,
+                    before=before,
+                    executed=executed,
+                    collision=collision,
+                )
+
+            if enable_two_agv_completion and plan.get("two_agv_completion"):
+                acknowledge_two_agv_progress(
                     simulator=simulator,
                     plan=plan,
                     index=index,
