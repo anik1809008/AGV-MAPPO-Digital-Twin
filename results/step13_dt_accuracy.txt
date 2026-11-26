@@ -1,0 +1,57 @@
+STEP 13 DT ACCURACY VALIDATION
+
+Episode 20131
+Replay matches: True
+Replay mismatches: []
+Timesteps: 400
+Agent checks: 3200
+Coverage rate: 1.0
+Singleton accuracy: 1.0
+Incorrect singletons: 0
+Eligible states: 400
+Eligible state errors: 0
+
+Episode 20132
+Replay matches: True
+Replay mismatches: []
+Timesteps: 400
+Agent checks: 3200
+Coverage rate: 1.0
+Singleton accuracy: 1.0
+Incorrect singletons: 0
+Eligible states: 400
+Eligible state errors: 0
+
+Episode 20138
+Replay matches: True
+Replay mismatches: []
+Timesteps: 400
+Agent checks: 3200
+Coverage rate: 1.0
+Singleton accuracy: 1.0
+Incorrect singletons: 0
+Eligible states: 400
+Eligible state errors: 0
+
+Episode 20186
+Replay matches: True
+Replay mismatches: []
+Timesteps: 400
+Agent checks: 3200
+Coverage rate: 1.0
+Singleton accuracy: 1.0
+Incorrect singletons: 0
+Eligible states: 400
+Eligible state errors: 0
+
+=== MATCHED VALIDATION SUMMARY ===
+Matched episodes: 4
+Total timesteps: 1600
+Total agent checks: 12800
+Coverage failures: 0
+Incorrect singletons: 0
+Eligible state steps: 1600
+Eligible state errors: 0
+Correct eligible states: 1600
+Pilot validation passed: True
+Saved: results/step13_dt_accuracy.jsonl
