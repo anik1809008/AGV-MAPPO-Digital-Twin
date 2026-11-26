@@ -1,0 +1,265 @@
+Validation passed: 1000 matched episodes.
+All experimental configuration fields match.
+
+=== OVERALL PERFORMANCE ===
+
+Original Two-Way
+  Success: 727/1000 (72.7%)
+  Collisions: 0
+  Deadlocks: 7
+  Other incomplete episodes: 266
+  Mean successful makespan: 164.549
+  Mean successful path_length: 662.402
+  Mean planning time: 20.780 s
+  Median planning time: 0.291 s
+  P95 planning time: 119.684 s
+  P99 planning time: 143.301 s
+  Max planning time: 153.184 s
+
+Single-AGV Only
+  Success: 778/1000 (77.8%)
+  Collisions: 0
+  Deadlocks: 7
+  Other incomplete episodes: 215
+  Mean successful makespan: 166.686
+  Mean successful path_length: 664.158
+  Mean planning time: 18.822 s
+  Median planning time: 0.310 s
+  P95 planning time: 78.418 s
+  P99 planning time: 100.969 s
+  Max planning time: 383.465 s
+
+Two-AGV Only
+  Success: 788/1000 (78.8%)
+  Collisions: 0
+  Deadlocks: 7
+  Other incomplete episodes: 205
+  Mean successful makespan: 170.319
+  Mean successful path_length: 666.702
+  Mean planning time: 18.499 s
+  Median planning time: 0.301 s
+  P95 planning time: 78.459 s
+  P99 planning time: 128.760 s
+  Max planning time: 150.299 s
+
+Combined Recovery
+  Success: 808/1000 (80.8%)
+  Collisions: 0
+  Deadlocks: 7
+  Other incomplete episodes: 185
+  Mean successful makespan: 170.894
+  Mean successful path_length: 668.714
+  Mean planning time: 17.493 s
+  Median planning time: 0.286 s
+  P95 planning time: 70.895 s
+  P99 planning time: 81.804 s
+  Max planning time: 103.890 s
+
+=== PAIRED STATISTICAL COMPARISONS ===
+
+Original Two-Way -> Single-AGV Only
+  Rescued: 51
+  Regressed: 0
+  Ties: 949
+  Success difference: +5.10 pp
+  Exact McNemar p: 8.8817842e-16
+  Route-cluster 95% CI: [+2.50, +8.20] pp
+  Route clusters: 200
+  Route-cluster p (exact): 0.00048828125
+  Scenario clusters: 5
+  Scenario-cluster p (exact): 0.0625
+
+Original Two-Way -> Two-AGV Only
+  Rescued: 61
+  Regressed: 0
+  Ties: 939
+  Success difference: +6.10 pp
+  Exact McNemar p: 8.6736174e-19
+  Route-cluster 95% CI: [+3.20, +9.40] pp
+  Route clusters: 200
+  Route-cluster p (exact): 6.1035156e-05
+  Scenario clusters: 5
+  Scenario-cluster p (exact): 0.0625
+
+Original Two-Way -> Combined Recovery
+  Rescued: 81
+  Regressed: 0
+  Ties: 919
+  Success difference: +8.10 pp
+  Exact McNemar p: 8.2718061e-25
+  Route-cluster 95% CI: [+4.80, +11.80] pp
+  Route clusters: 200
+  Route-cluster p (Monte Carlo): 1.99998e-05
+  Scenario clusters: 5
+  Scenario-cluster p (exact): 0.0625
+
+Single-AGV Only -> Two-AGV Only
+  Rescued: 30
+  Regressed: 20
+  Ties: 950
+  Success difference: +1.00 pp
+  Exact McNemar p: 0.20263875
+  Route-cluster 95% CI: [-1.80, +3.90] pp
+  Route clusters: 200
+  Route-cluster p (exact): 0.54785156
+  Scenario clusters: 5
+  Scenario-cluster p (exact): 0.4375
+
+Single-AGV Only -> Combined Recovery
+  Rescued: 30
+  Regressed: 0
+  Ties: 970
+  Success difference: +3.00 pp
+  Exact McNemar p: 1.8626451e-09
+  Route-cluster 95% CI: [+1.00, +5.40] pp
+  Route clusters: 200
+  Route-cluster p (exact): 0.0078125
+  Scenario clusters: 5
+  Scenario-cluster p (exact): 0.125
+
+Two-AGV Only -> Combined Recovery
+  Rescued: 20
+  Regressed: 0
+  Ties: 980
+  Success difference: +2.00 pp
+  Exact McNemar p: 1.9073486e-06
+  Route-cluster 95% CI: [+0.40, +4.00] pp
+  Route clusters: 200
+  Route-cluster p (exact): 0.0625
+  Scenario clusters: 5
+  Scenario-cluster p (exact): 0.125
+
+=== RECOVERY OVERLAP ===
+Single-AGV rescues: 51
+Two-AGV rescues: 61
+Rescued by both individual methods: 31
+Single-AGV exclusive rescues: 20
+Two-AGV exclusive rescues: 30
+Union of individual rescues: 81
+Combined Recovery rescues: 81
+Combined-only rescues: 0
+Individual rescues lost by Combined: 0
+
+=== PAIRED EFFICIENCY ===
+
+Original Two-Way -> Single-AGV Only
+  Jointly successful episodes: 727
+  makespan: 164.549 -> 164.549, mean paired difference=+0.000
+  path_length: 662.402 -> 662.402, mean paired difference=+0.000
+  planning_time: 8.660 -> 9.222, mean paired difference=+0.562
+  All-episode planning time difference: -1.958 s
+
+Original Two-Way -> Two-AGV Only
+  Jointly successful episodes: 727
+  makespan: 164.549 -> 164.693, mean paired difference=+0.144
+  path_length: 662.402 -> 662.404, mean paired difference=+0.003
+  planning_time: 8.660 -> 9.046, mean paired difference=+0.386
+  All-episode planning time difference: -2.281 s
+
+Original Two-Way -> Combined Recovery
+  Jointly successful episodes: 727
+  makespan: 164.549 -> 164.693, mean paired difference=+0.144
+  path_length: 662.402 -> 662.404, mean paired difference=+0.003
+  planning_time: 8.660 -> 8.680, mean paired difference=+0.020
+  All-episode planning time difference: -3.287 s
+
+Single-AGV Only -> Two-AGV Only
+  Jointly successful episodes: 758
+  makespan: 165.978 -> 166.682, mean paired difference=+0.704
+  path_length: 661.946 -> 660.476, mean paired difference=-1.470
+  planning_time: 12.097 -> 10.934, mean paired difference=-1.163
+  All-episode planning time difference: -0.323 s
+
+Single-AGV Only -> Combined Recovery
+  Jointly successful episodes: 778
+  makespan: 166.686 -> 167.373, mean paired difference=+0.686
+  path_length: 664.158 -> 662.726, mean paired difference=-1.432
+  planning_time: 13.466 -> 12.025, mean paired difference=-1.442
+  All-episode planning time difference: -1.329 s
+
+Two-AGV Only -> Combined Recovery
+  Jointly successful episodes: 788
+  makespan: 170.319 -> 170.319, mean paired difference=+0.000
+  path_length: 666.702 -> 666.702, mean paired difference=+0.000
+  planning_time: 12.949 -> 12.587, mean paired difference=-0.362
+  All-episode planning time difference: -1.006 s
+
+=== PER-SCENARIO PERFORMANCE ===
+
+('21',): N=200
+  Original Two-Way      : 147/200 (73.5%)
+  Single-AGV Only       : 150/200 (75.0%)
+  Two-AGV Only          : 149/200 (74.5%)
+  Combined Recovery     : 152/200 (76.0%)
+
+('22',): N=200
+  Original Two-Way      : 158/200 (79.0%)
+  Single-AGV Only       : 172/200 (86.0%)
+  Two-AGV Only          : 168/200 (84.0%)
+  Combined Recovery     : 172/200 (86.0%)
+
+('23',): N=200
+  Original Two-Way      : 140/200 (70.0%)
+  Single-AGV Only       : 150/200 (75.0%)
+  Two-AGV Only          : 155/200 (77.5%)
+  Combined Recovery     : 160/200 (80.0%)
+
+('24',): N=200
+  Original Two-Way      : 140/200 (70.0%)
+  Single-AGV Only       : 152/200 (76.0%)
+  Two-AGV Only          : 157/200 (78.5%)
+  Combined Recovery     : 165/200 (82.5%)
+
+('25',): N=200
+  Original Two-Way      : 142/200 (71.0%)
+  Single-AGV Only       : 154/200 (77.0%)
+  Two-AGV Only          : 159/200 (79.5%)
+  Combined Recovery     : 159/200 (79.5%)
+
+=== PER-UNCERTAINTY PERFORMANCE ===
+
+('0', '0.8'): N=100
+  Original Two-Way      : 71/100 (71.0%)
+  Single-AGV Only       : 71/100 (71.0%)
+  Two-AGV Only          : 71/100 (71.0%)
+  Combined Recovery     : 71/100 (71.0%)
+
+('0', '1.0'): N=500
+  Original Two-Way      : 412/500 (82.4%)
+  Single-AGV Only       : 463/500 (92.6%)
+  Two-AGV Only          : 473/500 (94.6%)
+  Combined Recovery     : 493/500 (98.6%)
+
+('1', '1.0'): N=100
+  Original Two-Way      : 79/100 (79.0%)
+  Single-AGV Only       : 79/100 (79.0%)
+  Two-AGV Only          : 79/100 (79.0%)
+  Combined Recovery     : 79/100 (79.0%)
+
+('2', '0.8'): N=100
+  Original Two-Way      : 51/100 (51.0%)
+  Single-AGV Only       : 51/100 (51.0%)
+  Two-AGV Only          : 51/100 (51.0%)
+  Combined Recovery     : 51/100 (51.0%)
+
+('2', '1.0'): N=100
+  Original Two-Way      : 82/100 (82.0%)
+  Single-AGV Only       : 82/100 (82.0%)
+  Two-AGV Only          : 82/100 (82.0%)
+  Combined Recovery     : 82/100 (82.0%)
+
+('4', '0.8'): N=100
+  Original Two-Way      : 32/100 (32.0%)
+  Single-AGV Only       : 32/100 (32.0%)
+  Two-AGV Only          : 32/100 (32.0%)
+  Combined Recovery     : 32/100 (32.0%)
+
+=== HOLM-ADJUSTED P-VALUES ===
+base -> single: McNemar=3.5527137e-15, Route=0.001953125, Scenario=0.375
+base -> two: McNemar=4.3368087e-18, Route=0.00030517578, Scenario=0.375
+base -> both: McNemar=4.9630837e-24, Route=0.0001199988, Scenario=0.375
+single -> two: McNemar=0.20263875, Route=0.54785156, Scenario=0.4375
+single -> both: McNemar=5.5879354e-09, Route=0.0234375, Scenario=0.375
+two -> both: McNemar=3.8146973e-06, Route=0.125, Scenario=0.375
+
+Saved: results/step12_ablation_statistics.csv
