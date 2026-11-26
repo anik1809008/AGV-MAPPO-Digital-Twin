@@ -136,3 +136,137 @@ def inferred_recovery_route_is_valid(
         return False
 
     return True
+
+
+def build_inferred_completion_plan(
+    *,
+    grid,
+    positions,
+    goals,
+    remaining_steps,
+    enable_single=True,
+    enable_two=True,
+):
+    """Build a bounded completion plan from inferred DT positions."""
+
+    from src.environment.actions import Action
+    from src.hybrid.single_agv_completion import (
+        plan_single_agv_completion,
+    )
+    from src.hybrid.two_agv_completion import (
+        plan_two_agv_completion,
+    )
+    from src.hybrid.recovery_route_guard import (
+        build_expected_positions,
+    )
+
+    if remaining_steps <= 0:
+        return None
+
+    if set(positions) != set(goals):
+        return None
+
+    unfinished = [
+        agent_id
+        for agent_id in goals
+        if tuple(positions[agent_id]) != tuple(goals[agent_id])
+    ]
+
+    if len(unfinished) == 1 and enable_single:
+        candidate = plan_single_agv_completion(
+            grid, positions, goals
+        )
+
+        if candidate is None:
+            return None
+
+        agent_id, actions = candidate
+        horizon = len(actions)
+
+        if not 0 < horizon <= remaining_steps:
+            return None
+
+        plan = {
+            "actions": {
+                a: (
+                    actions
+                    if a == agent_id
+                    else [int(Action.WAIT)] * horizon
+                )
+                for a in positions
+            },
+            "horizon": horizon,
+            "offset": 0,
+            "single_agv_completion": True,
+            "active_agent": agent_id,
+        }
+
+    elif len(unfinished) == 2 and enable_two:
+        plan = plan_two_agv_completion(
+            grid, positions, goals
+        )
+
+        if plan is None:
+            return None
+
+        if not 0 < plan["horizon"] <= remaining_steps:
+            return None
+
+    else:
+        return None
+
+    expected = build_expected_positions(
+        positions,
+        plan["actions"],
+        plan["horizon"],
+    )
+
+    # Validate that the generated route has no duplicate
+    # occupancy and moves exactly one agent per step.
+    for before, after in zip(expected, expected[1:]):
+        if len(set(after.values())) != len(after):
+            return None
+
+        moving = [
+            agent_id
+            for agent_id in before
+            if before[agent_id] != after[agent_id]
+        ]
+
+        if len(moving) != 1:
+            return None
+
+        for agent_id, position in after.items():
+            x, y = position
+
+            if not (
+                0 <= y < len(grid)
+                and 0 <= x < len(grid[y])
+            ):
+                return None
+
+            if grid[y][x] != 0:
+                return None
+
+            if (
+                before[agent_id] == tuple(goals[agent_id])
+                and after[agent_id] != before[agent_id]
+            ):
+                return None
+
+    if expected[-1] != {
+        a: tuple(goal) for a, goal in goals.items()
+    }:
+        return None
+
+    plan["recovery_expected_positions"] = expected
+    plan["dt_inferred_completion"] = True
+
+    if plan.get("single_agv_completion"):
+        agent_id = plan["active_agent"]
+
+        plan["route_positions"] = [
+            state[agent_id] for state in expected
+        ]
+
+    return plan
