@@ -18,6 +18,14 @@ from src.hybrid.recovery_pause import RecoveryPause
 from src.hybrid.recovery_trigger import should_start_recovery
 from src.evaluation.path_length import compute_step_path_length
 from src.mapf.lns_sat import solve_lns_sat
+from src.hybrid.dt_inferred_completion import (
+    get_inferred_completion_positions,
+    inferred_recovery_route_is_valid,
+    build_inferred_completion_plan,
+)
+from src.hybrid.dt_inferred_completion_supervisor import (
+    DTInferredCompletionSupervisor,
+)
 from src.hybrid.single_agv_completion import plan_single_agv_completion
 from src.hybrid.two_agv_completion import plan_two_agv_completion
 from src.hybrid.recovery_route_guard import (
@@ -143,12 +151,22 @@ def run_two_way_episode(
     diagnostic_episode_id=None,
     enable_single_agv_completion=False,
     enable_two_agv_completion=False,
+    enable_dt_inferred_completion=False,
 ):
     """Run an episode; start/replan from DT-trusted positions only on return.
 
     Requires a fresh TwoWayHybridSupervisor. Keeps full-timestep telemetry
     processing and the existing trained M7 control step unchanged.
     """
+    if enable_dt_inferred_completion:
+        if not isinstance(
+            supervisor, DTInferredCompletionSupervisor
+        ):
+            raise ValueError("DICR requires its experimental supervisor")
+
+        if not enable_execution_handover:
+            raise ValueError("DICR requires execution-aware handover")
+
     simulator = context["simulator"]
     twin = context["digital_twin"]
     channel = context["telemetry_channel"]
@@ -168,6 +186,7 @@ def run_two_way_episode(
         raise ValueError("replan_cooldown_steps must be >= 1")
 
     next_return_attempt = 0
+    next_inferred_attempt = 0
     last_failed_return_starts = None
     planning_failures = 0
     if plan is None:
@@ -254,6 +273,43 @@ def run_two_way_episode(
                 last_drain_timestep=last_drain_timestep,
             )
 
+        inferred_observe_kwargs = {}
+
+        if enable_dt_inferred_completion:
+            inferred_route_valid = None
+
+            if supervisor.inferred_completion_active:
+                inferred_route_valid = False
+
+                if (
+                    plan is not None
+                    and plan.get("dt_inferred_completion")
+                ):
+                    inferred_index = step - plan["offset"]
+
+                    inferred_route_valid = (
+                        0 <= inferred_index < plan["horizon"]
+                        and inferred_recovery_route_is_valid(
+                            plan=plan,
+                            dt=dt,
+                            index=inferred_index,
+                            immediate_probability=getattr(
+                                executor.delay_model,
+                                "immediate_probability",
+                                0.0,
+                            ),
+                            pending_commands=_has_pending(executor),
+                            handover_active=(
+                                handover is not None
+                                and handover.active
+                            ),
+                        )
+                    )
+
+            inferred_observe_kwargs["inferred_route_valid"] = (
+                inferred_route_valid
+            )
+
         decision = supervisor.observe(
             timestep=step, aoi_values=dt["aoi_values"],
             planned_next_positions=planned_next,
@@ -262,6 +318,7 @@ def run_two_way_episode(
                 _has_pending(executor)
                 or (recovery.active and not recovery_confirmed)
             ),
+            **inferred_observe_kwargs,
         )
         if (
             handover is not None
@@ -269,6 +326,92 @@ def run_two_way_episode(
             and getattr(decision, 'new_mode', None) == 'M7'
         ):
             handover.start()
+
+        if (
+            enable_dt_inferred_completion
+            and getattr(decision, "reason", None)
+            == "dt_inferred_route_invalid"
+        ):
+            plan = None
+            planning_failures += 1
+
+            next_inferred_attempt = max(
+                next_inferred_attempt,
+                step + replan_cooldown_steps,
+            )
+
+        # Experimental completion-specific return.
+        # The original RETURN_READY branch remains unchanged.
+        if (
+            enable_dt_inferred_completion
+            and allow_return_to_lns
+            and supervisor.mode == "M7"
+            and decision != "RETURN_READY"
+            and not recovery.active
+            and (handover is None or not handover.active)
+            and step >= next_inferred_attempt
+            and supervisor.last_switch_timestep is not None
+            and step - supervisor.last_switch_timestep
+                >= supervisor.min_dwell_steps
+        ):
+            probability = getattr(
+                executor.delay_model,
+                "immediate_probability",
+                0.0,
+            )
+
+            inferred_starts = get_inferred_completion_positions(
+                dt=dt,
+                goals=simulator.agent_goals,
+                immediate_probability=probability,
+                pending_commands=_has_pending(executor),
+                handover_active=False,
+            )
+
+            if inferred_starts is not None:
+                began = time.perf_counter()
+
+                candidate = build_inferred_completion_plan(
+                    grid=simulator.grid,
+                    positions=inferred_starts,
+                    goals=dict(simulator.agent_goals),
+                    remaining_steps=context["max_steps"] - step,
+                    enable_single=enable_single_agv_completion,
+                    enable_two=enable_two_agv_completion,
+                )
+
+                planning_time += time.perf_counter() - began
+                replans += 1
+
+                next_inferred_attempt = (
+                    step + replan_cooldown_steps
+                )
+
+                valid = (
+                    candidate is not None
+                    and inferred_recovery_route_is_valid(
+                        plan=candidate,
+                        dt=dt,
+                        index=0,
+                        immediate_probability=probability,
+                        pending_commands=_has_pending(executor),
+                        handover_active=False,
+                    )
+                )
+
+                if valid:
+                    supervisor.confirm_inferred_completion(
+                        timestep=step,
+                        eligibility_confirmed=True,
+                        route_valid=True,
+                        aoi=max(dt["aoi_values"].values()),
+                    )
+
+                    candidate["offset"] = step
+                    plan = candidate
+                    last_failed_return_starts = None
+                else:
+                    planning_failures += 1
 
         if (
             allow_return_to_lns
@@ -467,6 +610,7 @@ def run_two_way_episode(
             supervisor.mode == "LNS-SAT"
             and plan is not None
             and plan.get("recovery_expected_positions") is not None
+            and not plan.get("dt_inferred_completion")
         ):
             recovery_index = step - plan["offset"]
 

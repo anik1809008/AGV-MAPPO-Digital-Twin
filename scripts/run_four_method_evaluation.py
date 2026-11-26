@@ -16,6 +16,9 @@ from src.evaluation.real_method_callback import run_real_method
 from src.hybrid.two_way_episode_runner import run_two_way_episode
 from src.hybrid.two_way_supervisor import TwoWayHybridSupervisor
 from src.hybrid.execution_aware_supervisor import ExecutionAwareTwoWaySupervisor
+from src.hybrid.dt_inferred_completion_supervisor import (
+    DTInferredCompletionSupervisor,
+)
 from src.mapf.lns_sat_uncertain_runner import run_lns_sat_uncertain_episode
 from src.marl.scenario_split import get_random_scenario_path
 from src.marl.training_instance import build_training_instance
@@ -65,7 +68,21 @@ def run_episode(
     method, specification, models, max_steps=400,
     single_agv_completion=False,
     two_agv_completion=False,
+    dt_inferred_completion=False,
 ):
+    if dt_inferred_completion:
+        if method != "DT-ROBUST-HYBRID":
+            raise ValueError(
+                "DICR requires DT-ROBUST-HYBRID"
+            )
+
+        if not (
+            single_agv_completion or two_agv_completion
+        ):
+            raise ValueError(
+                "DICR requires at least one completion planner"
+            )
+
     seed = int(specification["seed"])
     random.seed(seed)
     np.random.seed(seed)
@@ -166,6 +183,9 @@ def run_episode(
         }
         else TwoWayHybridSupervisor
     )
+    if dt_inferred_completion:
+        supervisor_class = DTInferredCompletionSupervisor
+
     supervisor = supervisor_class(aoi_threshold=2)
 
     if method in {"DT-ROBUST-HYBRID", "ONE-WAY-ROBUST-HYBRID"}:
@@ -197,6 +217,7 @@ def run_episode(
         diagnostic_episode_id=specification.get("episode_id"),
         enable_single_agv_completion=single_agv_completion,
         enable_two_agv_completion=two_agv_completion,
+        enable_dt_inferred_completion=dt_inferred_completion,
 
     )
 
@@ -252,7 +273,31 @@ def main():
         action="store_true",
         help="Enable experimental sequential two-AGV completion",
     )
+    parser.add_argument(
+        "--dt-inferred-completion",
+        action="store_true",
+        help=(
+            "Enable experimental DT-inferred completion "
+            "under bounded communication latency"
+        ),
+    )
+
     args = parser.parse_args()
+
+    if args.dt_inferred_completion:
+        if args.method != "DT-ROBUST-HYBRID":
+            parser.error(
+                "--dt-inferred-completion requires DT-ROBUST-HYBRID"
+            )
+
+        if not (
+            args.single_agv_completion
+            or args.two_agv_completion
+        ):
+            parser.error(
+                "--dt-inferred-completion requires "
+                "at least one completion planner"
+            )
 
     if (
         args.single_agv_completion
@@ -354,6 +399,7 @@ def main():
                 max_steps=args.max_steps,
                 single_agv_completion=args.single_agv_completion,
                 two_agv_completion=args.two_agv_completion,
+                dt_inferred_completion=args.dt_inferred_completion,
             )
 
             row = {
