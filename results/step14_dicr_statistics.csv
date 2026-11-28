@@ -1,0 +1,5 @@
+comparison,reference,proposed,episodes,reference_success,proposed_success,rescued,regressed,ties,effect_pp,mcnemar_p,route_ci_low_pp,route_ci_high_pp,route_clusters,nonzero_route_clusters,route_cluster_p,route_test_method,scenario_clusters,nonzero_scenario_clusters,scenario_cluster_p,scenario_test_method,mcnemar_p_holm,route_cluster_p_holm,scenario_cluster_p_holm
+Original Hybrid vs Final DICR,base,dicr,1000,727,847,120,0,880,12.0,1.504632769052528e-36,8.0,16.3,200,32,9.99990000099999e-06,Monte Carlo,5,5,0.0625,exact,6.018531076210112e-36,3.999960000399996e-05,0.25
+Combined Recovery vs DICR,both,dicr,1000,808,847,39,0,961,3.9,3.637978807091713e-12,1.6,6.5,200,12,0.00048828125,exact,5,5,0.0625,exact,1.0913936421275139e-11,0.00146484375,0.25
+All imperfect conditions,both,dicr,500,315,354,39,0,461,7.8,3.637978807091713e-12,3.5999999999999996,12.8,100,12,0.00048828125,exact,5,5,0.0625,exact,1.0913936421275139e-11,0.00146484375,0.25
+Deterministic delayed conditions,both,dicr,200,161,200,39,0,161,19.5,3.637978807091713e-12,9.5,31.0,40,12,0.00048828125,exact,5,5,0.0625,exact,1.0913936421275139e-11,0.00146484375,0.25

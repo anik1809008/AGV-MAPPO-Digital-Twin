@@ -1,0 +1,142 @@
+Validation passed: 1000 matched episodes.
+All experimental configuration fields match.
+
+=== FINAL FIVE-METHOD PERFORMANCE ===
+Original Two-Way: 727/1000 (72.7%), collisions=0, deadlocks=7
+Single-AGV Only: 778/1000 (77.8%), collisions=0, deadlocks=7
+Two-AGV Only: 788/1000 (78.8%), collisions=0, deadlocks=7
+Combined Recovery: 808/1000 (80.8%), collisions=0, deadlocks=7
+Combined Recovery + DICR: 847/1000 (84.7%), collisions=0, deadlocks=7
+
+=== STATISTICAL COMPARISONS ===
+
+Original Hybrid vs Final DICR
+  Episodes: 1000
+  Success: 727/1000 -> 847/1000
+  Rescued: 120
+  Regressed: 0
+  Effect: +12.00 pp
+  Route-cluster 95% CI: [+8.00, +16.30] pp
+  McNemar p: 1.5046328e-36
+  Route-cluster p: 9.9999e-06
+  Scenario-cluster p: 0.0625
+  Holm-adjusted route p: 3.99996e-05
+  Holm-adjusted scenario p: 0.25
+  Nonzero route clusters: 32/200
+  Nonzero scenario clusters: 5/5
+
+Combined Recovery vs DICR
+  Episodes: 1000
+  Success: 808/1000 -> 847/1000
+  Rescued: 39
+  Regressed: 0
+  Effect: +3.90 pp
+  Route-cluster 95% CI: [+1.60, +6.50] pp
+  McNemar p: 3.6379788e-12
+  Route-cluster p: 0.00048828125
+  Scenario-cluster p: 0.0625
+  Holm-adjusted route p: 0.0014648438
+  Holm-adjusted scenario p: 0.25
+  Nonzero route clusters: 12/200
+  Nonzero scenario clusters: 5/5
+
+All imperfect conditions
+  Episodes: 500
+  Success: 315/500 -> 354/500
+  Rescued: 39
+  Regressed: 0
+  Effect: +7.80 pp
+  Route-cluster 95% CI: [+3.60, +12.80] pp
+  McNemar p: 3.6379788e-12
+  Route-cluster p: 0.00048828125
+  Scenario-cluster p: 0.0625
+  Holm-adjusted route p: 0.0014648438
+  Holm-adjusted scenario p: 0.25
+  Nonzero route clusters: 12/100
+  Nonzero scenario clusters: 5/5
+
+Deterministic delayed conditions
+  Episodes: 200
+  Success: 161/200 -> 200/200
+  Rescued: 39
+  Regressed: 0
+  Effect: +19.50 pp
+  Route-cluster 95% CI: [+9.50, +31.00] pp
+  McNemar p: 3.6379788e-12
+  Route-cluster p: 0.00048828125
+  Scenario-cluster p: 0.0625
+  Holm-adjusted route p: 0.0014648438
+  Holm-adjusted scenario p: 0.25
+  Nonzero route clusters: 12/40
+  Nonzero scenario clusters: 5/5
+
+=== CONDITION-SPECIFIC RESULTS ===
+Perfect: 493/500 -> 493/500, 98.60% -> 98.60%
+Imperfect: 315/500 -> 354/500, 63.00% -> 70.80%
+Deterministic delayed: 161/200 -> 200/200, 80.50% -> 100.00%
+Stochastic execution: 154/300 -> 154/300, 51.33% -> 51.33%
+
+=== PER-SCENARIO RESULTS ===
+Scenario 21: 152/200 -> 167/200, gain=+7.50 pp
+Scenario 22: 172/200 -> 173/200, gain=+0.50 pp
+Scenario 23: 160/200 -> 161/200, gain=+0.50 pp
+Scenario 24: 165/200 -> 178/200, gain=+6.50 pp
+Scenario 25: 159/200 -> 168/200, gain=+4.50 pp
+
+=== PAIRED EFFICIENCY TRADE-OFF ===
+Common successful episodes: 808
+
+makespan
+  Before: 170.8936
+  After: 173.8106
+  Mean difference: +2.9171
+  Relative change: +1.71%
+  Median difference: 0.0000
+  Improved: 3
+  Unchanged: 718
+  Worsened: 87
+
+path_length
+  Before: 668.7141
+  After: 668.4295
+  Mean difference: -0.2847
+  Relative change: -0.04%
+  Median difference: 0.0000
+  Improved: 5
+  Unchanged: 803
+  Worsened: 0
+
+planning_time
+  Before: 13.8733
+  After: 13.3989
+  Mean difference: -0.4744
+  Relative change: -3.42%
+  Median difference: -0.0026
+  Improved: 449
+  Unchanged: 0
+  Worsened: 359
+
+=== PLANNING TIME DISTRIBUTION ===
+
+Original Two-Way
+  Mean: 20.7801 s
+  Median: 0.2913 s
+  P95: 119.6841 s
+  P99: 143.3011 s
+  Maximum: 153.1838 s
+
+Combined Recovery
+  Mean: 17.4926 s
+  Median: 0.2863 s
+  P95: 70.8954 s
+  P99: 81.8040 s
+  Maximum: 103.8903 s
+
+Combined Recovery + DICR
+  Mean: 16.4285 s
+  Median: 0.2934 s
+  P95: 68.5783 s
+  P99: 78.2589 s
+  Maximum: 85.1578 s
+
+Saved: results/step14_dicr_statistics.csv
