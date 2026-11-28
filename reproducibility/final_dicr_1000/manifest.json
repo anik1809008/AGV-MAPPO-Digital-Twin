@@ -1,0 +1,180 @@
+{
+  "benchmark": {
+    "agent_count": 8,
+    "conditions": [
+      {
+        "episodes": 500,
+        "latency": 0,
+        "p": 1.0
+      },
+      {
+        "episodes": 100,
+        "latency": 0,
+        "p": 0.8
+      },
+      {
+        "episodes": 100,
+        "latency": 1,
+        "p": 1.0
+      },
+      {
+        "episodes": 100,
+        "latency": 2,
+        "p": 1.0
+      },
+      {
+        "episodes": 100,
+        "latency": 2,
+        "p": 0.8
+      },
+      {
+        "episodes": 100,
+        "latency": 4,
+        "p": 0.8
+      }
+    ],
+    "distinct_start_goal_configurations": 200,
+    "episodes_per_method": 1000,
+    "episodes_per_training_scenario": 20,
+    "map": "warehouse-10-20-10-2-1",
+    "max_steps": 400,
+    "seeds": [
+      0,
+      1,
+      2,
+      3,
+      4
+    ],
+    "test_scenarios": [
+      21,
+      25
+    ],
+    "training_scenarios": [
+      1,
+      15
+    ],
+    "validation_scenarios": [
+      16,
+      20
+    ]
+  },
+  "benchmark_files": {
+    "benchmarks/movingai/scen-even/warehouse-10-20-10-2-1-even-1.scen": "6dc9e580ebb72a0a01227e3eaf802e07f7743dad5423d73155600eb815365e1b",
+    "benchmarks/movingai/scen-even/warehouse-10-20-10-2-1-even-10.scen": "b9c4b78758bf33b7db3a7770c94d285b38b1cc5ee53e2bfe04b5a2a1a8e2c864",
+    "benchmarks/movingai/scen-even/warehouse-10-20-10-2-1-even-11.scen": "a965abf0c62ea7b69051733b95ee92da454e489420a3a07ef0247150179e4e5d",
+    "benchmarks/movingai/scen-even/warehouse-10-20-10-2-1-even-12.scen": "1e7e07577badeff027c6d4e5f7e2ec3e411b4ae90b10ff391e29a3c913bb382e",
+    "benchmarks/movingai/scen-even/warehouse-10-20-10-2-1-even-13.scen": "c223792d656b7719c28c168137db362bcd162959848278c0e45bdbc889abc65a",
+    "benchmarks/movingai/scen-even/warehouse-10-20-10-2-1-even-14.scen": "eca354a02fc1ace6c9ca2f4cd29b735c9aa85a53220dfdb1047a6f5dca020fbd",
+    "benchmarks/movingai/scen-even/warehouse-10-20-10-2-1-even-15.scen": "604aadbdf601e62022d21ddb6832fc77bd7fb11160ccb81a8990d9584c6ae611",
+    "benchmarks/movingai/scen-even/warehouse-10-20-10-2-1-even-16.scen": "1ad607cccec1b5ff3ab465ddbd8b5a1489f75b89b55596fa2d22035f3fd03bbf",
+    "benchmarks/movingai/scen-even/warehouse-10-20-10-2-1-even-17.scen": "40f09b7c1e05a281bbbe312b882b9f1e28e3fc5934014b1d24e407713b78c387",
+    "benchmarks/movingai/scen-even/warehouse-10-20-10-2-1-even-18.scen": "16b01d214af80ce60907954befe90823ae0bfdf149d3068f2e4a7ce66704a3fb",
+    "benchmarks/movingai/scen-even/warehouse-10-20-10-2-1-even-19.scen": "60b95a00e1abb0e75f3924e4a4ad9f41ff003583d971d6feafd998b10268fff0",
+    "benchmarks/movingai/scen-even/warehouse-10-20-10-2-1-even-2.scen": "b385bd054c4ade0478cd2c73a3115f29e3f723b71a96bd67dd89a8fb41611b17",
+    "benchmarks/movingai/scen-even/warehouse-10-20-10-2-1-even-20.scen": "3b470fa1b1b9e9ae04a01dfd1337c3cb941e3540b418e5752152c6cf227a78e9",
+    "benchmarks/movingai/scen-even/warehouse-10-20-10-2-1-even-21.scen": "1c90435bc397800f9ea1a716c847a7f3f410678e1740248cd6a83d4af15efd2f",
+    "benchmarks/movingai/scen-even/warehouse-10-20-10-2-1-even-22.scen": "dc2e1b58620bd084c345e43db54eb8fbac1df50149f7ec35c798f37785124e50",
+    "benchmarks/movingai/scen-even/warehouse-10-20-10-2-1-even-23.scen": "774cadb48fe9d500bd82bbaa67f525cd67b43f82e3230dee748c62586c0b5504",
+    "benchmarks/movingai/scen-even/warehouse-10-20-10-2-1-even-24.scen": "de42fb21241e383b22281ba09175055a4c796916c7d17d4ae770c0be93085150",
+    "benchmarks/movingai/scen-even/warehouse-10-20-10-2-1-even-25.scen": "6f74fe595c60a828025f8f31e84ba161458a8452166db8fd48c14ba204c5b389",
+    "benchmarks/movingai/scen-even/warehouse-10-20-10-2-1-even-3.scen": "7fdaaccc2e4f704683edeeff06b37116beb370886c759be94827796fe3a40267",
+    "benchmarks/movingai/scen-even/warehouse-10-20-10-2-1-even-4.scen": "588e9d56f1a600a22bc96e37f6261fc5d465c81091b8ce6136b11b94605488be",
+    "benchmarks/movingai/scen-even/warehouse-10-20-10-2-1-even-5.scen": "0483ce25f5393157f5d7334dbf4ddfa149f284f8468c91e52049cb269a5cea03",
+    "benchmarks/movingai/scen-even/warehouse-10-20-10-2-1-even-6.scen": "37a79ec56faa5faac77c94de19cd33121d8499ffcc2009d7c4eec896c9aa84b5",
+    "benchmarks/movingai/scen-even/warehouse-10-20-10-2-1-even-7.scen": "62b1c4bda303cb45f24c6a09b4f48c2f19ad92837850790f2ff14a81f699960f",
+    "benchmarks/movingai/scen-even/warehouse-10-20-10-2-1-even-8.scen": "40a067cc47ce5ce2b91ed1e4581b988953cbaddaa64ac3789f952630fc03d57d",
+    "benchmarks/movingai/scen-even/warehouse-10-20-10-2-1-even-9.scen": "2560472687dbf37895a6bb9c2f117579db1b6c279d0eb15a1596682a8d36425d",
+    "benchmarks/movingai/scen-random/warehouse-10-20-10-2-1-random-1.scen": "cc8694ea3b0781781bde18fab744386cecc09a836e7cbf12849728ef07a19868",
+    "benchmarks/movingai/scen-random/warehouse-10-20-10-2-1-random-10.scen": "34456b21f5d1df79f5c6c3aa208846548b5166662621d02b542ef161c1300cfc",
+    "benchmarks/movingai/scen-random/warehouse-10-20-10-2-1-random-11.scen": "689b67404740412707fa2f6ad98859ccddaae6c41d303bc6be855b9f71a6ea73",
+    "benchmarks/movingai/scen-random/warehouse-10-20-10-2-1-random-12.scen": "4122e7f6cf08d4109a6a68e29ce8d5f8560d96137bd24e1ab178016b77cc3fae",
+    "benchmarks/movingai/scen-random/warehouse-10-20-10-2-1-random-13.scen": "50081693c2c949374cd91514571d2cf40756c633c9716dedbfc4b37f1065ae19",
+    "benchmarks/movingai/scen-random/warehouse-10-20-10-2-1-random-14.scen": "22efe0257139401ec605dd24ac026699681658757fc9a7a75410c3f86b0816ff",
+    "benchmarks/movingai/scen-random/warehouse-10-20-10-2-1-random-15.scen": "7b874bfa8a9f41542b3ad6bc4796889958126b842cc3a00c4be603bf5dc0302f",
+    "benchmarks/movingai/scen-random/warehouse-10-20-10-2-1-random-16.scen": "d98e78ee80c15c73e5b8f5b81aa3dd6087e06d718a2ce705bf62f11a36667ed0",
+    "benchmarks/movingai/scen-random/warehouse-10-20-10-2-1-random-17.scen": "e68723c114fa1b1d1c093f3ddec33b3c7cf851c7fc2977887980c4e1ba89784e",
+    "benchmarks/movingai/scen-random/warehouse-10-20-10-2-1-random-18.scen": "3da752a6bc55bb0770bb02d36fd3626959bef26d2e27bad394311f3cf91c3eed",
+    "benchmarks/movingai/scen-random/warehouse-10-20-10-2-1-random-19.scen": "4a4af4d10463ef2470f1d76df79f402bad198ba1fc4e0e2413fb99ab1c8a50c8",
+    "benchmarks/movingai/scen-random/warehouse-10-20-10-2-1-random-2.scen": "18f034a2297b24efccf9d311ae37162c72885c70859eb6a387a312039dcc7055",
+    "benchmarks/movingai/scen-random/warehouse-10-20-10-2-1-random-20.scen": "ecdd9372ce00b5a348de11d7bab0de70c6d59e75370c90f5c1e829473588bca6",
+    "benchmarks/movingai/scen-random/warehouse-10-20-10-2-1-random-21.scen": "10da08599612b12ddfb4464b3b639c361edbc031f6fd8c7b6e13349b16d82d7a",
+    "benchmarks/movingai/scen-random/warehouse-10-20-10-2-1-random-22.scen": "4e1c271d7e0a0df9d906dfe119766c832a720f79d0096154e3605ce40cc8ca87",
+    "benchmarks/movingai/scen-random/warehouse-10-20-10-2-1-random-23.scen": "c0c1bf9b4f21c4ff47c8a4b525e8a6b17169c785b63172259292ce6b08d5ea34",
+    "benchmarks/movingai/scen-random/warehouse-10-20-10-2-1-random-24.scen": "8d4f0f5d504f1e52f96a10d7141db4f7001635be2929f2fed46c005df07b3a45",
+    "benchmarks/movingai/scen-random/warehouse-10-20-10-2-1-random-25.scen": "28b9f4209c3ed1b5825fa05be4718797763ac443dc1a64aba6bf8ea63dca57ab",
+    "benchmarks/movingai/scen-random/warehouse-10-20-10-2-1-random-3.scen": "1dda14bd7c040f68f95fa4a6cbe38c4242e25f36a010316858ba4114bc9cf70e",
+    "benchmarks/movingai/scen-random/warehouse-10-20-10-2-1-random-4.scen": "dea783b3f1eebeb399db71d6cb059077694700824e9c2de1964ffc21a2da1f59",
+    "benchmarks/movingai/scen-random/warehouse-10-20-10-2-1-random-5.scen": "9000c6c43ecade67a1c80978aca8864ab8d3adeaf0c8078861b4f37eebfc40a6",
+    "benchmarks/movingai/scen-random/warehouse-10-20-10-2-1-random-6.scen": "5c9e59ad0273e952048b7538283b5b491805baf7b963b1d31260afb8058b2421",
+    "benchmarks/movingai/scen-random/warehouse-10-20-10-2-1-random-7.scen": "bb3899b86c2de8b360cc9e90d91d5aa372da9f5eff460435f4d0728580c3aa30",
+    "benchmarks/movingai/scen-random/warehouse-10-20-10-2-1-random-8.scen": "aed87b08176c285098985ecee13c6c355423227bc36858af028e25fc0505d9b6",
+    "benchmarks/movingai/scen-random/warehouse-10-20-10-2-1-random-9.scen": "64001d730cd8e7493816951b0d38a97ff719a544d980d3f7cea9c023bb5bc3df",
+    "benchmarks/movingai/warehouse-10-20-10-2-1.map": "c8d1b2f24788ed6bd1ccf45065b96b4ce82d65f88c72de750e03e2758637bff0"
+  },
+  "branch": "feature/execution-aware-hybrid",
+  "checkpoint_binaries_included_in_git": false,
+  "checkpoint_files": {
+    "results/checkpoints/validation/m3_agents8_seed0_eps20.pt": "a6f2778940d869d43c8c28079436106cd2e080b90081e5324389ff568690cb02",
+    "results/checkpoints/validation/m3_agents8_seed1_eps20.pt": "50260314eea6f0e33c88c14379f0f548b4d2035f1d9c76e0f860ac341527693a",
+    "results/checkpoints/validation/m3_agents8_seed2_eps20.pt": "fea5690568821d1dc27e8e7cefefb2ebccc15d2ad9c9c731d8d600403cf3f247",
+    "results/checkpoints/validation/m3_agents8_seed3_eps20.pt": "1071ed1e2d7d08d9bb0c3bb11295edc7755fe35b9ed19ea0771ceb147fb7a274",
+    "results/checkpoints/validation/m3_agents8_seed4_eps20.pt": "92b22ad9211e6e3e51c787e23ebea1ef6f897f5f41d7cb5bff92a8b777260405"
+  },
+  "checkpoint_fingerprints_match_historical": true,
+  "combined_recovery_implementation": "4193f66377a18bbf3188e02ce83e1715885b0dea",
+  "dependencies": {
+    "numpy": "2.5.2",
+    "pytest": "9.1.1",
+    "python-sat": "1.9.dev15",
+    "torch": "2.14.0+cpu"
+  },
+  "dicr_implementation": "f975eebb7221de8270aded70ed727d88e424637a",
+  "dicr_results_commit": "f0d115b775d24956ab4eed0c64fc85ee6944149f",
+  "documentation_snapshot": "de6ff03f6dbbfa8f63390ece8816c242d2e24467",
+  "evaluation_files": {
+    "results/step11_single_only1000.csv": "aae8bf4e86d9767babe30afb0c5344b15f860abb193893a7b094588b81b3e13e",
+    "results/step11_two_only1000.csv": "ea3a1758dbc53d1de778d013c751d249df78c64e9a22703febdf026d0e99a4d5",
+    "results/step12_ablation_analysis.txt": "c1c49b37c69de3411b2ff810f25ad79c8b34d92c29eaa7fbff4d2e11cd219d6c",
+    "results/step12_ablation_statistics.csv": "69be1461040317ed75f0b82b859fa16929a3af18d443f23942dd47b765a47a3e",
+    "results/step13_dicr_final1000.csv": "ee7f28e618e19ff3ba2188efc4a22630b9195aa6dfcc416534f31696b7992601",
+    "results/step13_dicr_pilot20.csv": "7578692dea677f6f6929e5ef2063f8efa316e70210fe1574733daad2234e0b57",
+    "results/step13_dicr_pilot20_flag_off.csv": "e18e4cd5a1f071fa0bfe8fa3932ea803640008e106ed226956cea3eed40fba65",
+    "results/step13_dicr_pilot20_matrix.csv": "fbf024481718cc9e62a1a5f5221c2b44006af70dc8a6d812db0bb42b4e41b4f7",
+    "results/step13_dt_accuracy.jsonl": "54982208ba0023348915a2184a63bb4663110b32025ab08de59dabe8a4073ffe",
+    "results/step13_dt_accuracy.txt": "f8dcab9a00170f2c4ec61c5845ed0d6f668ee4f1b35bbf5bf5a7f4d81427070e",
+    "results/step13_failure_diagnostics.jsonl": "07dd4e8e3710120d0273919afc4b0c16126a0e46581bc7f2a5d396faddd56012",
+    "results/step13_failure_diagnostics.txt": "c6b51efccb7381e2bc3c7b411f3bf853e04910b02c7a3028f653a66328fee998",
+    "results/step14_dicr_analysis.txt": "95373f67a368ab98e66bdda6e8f08265fe2987b409f997ee6342388ca8d784c9",
+    "results/step14_dicr_statistics.csv": "1a6f95487527cc68b094e20065c5f36cedf746d4ef757d9498ee7801de88784a",
+    "results/step8_final1000_baseline.csv": "2ed48b93d220e4fbbb43ba21ec9159bc42c1b477b3b2d148b43ff5816cacca79",
+    "results/step8_final1000_improved.csv": "de28c30264e311bad8f89aa46416017ada113b6b1b980cfd969e0956072e12fb",
+    "results/step8_final1000_matrix.csv": "5618c4345eb0870123c1b34b946ed25db7982249002768ebea49e1224f9a3098"
+  },
+  "final_method": {
+    "dt_inferred_completion": true,
+    "method": "DT-ROBUST-HYBRID",
+    "single_agv_completion": true,
+    "two_agv_completion": true
+  },
+  "hash_algorithm": "SHA-256",
+  "platform": "Linux-7.0.0-43-generic-x86_64-with-glibc2.39",
+  "project": "Uncertainty-Aware Two-Way Hybrid Digital Twin for Multi-AGV Navigation",
+  "python_version": "3.12.3",
+  "recorded_results": {
+    "collisions": 0,
+    "deadlocks": 7,
+    "deterministic_delayed_episodes": 200,
+    "deterministic_delayed_successes": 200,
+    "dicr_rescues": 39,
+    "episodes": 1000,
+    "other_incomplete": 146,
+    "success_rate": 0.847,
+    "success_regressions": 0,
+    "successes": 847
+  },
+  "recorded_software_validation": {
+    "passed_tests": 432,
+    "test_command": "PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 pytest -q"
+  },
+  "statistical_analysis_commit": "367880e52d8188cd56a91a11dd0dbcb5cb1e39c2"
+}
